@@ -7,7 +7,7 @@ export interface Rect {
   h: number
 }
 
-export const css = (c: Color) => `rgb(${c[0]} ${c[1]} ${c[2]} / ${c[3] ?? 1})`
+export const css = (c: Color) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${c[3] ?? 1})`
 
 export function fill(ctx: CanvasRenderingContext2D, color: Color, x: number, y: number, w: number, h: number) {
   ctx.fillStyle = css(color)
