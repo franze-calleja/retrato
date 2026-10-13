@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import type { PhotoSource } from '../photo/crop'
 import { useBooth } from './booth'
+import { useOperator } from './operator'
 
 const s = () => useBooth.getState()
 const photo = (): PhotoSource => ({ source: document.createElement('canvas'), w: 10, h: 10 })
@@ -62,5 +63,44 @@ describe('booth store', () => {
   test('setValue ignores keys the template does not have', () => {
     s().setValue('nope', 'x')
     expect(s().values).not.toHaveProperty('nope')
+  })
+})
+
+describe('editions', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useOperator.getState().reset()
+  })
+
+  test('capture rolls the edition from operator settings', () => {
+    useOperator.getState().setForced('holo')
+    s().selectTemplate('stamp')
+    s().setCapture(photo())
+    expect(s().edition).toBe('holo')
+  })
+
+  test('editing text keeps the edition', () => {
+    useOperator.getState().setForced('foil')
+    s().setCapture(photo())
+    useOperator.getState().setForced('poly')
+    s().setValue('title', 'CHANGED')
+    expect(s().edition).toBe('foil')
+  })
+
+  test('retake then capture rolls again with the current settings', () => {
+    useOperator.getState().setForced('foil')
+    s().setCapture(photo())
+    useOperator.getState().setForced('poly')
+    s().retake()
+    expect(s().edition).toBe('common')
+    s().setCapture(photo())
+    expect(s().edition).toBe('poly')
+  })
+
+  test('changing template clears the edition', () => {
+    useOperator.getState().setForced('holo')
+    s().setCapture(photo())
+    s().selectTemplate('voucher')
+    expect(s().edition).toBe('common')
   })
 })
