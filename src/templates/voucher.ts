@@ -50,6 +50,7 @@ export const voucher: Template = {
   name: 'Voucher',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
+  badgeAt: { x: BW - 1, y: 0, align: 'right' }, // top of the stub
   printSizeMm: { w: 120, h: 60 },
   fields: [
     { key: 'title', label: 'Title', default: 'VOUCHER', maxLength: 14 },

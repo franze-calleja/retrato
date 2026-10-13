@@ -1,3 +1,4 @@
+import type { BadgeAnchor } from '../editions/apply'
 import type { Rect } from './draw'
 
 export type { Rect }
@@ -20,6 +21,8 @@ export interface Template {
   /** Art pixels. The composer draws the photo here; render() must not. */
   photoRect: Rect
   fields: readonly TemplateField[]
+  /** Where the edition badge sits (art pixels); must stay clear of photoRect. Defaults to the top-left corner. */
+  badgeAt?: BadgeAnchor
   printSizeMm: { w: number; h: number }
   /** Draws frame and text at art scale. Must tolerate missing values. */
   render(ctx: CanvasRenderingContext2D, values: Record<string, string>): void

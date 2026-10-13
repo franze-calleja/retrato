@@ -26,7 +26,7 @@ function frameArt(template: Template, values: Record<string, string>, opts: Comp
   canvas.height = template.size.h
   const ctx = canvas.getContext('2d')!
   template.render(ctx, values)
-  if (edition) applyEdition(ctx, edition, canvas.width, canvas.height, angle)
+  if (edition) applyEdition(ctx, edition, canvas.width, canvas.height, angle, template.badgeAt)
   artCache.set(template.id, { key, canvas })
   return canvas
 }
