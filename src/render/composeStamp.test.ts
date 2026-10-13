@@ -1,4 +1,5 @@
 import { expect, test, vi } from 'vitest'
+import { getEdition } from '../editions/registry'
 import { resolveDefaults } from '../templates/fields'
 import { placeholderPhoto } from '../templates/placeholder'
 import { getTemplate } from '../templates/registry'
@@ -45,5 +46,43 @@ test('reuses the rendered frame art when template and values are unchanged (live
   expect(render).toHaveBeenCalledTimes(1)
   composeStamp(t, photo, { ...values, title: 'CHANGED' }, 4)
   expect(render).toHaveBeenCalledTimes(2)
+  render.mockRestore()
+})
+
+test('edition overlay is applied before the photo, and the photo is drawn last into photoRect × scale', () => {
+  const holo = getEdition('holo')
+  const overlay = vi.spyOn(holo, 'overlay')
+  const target = document.createElement('canvas')
+  const ctx = target.getContext('2d')!
+  const drawImage = vi.spyOn(ctx, 'drawImage')
+  composeStamp(t, photo, { title: 'EDITION ORDER' }, 4, target, { edition: holo, angle: 0.2 })
+  expect(overlay).toHaveBeenCalled()
+  const last = drawImage.mock.calls.at(-1)!
+  const r = t.photoRect
+  expect(last[0]).toBe(photo.source)
+  expect(last.slice(5)).toEqual([r.x * 4, r.y * 4, r.w * 4, r.h * 4])
+  overlay.mockRestore()
+})
+
+test('art cache distinguishes edition and quantized angle', () => {
+  const render = vi.spyOn(t, 'render')
+  const values = { title: 'CACHE EDITION' }
+  const holo = getEdition('holo')
+  composeStamp(t, photo, values, 1, undefined, { edition: holo, angle: 0.1 })
+  composeStamp(t, photo, values, 1, undefined, { edition: holo, angle: 0.1004 })
+  expect(render).toHaveBeenCalledTimes(1)
+  composeStamp(t, photo, values, 1, undefined, { edition: holo, angle: 0.6 })
+  expect(render).toHaveBeenCalledTimes(2)
+  composeStamp(t, photo, values, 1, undefined, { edition: getEdition('foil'), angle: 0.6 })
+  expect(render).toHaveBeenCalledTimes(3)
+  render.mockRestore()
+})
+
+test('common edition ignores angle for caching', () => {
+  const render = vi.spyOn(t, 'render')
+  const values = { title: 'CACHE COMMON' }
+  composeStamp(t, photo, values, 1, undefined, { edition: getEdition('common'), angle: 0.1 })
+  composeStamp(t, photo, values, 1, undefined, { edition: getEdition('common'), angle: 0.9 })
+  expect(render).toHaveBeenCalledTimes(1)
   render.mockRestore()
 })
