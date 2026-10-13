@@ -99,8 +99,6 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .error { color: #ff9a9a; text-shadow: 1px 1px 0 var(--dark); }
 
 /* Editor */
-.pop-in { animation: pop-in 420ms cubic-bezier(.2, 1.6, .4, 1); }
-@keyframes pop-in { from { transform: scale(0.6) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
 .fields {
   display: grid; gap: 12px; width: min(100%, 480px); padding: 16px;
   background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; box-shadow: 0 5px 0 var(--dark);
@@ -112,10 +110,45 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .fields input:focus { border-color: var(--gold); outline: none; }
 
+/* Card reveal */
+.reveal { position: relative; perspective: 900px; width: min(100%, 520px); }
+.reveal[data-phase='back'], .reveal[data-phase='flip'] { cursor: pointer; }
+.reveal canvas { width: 100%; }
+.reveal-card { position: relative; transform-style: preserve-3d; transition: transform 600ms cubic-bezier(.3, 1.4, .5, 1); }
+.reveal[data-phase='back'] .reveal-card { transform: rotateY(180deg); }
+.reveal-face { backface-visibility: hidden; }
+.reveal-back { position: absolute; inset: 0; transform: rotateY(180deg); }
+
+.edition-banner {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%; pointer-events: none; white-space: nowrap;
+  font: 700 clamp(28px, 7vw, 52px) var(--font); color: var(--gold);
+  text-shadow: 4px 4px 0 var(--dark), -2px -2px 0 var(--red);
+  animation: banner 1.2s ease-out forwards;
+}
+@keyframes banner {
+  0% { transform: scale(.4) rotate(-8deg); opacity: 0; }
+  15% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+  30% { transform: scale(1) rotate(0); }
+  80% { opacity: 1; }
+  100% { transform: translateY(-24px); opacity: 0; }
+}
+.sparkle {
+  position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; pointer-events: none;
+  background: var(--gold); box-shadow: 0 0 0 3px var(--dark);
+  animation: burst 900ms ease-out forwards;
+}
+@keyframes burst {
+  from { transform: translate(-50%, -50%) rotate(var(--a)) translateY(0) scale(1); opacity: 1; }
+  to { transform: translate(-50%, -50%) rotate(var(--a)) translateY(-180px) scale(.3); opacity: 0; }
+}
+.edition-note { margin: 0; font-weight: 700; color: var(--gold); text-shadow: 2px 2px 0 var(--dark); }
+
 .print-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tilt-inner, .countdown, .pop-in { animation: none; }
+  .tilt-inner, .countdown { animation: none; }
+  .reveal-card { transition: none; }
+  .edition-banner, .sparkle { animation: none; }
   .tilt-inner { transform: none; }
   .btn, .picker-card { transition: none; }
 }
