@@ -36,3 +36,14 @@ test('rejects non-integer or non-positive scale', () => {
   expect(() => composeStamp(t, photo, {}, 1.5)).toThrow(RangeError)
   expect(() => composeStamp(t, photo, {}, 0)).toThrow(RangeError)
 })
+
+test('reuses the rendered frame art when template and values are unchanged (live preview runs every frame)', () => {
+  const render = vi.spyOn(t, 'render')
+  const values = { title: 'CACHE ME', value: '1¢' }
+  composeStamp(t, photo, values, 4)
+  composeStamp(t, photo, { ...values }, 4)
+  expect(render).toHaveBeenCalledTimes(1)
+  composeStamp(t, photo, { ...values, title: 'CHANGED' }, 4)
+  expect(render).toHaveBeenCalledTimes(2)
+  render.mockRestore()
+})

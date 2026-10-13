@@ -118,7 +118,7 @@ export function Booth() {
         </button>
         <label className="btn blue">
           Upload photo
-          <input type="file" accept="image/*" hidden onChange={onUpload} />
+          <input type="file" accept="image/*" className="visually-hidden" onChange={onUpload} />
         </label>
       </div>
       {uploadError && <p className="error" role="alert">{uploadError}</p>}

@@ -40,7 +40,7 @@ body {
 h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-shadow: 3px 3px 0 var(--dark); }
 .screen { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 
-.stamp-canvas { image-rendering: pixelated; max-width: 100%; height: auto; display: block; }
+.stamp-canvas { max-width: 100%; height: auto; display: block; }
 
 /* Template cards */
 .picker-grid { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: center; }
@@ -76,7 +76,9 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .btn:hover:not(:disabled) { transform: translateY(-2px); }
 .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--dark); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.btn:focus-visible, .btn:has(.visually-hidden:focus-visible) { outline: 3px solid var(--gold); outline-offset: 3px; }
+.btn { position: relative; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 .row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center; }
 
 /* Booth */
@@ -123,5 +125,4 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
   body { background: #fff; }
   .swirl, .app > *:not(.print-only) { display: none !important; }
   .print-only { display: block; }
-  .print-only img { image-rendering: pixelated; }
 }
