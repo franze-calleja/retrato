@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { tiltFor } from './TiltCard'
+import { tiltFor } from './tilt'
 
 const rect = { left: 100, top: 50, width: 200, height: 100 }
 

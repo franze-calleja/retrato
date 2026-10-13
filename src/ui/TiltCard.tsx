@@ -1,19 +1,7 @@
 import { useRef, type PointerEvent, type ReactNode } from 'react'
+import { tiltFor } from './tilt'
 
 const MAX_TILT = 10
-const clamp = (v: number) => Math.max(-0.5, Math.min(0.5, v))
-
-export function tiltFor(
-  clientX: number,
-  clientY: number,
-  rect: { left: number; top: number; width: number; height: number },
-  max: number,
-) {
-  const px = clamp((clientX - rect.left) / rect.width - 0.5)
-  const py = clamp((clientY - rect.top) / rect.height - 0.5)
-  // `+ 0` normalizes -0 to 0.
-  return { rx: -py * 2 * max + 0, ry: px * 2 * max + 0 }
-}
 
 export function TiltCard({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null)
