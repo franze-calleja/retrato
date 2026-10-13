@@ -1,4 +1,5 @@
 import { Booth } from './screens/Booth'
+import { Editor } from './screens/Editor'
 import { TemplatePicker } from './screens/TemplatePicker'
 import { useBooth } from './store/booth'
 import { SwirlBackground } from './ui/SwirlBackground'
@@ -12,7 +13,7 @@ export default function App() {
         <h1 className="logo">PIXEL BOOTH</h1>
         {screen === 'picker' && <TemplatePicker />}
         {screen === 'booth' && <Booth />}
-        {screen === 'editor' && <p>Editor coming soon</p>}
+        {screen === 'editor' && <Editor />}
       </main>
     </>
   )
