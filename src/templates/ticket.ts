@@ -11,6 +11,9 @@ const STUB = 148
 const TEXT_CX = 109
 const STUB_CX = 168
 
+/** Headline ink; dark on gold so it stays readable. */
+export const ADMIT_TEXT = OUTLINE
+
 const pad = (n: number, len: number) => String(n).padStart(len, '0')
 
 export function todayIso(now = new Date()): string {
@@ -39,7 +42,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   outline(ctx, OUTLINE, PHOTO.x - 1, PHOTO.y - 1, PHOTO.w + 2, PHOTO.h + 2)
   for (let y = 4; y < BH - 4; y += 4) fill(ctx, OUTLINE, STUB, y, 1, 2)
 
-  drawTextCentered(ctx, 'ADMIT ONE', TEXT_CX, 6, CREAM, 2, GOLD_DARK)
+  drawTextCentered(ctx, 'ADMIT ONE', TEXT_CX, 6, ADMIT_TEXT, 2, GOLD_DARK)
 
   panel(ctx, OUTLINE, 74, 22, 70, 22, 2)
   panel(ctx, RED, 75, 23, 68, 20, 1)

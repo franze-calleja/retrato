@@ -23,3 +23,17 @@ test('ticket serial regenerates per capture; event name is kept', () => {
 test('registry lists stamp, voucher, ticket in order', () => {
   expect(templates.map((t) => t.id)).toEqual(['stamp', 'voucher', 'ticket'])
 })
+
+test('ADMIT ONE headline is readable on the gold ticket (WCAG contrast ≥ 4.5)', async () => {
+  const { ADMIT_TEXT } = await import('./ticket')
+  const { GOLD } = await import('./colors')
+  const lum = (c: readonly number[]) => {
+    const [r, g, b] = c.slice(0, 3).map((v) => {
+      const s = v / 255
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const [hi, lo] = [lum(ADMIT_TEXT), lum(GOLD)].sort((a, b) => b - a)
+  expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5)
+})
