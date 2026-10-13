@@ -1,32 +1,30 @@
-# React + TypeScript + Vite
+# Pixel Booth
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A browser photobooth that puts your photo inside a pixel-art **stamp**, **voucher**, or **ticket** — download it as a PNG or print it. The photo stays exactly as taken; the frames are pixel art.
 
-Currently, two official plugins are available:
+Everything runs in the browser. Photos never leave the device.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test
+npm run build    # static site in dist/
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The camera needs HTTPS (localhost is fine for development).
+
+## Deploy
+
+Serve `dist/` from any static host (nginx, Dokploy static app, GitHub Pages) over HTTPS. No environment variables.
+
+## Add a template
+
+1. Create `src/templates/<name>.ts` exporting a `Template` (see `src/templates/types.ts`). Draw the frame and text at art-pixel scale with `draw.ts`, `colors.ts`, and `pixelFont.ts`. Leave the photo to the composer — just set `photoRect`.
+2. Add it to the list in `src/templates/registry.ts`.
+3. `npm test` — the contract test in `templates.test.ts` checks it automatically.
+
+## Credits
+
+UI font: Pixelify Sans (SIL Open Font License 1.1). Visual style inspired by pixel-art card games; all art is original.
