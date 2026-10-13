@@ -143,6 +143,22 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .edition-note { margin: 0; font-weight: 700; color: var(--gold); text-shadow: 2px 2px 0 var(--dark); }
 
+/* Operator panel */
+.logo { user-select: none; -webkit-tap-highlight-color: transparent; }
+.operator-backdrop {
+  position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px;
+  background: rgb(0 0 0 / 0.55);
+}
+.operator-panel {
+  display: grid; gap: 14px; width: min(100%, 440px); padding: 20px;
+  background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; box-shadow: 0 6px 0 var(--dark);
+}
+.operator-panel:focus { outline: none; }
+.operator-row { display: grid; grid-template-columns: 7.5em 1fr 3.5em; gap: 10px; align-items: center; }
+.operator-row output { text-align: right; font-weight: 700; }
+.operator-row select { grid-column: 2 / 4; font: 700 16px var(--font); padding: 6px; background: var(--dark); color: var(--ink); border: 3px solid var(--dark); border-radius: 6px; }
+.operator-row input[type='range'] { accent-color: var(--gold); width: 100%; }
+
 .print-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
