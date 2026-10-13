@@ -55,6 +55,7 @@ export const GLYPHS: Record<string, readonly string[]> = {
   '+': ['000', '010', '111', '010', '000'],
   '*': ['101', '010', '101', '000', '000'],
   '¢': ['010', '111', '100', '111', '010'],
+  '★': ['010', '111', '010', '101', '000'],
 }
 
 const chars = (text: string) => Array.from(text.toUpperCase())
