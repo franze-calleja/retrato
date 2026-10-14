@@ -1,8 +1,11 @@
-import { useState, type CSSProperties } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { fitCount, packSheets, type Page } from '../print/layout'
+import { PrintSheets } from '../print/PrintSheets'
 import { composeStamp } from '../render/composeStamp'
 import { EXPORT_SCALE, PREVIEW_SCALE, exportFileName } from '../render/export'
 import { useBooth } from '../store/booth'
+import { useOperator } from '../store/operator'
+import { TRAY_MAX, useTray } from '../store/tray'
 import { getTemplate } from '../templates/registry'
 import { SNAPSHOT_ANGLE } from '../editions/angle'
 import { getEdition } from '../editions/registry'
@@ -22,7 +25,13 @@ export function Editor() {
   const { phase, celebrate, skip } = useReveal(edition.rare, reducedMotion || revealed)
   const { setValue, retake, goToPicker } = useBooth.getState()
   const template = getTemplate(templateId)
-  const [print, setPrint] = useState<{ url: string; n: number } | null>(null)
+  const paper = useOperator((s) => s.paper)
+  const trayFull = useTray((s) => s.items.length >= TRAY_MAX)
+  const [copies, setCopies] = useState('1')
+  const [job, setJob] = useState<{ pages: Page[]; n: number } | null>(null)
+  const [note, setNote] = useState<string | null>(null)
+  const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(noteTimer.current), [])
 
   if (!capture) return null
 
@@ -41,12 +50,32 @@ export function Editor() {
     }, 'image/png')
   }
 
-  function startPrint() {
-    // New key each time so the <img> remounts and onLoad fires even if the image is unchanged.
-    setPrint((p) => ({ url: renderFull().toDataURL('image/png'), n: (p?.n ?? 0) + 1 }))
+  const copyCount = copies === 'fill' ? fitCount(template.printSizeMm, paper) : Number(copies)
+
+  function flash(text: string) {
+    setNote(text)
+    clearTimeout(noteTimer.current)
+    noteTimer.current = setTimeout(() => setNote(null), 2000)
   }
 
-  const printRoot = document.querySelector('.app')
+  function startPrint() {
+    const src = renderFull().toDataURL('image/png')
+    const items = Array.from({ length: copyCount }, () => ({ src, ...template.printSizeMm }))
+    // New key per press so the sheet remounts and waits for its own images.
+    setJob((j) => ({ pages: packSheets(items, paper), n: (j?.n ?? 0) + 1 }))
+  }
+
+  function addToTray() {
+    renderFull().toBlob((blob) => {
+      if (!blob) return flash("Couldn't add this card")
+      const url = URL.createObjectURL(blob)
+      const added = useTray.getState().add({
+        templateId: template.id, name: template.name, edition: edition.id, url, size: template.printSizeMm, copies: copyCount,
+      })
+      if (!added) URL.revokeObjectURL(url)
+      flash(added ? 'Added to tray' : `Tray full (${TRAY_MAX})`)
+    }, 'image/png')
+  }
 
   return (
     <section className="screen">
@@ -98,26 +127,27 @@ export function Editor() {
 
       <div className="row">
         <button className="btn gold" onClick={download}>Download PNG</button>
+        <label className="copies">
+          Copies
+          <select value={copies} onChange={(e) => setCopies(e.target.value)}>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="fill">Fill page</option>
+          </select>
+        </label>
         <button className="btn blue" onClick={startPrint}>Print</button>
+        <button className="btn green" onClick={addToTray} disabled={trayFull}>
+          {trayFull ? `Tray full (${TRAY_MAX})` : 'Add to tray'}
+        </button>
       </div>
+      <p className="editor-note" role="status">{note}</p>
       <div className="row">
         <button className="btn red" onClick={retake}>Retake</button>
         <button className="btn" onClick={goToPicker}>Change card</button>
       </div>
 
-      {print && printRoot &&
-        createPortal(
-          <div className="print-only">
-            <img
-              key={print.n}
-              src={print.url}
-              alt=""
-              style={{ width: `${template.printSizeMm.w}mm`, height: `${template.printSizeMm.h}mm` }}
-              onLoad={() => window.print()}
-            />
-          </div>,
-          printRoot,
-        )}
+      {job && <PrintSheets key={job.n} pages={job.pages} paper={paper} onReady={() => window.print()} />}
     </section>
   )
 }
