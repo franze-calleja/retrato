@@ -8,6 +8,9 @@ export const FRAGMENT = `
 precision mediump float;
 uniform vec2 u_res;
 uniform float u_time;
+uniform vec3 u_a;
+uniform vec3 u_b;
+uniform vec3 u_c;
 void main() {
   vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
   float r = length(uv);
@@ -19,11 +22,8 @@ void main() {
               0.6 / fi * cos(fi * p.x + u_time * 0.25 + 0.3 * fi));
   }
   float t = 0.5 + 0.5 * sin(p.x + p.y);
-  vec3 red = vec3(0.86, 0.26, 0.29);
-  vec3 blue = vec3(0.00, 0.50, 0.84);
-  vec3 dark = vec3(0.11, 0.11, 0.17);
-  vec3 col = mix(red, blue, smoothstep(0.2, 0.8, t));
-  col = mix(col, dark, 0.65 * smoothstep(0.5, 1.0, 0.5 + 0.5 * sin(p.x * 1.7 - p.y * 1.3)));
+  vec3 col = mix(u_a, u_b, smoothstep(0.2, 0.8, t));
+  col = mix(col, u_c, 0.65 * smoothstep(0.5, 1.0, 0.5 + 0.5 * sin(p.x * 1.7 - p.y * 1.3)));
   col = floor(col * 8.0) / 8.0;
   gl_FragColor = vec4(col, 1.0);
 }
@@ -46,4 +46,12 @@ export function createProgram(gl: WebGLRenderingContext): WebGLProgram | null {
   gl.attachShader(program, fs)
   gl.linkProgram(program)
   return gl.getProgramParameter(program, gl.LINK_STATUS) ? program : null
+}
+
+export type SwirlPalette = 'booth' | 'shop'
+
+/** Three colors (0–1 RGB) the swirl blends between. */
+export const PALETTES: Record<SwirlPalette, readonly [number, number, number][]> = {
+  booth: [[0.86, 0.26, 0.29], [0.0, 0.5, 0.84], [0.11, 0.11, 0.17]],
+  shop: [[0.2, 0.52, 0.38], [0.1, 0.38, 0.33], [0.05, 0.13, 0.11]],
 }

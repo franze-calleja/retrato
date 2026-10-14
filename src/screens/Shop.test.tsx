@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, expect, test } from 'vitest'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
+import { useStats } from '../store/stats'
 import { templates } from '../templates/registry'
 import { Shop } from './Shop'
 
@@ -11,8 +12,12 @@ beforeEach(() => {
   useBooth.setState(useBooth.getInitialState(), true)
 })
 
+const seeAll = () => fireEvent.click(screen.getByRole('button', { name: /see all cards/i }))
+const cardButtons = () => templates.filter((t) => screen.queryByRole('button', { name: t.name }))
+
 test('every card is a button described by its info box', () => {
   render(<Shop />)
+  seeAll()
   for (const t of templates) {
     const button = screen.getByRole('button', { name: t.name })
     const infoId = button.getAttribute('aria-describedby')!
@@ -23,6 +28,7 @@ test('every card is a button described by its info box', () => {
 
 test('choosing a card opens the booth for it', () => {
   render(<Shop />)
+  seeAll()
   fireEvent.click(screen.getByRole('button', { name: 'Ticket' }))
   expect([useBooth.getState().screen, useBooth.getState().templateId, useBooth.getState().mode]).toEqual(['booth', 'ticket', 'single'])
 })
@@ -79,4 +85,40 @@ test('the shop has its sign and two shelves', () => {
   expect(screen.getByRole('heading', { name: 'SHOP' })).toBeTruthy()
   expect(screen.getByRole('region', { name: 'Cards' })).toBeTruthy()
   expect(screen.getByRole('region', { name: 'Packs' })).toBeTruthy()
+})
+
+test('three featured cards by default; See all shows every card and can fold back', () => {
+  render(<Shop />)
+  expect(cardButtons()).toHaveLength(3)
+  seeAll()
+  expect(cardButtons()).toHaveLength(templates.length)
+  const toggle = screen.getByRole('button', { name: /show featured/i })
+  expect(toggle.getAttribute('aria-expanded')).toBe('true')
+  fireEvent.click(toggle)
+  expect(cardButtons()).toHaveLength(3)
+})
+
+test('reroll swaps in a different set of featured cards', () => {
+  render(<Shop />)
+  const before = cardButtons().map((t) => t.id).sort()
+  fireEvent.click(screen.getByRole('button', { name: /reroll/i }))
+  expect(cardButtons().map((t) => t.id).sort()).not.toEqual(before)
+})
+
+test('items carry FREE tags', () => {
+  render(<Shop />)
+  expect(screen.getAllByText('FREE').length).toBeGreaterThanOrEqual(3 + 4)
+})
+
+test('photos taken shows on the stat box and the deck pile', () => {
+  useStats.setState({ photos: 137 })
+  render(<Shop />)
+  expect(screen.getByTestId('photos').textContent).toBe('137')
+  expect(screen.getByRole('img', { name: '137 photos taken' })).toBeTruthy()
+  useStats.setState({ photos: 0 })
+})
+
+test('the marquee sign has its tagline', () => {
+  render(<Shop />)
+  expect(screen.getByText('Strike a pose!')).toBeTruthy()
 })

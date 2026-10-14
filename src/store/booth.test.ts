@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { PhotoSource } from '../photo/crop'
 import { useBooth } from './booth'
 import { useOperator } from './operator'
+import { useStats } from './stats'
 
 const s = () => useBooth.getState()
 const photo = (): PhotoSource => ({ source: document.createElement('canvas'), w: 10, h: 10 })
@@ -202,5 +203,16 @@ describe('themed packs', () => {
     s().pickPackCard(0)
     s().retake()
     expect([s().mode, s().packId]).toEqual(['pack', 'cosmic'])
+  })
+})
+
+describe('photo counter', () => {
+  test('every capture counts, single and pack', () => {
+    useStats.getState().resetPhotos()
+    s().selectTemplate('stamp')
+    s().setCapture(photo())
+    s().selectPack('classic')
+    s().setCapture(photo())
+    expect(useStats.getState().photos).toBe(2)
   })
 })

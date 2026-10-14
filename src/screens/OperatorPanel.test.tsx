@@ -3,6 +3,7 @@ import { beforeEach, expect, test } from 'vitest'
 import App from '../App'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
+import { useStats } from '../store/stats'
 
 beforeEach(() => {
   localStorage.clear()
@@ -36,7 +37,7 @@ test('sliders, force select and reset update operator settings', () => {
   expect(useOperator.getState().weights.holo).toBe(40)
   fireEvent.change(screen.getByLabelText(/force edition/i), { target: { value: 'poly' } })
   expect(useOperator.getState().forced).toBe('poly')
-  fireEvent.click(screen.getByRole('button', { name: /reset/i }))
+  fireEvent.click(screen.getByRole('button', { name: /reset to defaults/i }))
   expect(useOperator.getState()).toMatchObject({ forced: 'random', weights: { holo: 12 } })
 })
 
@@ -46,4 +47,12 @@ test('all-zero weights show 100% common', () => {
   fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
   expect(screen.getByTestId('pct-common').textContent).toBe('100%')
   expect(screen.getByTestId('pct-poly').textContent).toBe('0%')
+})
+
+test('the operator can reset the photo counter', () => {
+  useStats.getState().recordPhoto()
+  render(<App />)
+  fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
+  fireEvent.click(screen.getByRole('button', { name: /reset photo counter/i }))
+  expect(useStats.getState().photos).toBe(0)
 })

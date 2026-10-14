@@ -23,6 +23,12 @@ body {
 }
 
 /* Fixed swirl canvas; the gradient is the fallback when WebGL is unavailable. */
+.swirl[data-palette='shop'] {
+  background:
+    radial-gradient(circle at 30% 30%, #2f8a5f 0, transparent 55%),
+    radial-gradient(circle at 70% 70%, #1b5c4e 0, transparent 55%),
+    #0d221c;
+}
 .swirl {
   position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1;
   image-rendering: pixelated;
@@ -52,34 +58,73 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 
-/* Shop counter */
-.counter {
-  position: relative; width: 100%; margin-top: 26px; padding: 0 18px 22px;
-  background: var(--panel); border: 4px solid var(--dark); border-radius: 14px; box-shadow: 0 8px 0 var(--dark);
+/* Shop */
+.shop { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; align-items: start; width: 100%; }
+.shop-side { display: grid; gap: 12px; min-width: 0; }
+.marquee {
+  position: relative; padding: 20px 16px 14px; text-align: center;
+  background: var(--dark); border: 4px solid var(--red); border-radius: 12px; box-shadow: 0 6px 0 var(--dark);
 }
-.shop-sign {
-  position: relative; top: -26px; width: fit-content; margin: 0 auto -8px; padding: 6px 30px;
-  font: 700 36px/1 var(--font); letter-spacing: 8px; color: var(--gold);
-  background: var(--red); border: 4px solid var(--dark); border-radius: 10px;
-  box-shadow: inset 0 0 0 3px var(--gold), 0 6px 0 var(--dark); text-shadow: 3px 3px 0 var(--red-dark);
+.marquee-frame { position: absolute; inset: 7px; pointer-events: none; }
+.bulb {
+  position: absolute; width: 8px; height: 8px; translate: -50% -50%; border-radius: 50%;
+  background: #fff3c4; box-shadow: 0 0 6px 2px #ffd56b;
+  animation: chase 1.2s steps(1) infinite; animation-delay: calc(var(--i) * -0.15s);
 }
-.counter-body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
-.counter-side { display: grid; gap: 12px; min-width: 0; }
-.counter h3 { margin: 0 0 8px; font: 700 20px var(--font); text-shadow: 2px 2px 0 var(--dark); }
+@keyframes chase { 0% { opacity: 1; } 50% { opacity: 0.2; } }
+.marquee-title {
+  margin: 4px 0 2px; font: 700 54px/1 var(--font); letter-spacing: 5px; color: var(--gold);
+  text-shadow: 4px 4px 0 var(--red-dark), 0 0 14px rgb(255 213 107 / 0.45);
+}
+.marquee-tag { margin: 0; font: 700 18px var(--font); color: var(--ink); text-shadow: 2px 2px 0 var(--dark); }
+.stat-box {
+  display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;
+  background: var(--panel); border: 3px solid var(--dark); border-radius: 10px; box-shadow: 0 5px 0 var(--dark);
+}
+.stat-box h3 { margin: 0; font: 700 18px var(--font); text-shadow: 2px 2px 0 var(--dark); }
+.stat-box .num { font-size: 30px; color: var(--gold); }
+.odds-box { padding: 12px; background: var(--panel); border: 3px solid var(--dark); border-radius: 10px; box-shadow: 0 5px 0 var(--dark); }
+.shop h3 { margin: 0 0 8px; font: 700 20px var(--font); text-shadow: 2px 2px 0 var(--dark); }
+.num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-weight: 700; }
 .odds-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .odds-tile {
   display: grid; gap: 2px; padding: 8px 6px; text-align: center;
   background: var(--dark); border-radius: 8px; border-top: 6px solid #c9c3b4;
 }
-.num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-weight: 700; }
 .odds-tile .num { font-size: 22px; color: var(--ink); }
-.odds-name { font-size: 13px; color: var(--muted, #b9b3c9); }
+.odds-name { font-size: 13px; color: #b9b3c9; }
 .odds-foil { border-top-color: #dfe6f0; }
 .odds-holo { border-image: linear-gradient(90deg, #ff6b9d, #ffd36b, #6bffb8, #6bb8ff) 6 0 0 0; }
 .odds-poly { border-image: linear-gradient(90deg, #ff5e5e, #ffd35e, #5eff8a, #5ec8ff, #b65eff) 6 0 0 0; }
-.btn.big { width: 100%; padding: 16px 12px; font-size: 21px; }
+.btn.big { width: 100%; padding: 16px 12px; font-size: 21px; flex-direction: column; gap: 4px; }
+.btn.big small { font-size: 14px; }
+.btn.green { background: #3fa36b; box-shadow: 0 5px 0 #2a7349, 0 5px 0 3px var(--dark); }
 .how { margin: 0; padding: 10px 10px 10px 2em; display: grid; gap: 6px; background: var(--dark); border-radius: 8px; }
 .how[hidden] { display: none; }
+
+.counter {
+  min-width: 0; padding: 18px; background: var(--panel);
+  border: 4px solid var(--red); border-radius: 14px; box-shadow: 0 8px 0 var(--dark);
+}
+.counter-top { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.counter-buttons { display: grid; gap: 12px; align-content: start; }
+.link-btn {
+  display: block; margin: 12px auto 18px; padding: 4px 8px; background: none; border: 0; cursor: pointer;
+  color: var(--gold); font: 700 16px var(--font); text-decoration: underline; text-shadow: 1px 1px 0 var(--dark);
+}
+.link-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.counter-bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 22px; align-items: end; }
+.nameplate {
+  font: 700 13px var(--font); color: var(--ink); background: var(--dark);
+  border-radius: 4px; padding: 1px 8px; white-space: nowrap;
+}
+.deck { position: relative; width: 76px; height: 104px; margin: 0 6px 30px 0; }
+.deck-card {
+  position: absolute; inset: 0; border: 3px solid var(--dark); border-radius: 6px; box-shadow: 0 3px 0 var(--dark);
+  background: repeating-linear-gradient(45deg, var(--red) 0 6px, var(--red-dark) 6px 12px);
+  transform: translate(calc(var(--l) * -3px), calc(var(--l) * -3px));
+}
+.deck-count { position: absolute; left: 50%; top: calc(100% + 8px); translate: -50% 0; font-size: 18px; color: var(--ink); }
 
 .shelves { display: grid; gap: 22px; min-width: 0; }
 .shelf {
@@ -131,16 +176,17 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 @keyframes sheen { from { background-position: 150% 0; } to { background-position: -50% 0; } }
 @media (max-width: 719px) {
-  .shop-sign { font-size: 28px; letter-spacing: 5px; }
-  .counter { padding: 0 10px 18px; }
-  .counter-body { grid-template-columns: 1fr; }
-  .counter-side { grid-template-columns: 1fr 1fr; }
-  .odds-box, .how { grid-column: 1 / -1; }
+  .shop { grid-template-columns: 1fr; }
+  .marquee-title { font-size: 42px; }
+  .counter { padding: 12px 10px; }
+  .counter-top { grid-template-columns: 1fr; }
+  .counter-buttons { grid-template-columns: 1fr 1fr; }
   .odds-tiles { grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .odds-tile .num { font-size: 18px; }
   .odds-name { font-size: 11px; }
   .btn.big { font-size: 17px; padding: 12px 8px; }
   .tile-btn canvas { height: 120px; }
+  .deck { width: 56px; height: 78px; }
 }
 
 /* Chunky buttons */
@@ -278,6 +324,7 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
   .deal-card.glint .deal-front::after { display: none; }
   .tilt-inner { transform: none; }
   .btn, .tile-btn { transition: none; }
+  .bulb { animation: none; }
   .pack-btn::after { animation: none; display: none; }
 }
 

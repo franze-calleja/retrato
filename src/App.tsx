@@ -30,7 +30,7 @@ export default function App() {
 
   return (
     <>
-      <SwirlBackground />
+      <SwirlBackground palette={screen === 'picker' ? 'shop' : 'booth'} />
       <main className="app">
         <h1 className="logo" onClick={onLogoTap}>PIXEL BOOTH</h1>
         {screen === 'picker' && <Shop />}

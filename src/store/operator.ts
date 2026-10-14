@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { DEFAULT_WEIGHTS, editions } from '../editions/registry'
 import type { EditionSettings } from '../editions/roll'
+import { readJson, writeJson } from './storage'
 
 export const OPERATOR_KEY = 'pixel-booth:operator'
 
@@ -22,30 +23,12 @@ export function sanitize(raw: unknown): EditionSettings {
   return { weights, forced }
 }
 
-// localStorage can be missing or throw (private mode, sandboxed iframes, quota); settings then live in memory.
-function storage(): Storage | null {
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
-}
-
 export function loadSettings(): EditionSettings {
-  try {
-    const raw = storage()?.getItem(OPERATOR_KEY)
-    return sanitize(raw ? JSON.parse(raw) : null)
-  } catch {
-    return defaultSettings()
-  }
+  return sanitize(readJson(OPERATOR_KEY))
 }
 
 function save({ weights, forced }: EditionSettings) {
-  try {
-    storage()?.setItem(OPERATOR_KEY, JSON.stringify({ weights, forced }))
-  } catch {
-    // Keep working in memory.
-  }
+  writeJson(OPERATOR_KEY, { weights, forced })
 }
 
 interface OperatorState extends EditionSettings {

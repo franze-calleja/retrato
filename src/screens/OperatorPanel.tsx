@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { editionPercents } from '../editions/odds'
 import { editions } from '../editions/registry'
 import { useOperator } from '../store/operator'
+import { useStats } from '../store/stats'
 
 export function OperatorPanel({ onClose }: { onClose: () => void }) {
   const weights = useOperator((s) => s.weights)
@@ -60,6 +61,7 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
         </label>
         <div className="row">
           <button className="btn" onClick={reset}>Reset to defaults</button>
+          <button className="btn" onClick={() => useStats.getState().resetPhotos()}>Reset photo counter</button>
           <button className="btn gold" onClick={onClose}>Close</button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import type { PhotoSource } from '../photo/crop'
 import { clampValue, refreshPerCapture, resolveDefaults } from '../templates/fields'
 import { getTemplate } from '../templates/registry'
 import { useOperator } from './operator'
+import { useStats } from './stats'
 
 export type Screen = 'picker' | 'booth' | 'pack' | 'editor'
 export type Mode = 'single' | 'pack'
@@ -59,6 +60,7 @@ export const useBooth = create<BoothState>()((set, get) => ({
   },
   selectPack: (packId = 'classic') => set({ ...cleared, mode: 'pack', packId: getPack(packId).id, screen: 'booth' }),
   setCapture(photo) {
+    useStats.getState().recordPhoto()
     if (get().mode === 'pack') {
       set({ capture: photo, pack: dealPack(getPack(get().packId), useOperator.getState(), get().saved), screen: 'pack' })
       return
