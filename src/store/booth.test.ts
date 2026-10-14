@@ -216,3 +216,17 @@ describe('photo counter', () => {
     expect(useStats.getState().photos).toBe(2)
   })
 })
+
+test('typing into a full field keeps the text instead of dropping the last character', () => {
+  useBooth.getState().selectTemplate('ticket')
+  useBooth.getState().setValue('event', 'ABCDEFGHIJKLMN') // 14 = max
+  useBooth.getState().setValue('event', 'ABCXDEFGHIJKLMN') // typed X mid-field
+  expect(useBooth.getState().values.event).toBe('ABCDEFGHIJKLMN')
+})
+
+test('pasting a long text into a field that has room still clamps it', () => {
+  useBooth.getState().selectTemplate('ticket')
+  useBooth.getState().setValue('event', 'AB')
+  useBooth.getState().setValue('event', 'ABCDEFGHIJKLMNOPQRS')
+  expect(useBooth.getState().values.event).toBe('ABCDEFGHIJKLMN')
+})

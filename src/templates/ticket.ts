@@ -24,6 +24,18 @@ export function randomSerial(rand: () => number = Math.random): string {
   return `NO. ${pad(Math.floor(rand() * 1_000_000), 6)}`
 }
 
+const STUB_CHARS = 9
+
+/** Serial words as stub lines: words longer than the stub wrap onto the next line; at most 3 lines. */
+export function serialLines(serial: string): string[] {
+  const lines: string[] = []
+  for (const word of serial.split(' ').filter(Boolean)) {
+    const cps = Array.from(word)
+    for (let i = 0; i < cps.length; i += STUB_CHARS) lines.push(cps.slice(i, i + STUB_CHARS).join(''))
+  }
+  return lines.slice(0, 3)
+}
+
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
   panel(ctx, GOLD, 1, 1, BW - 2, BH - 2, 2)
@@ -55,8 +67,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 
   drawTextCentered(ctx, 'ADMIT', STUB_CX, 8, OUTLINE)
   drawTextCentered(ctx, 'ONE', STUB_CX, 16, OUTLINE)
-  const lines = (values.serial ?? '').split(' ').filter(Boolean).slice(0, 3)
-  lines.forEach((line, i) => drawTextCentered(ctx, line.slice(0, 9), STUB_CX, 34 + i * 8, OUTLINE))
+  serialLines(values.serial ?? '').forEach((line, i) => drawTextCentered(ctx, line, STUB_CX, 34 + i * 8, OUTLINE))
 }
 
 export const ticket: Template = {

@@ -34,3 +34,10 @@ test('ADMIT ONE headline is readable on the gold ticket (WCAG contrast ≥ 4.5)'
   const [hi, lo] = [lum(ADMIT_TEXT), lum(GOLD)].sort((a, b) => b - a)
   expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5)
 })
+
+test('serial words longer than the stub wrap instead of losing characters', async () => {
+  const { serialLines } = await import('./ticket')
+  expect(serialLines('NO. 123456')).toEqual(['NO.', '123456'])
+  expect(serialLines('1234567890')).toEqual(['123456789', '0'])
+  expect(serialLines('A B C D')).toEqual(['A', 'B', 'C'])
+})

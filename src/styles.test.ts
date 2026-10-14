@@ -13,3 +13,7 @@ test('composed images (which contain the photo) are not displayed with nearest-n
     expect(body ?? '', selector).not.toMatch(/image-rendering:\s*pixelated/)
   }
 })
+
+test('editor text fields use the legible number font (Pixelify digits read as letters)', () => {
+  expect(rule('.fields input')).toMatch(/font(-family)?:[^;]*monospace/)
+})

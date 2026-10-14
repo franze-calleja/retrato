@@ -69,3 +69,8 @@ describe('draw helpers', () => {
     expect(() => withDropShadow(ctx, 20, 10, 2, [0, 0, 0, 0.4], (c) => panel(c, [9, 9, 9], 0, 0, 20, 10))).not.toThrow()
   })
 })
+
+test('letters that grow when uppercased (ß, ﬁ) still take one slot', () => {
+  expect(measureText('ß')).toBe(measureText('A'))
+  expect(measureText('ﬁx')).toBe(measureText('AB'))
+})
