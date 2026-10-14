@@ -15,7 +15,7 @@ export const poly: Edition = {
       const n = hash(x, y)
       if (n > 0.985 && fract(n * 7 + angle * 3) > 0.6) return [255, 255, 255, 0.95]
       const [r, g, b] = hsl(step(fract(diag(x, y, w, h) * 1.5 + (y / h) * 0.5 + angle * 1.5), 8), 1, 0.6)
-      return [r, g, b, 0.45]
+      return [r, g, b, 0.27] // 40% softer than it was: busy or light frames stayed hard to read
     })
   },
 }

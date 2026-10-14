@@ -41,3 +41,13 @@ describe.each(editions.map((e) => [e.id, e] as const))('edition %s', (_id, e) =>
     expect(a).not.toBe(b)
   })
 })
+
+test('polychrome rainbow is softened so light and busy cards stay readable', async () => {
+  const { poly } = await import('./poly')
+  const data = poly.overlay(64, 64, 0.35)!.data
+  const alphas: number[] = []
+  for (let i = 3; i < data.length; i += 4) alphas.push(data[i])
+  alphas.sort((a, b) => a - b)
+  const median = alphas[alphas.length >> 1]
+  expect(median).toBeLessThanOrEqual(Math.round(0.27 * 255))
+})
