@@ -9,7 +9,9 @@ import { EXPORT_SCALE } from '../render/export'
 import { useBooth } from '../store/booth'
 import { placeholderPhoto } from '../templates/placeholder'
 import { getTemplate } from '../templates/registry'
+import { prefersReducedMotion } from '../ui/motion'
 import { CameraStage } from './CameraStage'
+import { InstantPrint } from './InstantPrint'
 
 const MESSAGES: Partial<Record<CameraStatus, string>> = {
   insecure: 'The camera only works over HTTPS (or on localhost). You can still upload a photo.',
@@ -33,6 +35,9 @@ export function Booth() {
   }, [])
   const [count, setCount] = useState<number | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [reducedMotion] = useState(prefersReducedMotion)
+  const [printing, setPrinting] = useState<PhotoSource | null>(null)
+  const [flashing, setFlashing] = useState(false)
 
   useEffect(() => {
     void start()
@@ -83,6 +88,16 @@ export function Booth() {
     [mode, template, setCapture],
   )
 
+  // Freeze the frame now (the video keeps moving), then print it before handing off.
+  const capture = useCallback(
+    (photo: PhotoSource) => {
+      const frozen = capturePackPhoto(photo)
+      if (reducedMotion) return keep(frozen)
+      setPrinting(frozen)
+    },
+    [keep, reducedMotion],
+  )
+
   // A camera that drops mid-countdown cancels it rather than capturing a frozen frame.
   const [countStatus, setCountStatus] = useState(status)
   if (countStatus !== status) {
@@ -97,10 +112,10 @@ export function Booth() {
       if (count > 1) return setCount(count - 1)
       setCount(null)
       const photo = liveSource()
-      if (photo) keep(photo)
+      if (photo) capture(photo)
     }, 1000)
     return () => clearTimeout(id)
-  }, [count, liveSource, keep])
+  }, [count, liveSource, capture])
 
   async function onUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -109,7 +124,7 @@ export function Booth() {
     setUploadError(null)
     try {
       const bmp = await createImageBitmap(file)
-      if (mounted.current) keep({ source: bmp, w: bmp.width, h: bmp.height })
+      if (mounted.current) capture({ source: bmp, w: bmp.width, h: bmp.height })
       bmp.close()
     } catch {
       if (!mounted.current) return
@@ -129,11 +144,25 @@ export function Booth() {
         template={template}
         title={template.name}
         count={count}
-        shutterEnabled={status === 'live' && count === null}
+        shutterEnabled={status === 'live' && count === null && !printing}
         onShutter={() => setCount(3)}
         screenRef={setScreen}
-        flashing={false}
-      />
+        flashing={flashing}
+      >
+        {printing && (
+          <InstantPrint
+            photo={printing}
+            mode={mode}
+            packId={packId}
+            reducedMotion={reducedMotion}
+            onFlash={setFlashing}
+            onDone={() => {
+              if (mounted.current) keep(printing)
+            }}
+          />
+        )}
+      </CameraStage>
+      {flashing && <div className="screen-flash" aria-hidden="true" />}
       {/* The visible number remounts for its animation; announce through one region that stays put. */}
       <div className="visually-hidden" data-testid="countdown-live" aria-live="assertive">
         {count !== null && count > 0 ? count : ''}
@@ -151,17 +180,18 @@ export function Booth() {
         <button
           className="btn"
           aria-pressed={side === 'back'}
+          disabled={printing !== null}
           onClick={() => useBooth.getState().setCameraSide(side === 'front' ? 'back' : 'front')}
         >
           {side === 'front' ? 'Show back' : 'Show front'}
         </button>
         <button className="btn" onClick={goToPicker}>Back</button>
-        <button className="btn red" disabled={status !== 'live' || count !== null} onClick={() => setCount(3)}>
+        <button className="btn red" disabled={status !== 'live' || count !== null || printing !== null} onClick={() => setCount(3)}>
           Take photo
         </button>
         <label className="btn blue">
           Upload photo
-          <input type="file" accept="image/*" className="visually-hidden" onChange={onUpload} />
+          <input type="file" accept="image/*" className="visually-hidden" disabled={printing !== null} onChange={onUpload} />
         </label>
       </div>
       {uploadError && <p className="error" role="alert">{uploadError}</p>}
