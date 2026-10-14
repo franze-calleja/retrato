@@ -61,7 +61,7 @@ export const GLYPHS: Record<string, readonly string[]> = {
 // Uppercase per character: ß→SS or ﬁ→FI would otherwise grow the text past its slot.
 const upper = (ch: string) => {
   const u = ch.toUpperCase()
-  return Array.from(u).length === 1 ? u : ch
+  return Array.from(u)[0] // ß→S, ﬁ→F: one slot, and a letter rather than ?
 }
 const chars = (text: string) => Array.from(text, upper)
 

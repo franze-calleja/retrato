@@ -43,3 +43,24 @@ test('the countdown announces through one live region that stays mounted', () =>
   expect(live).not.toBeNull()
   expect(live!.closest('[data-testid="countdown-live"]')).not.toBeNull()
 })
+
+test('a camera that disconnects mid-countdown cancels the countdown', async () => {
+  Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true })
+  const listeners: Record<string, () => void> = {}
+  const track = { stop: vi.fn(), addEventListener: (t: string, fn: () => void) => (listeners[t] = fn) }
+  Object.defineProperty(navigator, 'mediaDevices', {
+    configurable: true,
+    value: { getUserMedia: () => Promise.resolve({ getTracks: () => [track] }) },
+  })
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth' }, true)
+  render(<Booth />)
+  await act(async () => {})
+  fireEvent.click(screen.getByRole('button', { name: /take photo/i }))
+  expect(screen.getByTestId('countdown-live').textContent).toBe('3')
+  act(() => listeners.ended())
+  expect(screen.getByTestId('countdown-live').textContent).toBe('')
+  expect(screen.getByRole('alert').textContent).toMatch(/camera stopped/i)
+  vi.restoreAllMocks()
+  useBooth.setState(useBooth.getInitialState(), true)
+})

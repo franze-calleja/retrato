@@ -91,9 +91,6 @@ export const useBooth = create<BoothState>()((set, get) => ({
     const { templateId, values, saved } = get()
     const field = getTemplate(templateId).fields.find((f) => f.key === key)
     if (!field) return
-    // Typing into a full field would push its last character out; keep the text instead.
-    const len = (v: string) => Array.from(v).length
-    if (len(value) > field.maxLength && len(values[key] ?? '') >= field.maxLength) return
     const next = { ...values, [key]: clampValue(field, value) }
     set({ values: next, saved: { ...saved, [templateId]: next } })
   },

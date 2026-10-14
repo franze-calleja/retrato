@@ -40,3 +40,25 @@ test('paused (operator panel open) never fires', () => {
   vi.advanceTimersByTime(10 * 60_000)
   expect(onIdle).not.toHaveBeenCalled()
 })
+
+test('printing and moving the pointer count as activity', () => {
+  const onIdle = vi.fn()
+  renderHook(() => useIdleReset(1, onIdle, false))
+  vi.advanceTimersByTime(50_000)
+  fireEvent(window, new Event('afterprint'))
+  vi.advanceTimersByTime(50_000)
+  fireEvent.pointerMove(window)
+  vi.advanceTimersByTime(50_000)
+  expect(onIdle).not.toHaveBeenCalled()
+})
+
+test('the timer is paused while the print dialog is open', () => {
+  const onIdle = vi.fn()
+  renderHook(() => useIdleReset(1, onIdle, false))
+  fireEvent(window, new Event('beforeprint'))
+  vi.advanceTimersByTime(5 * 60_000)
+  expect(onIdle).not.toHaveBeenCalled()
+  fireEvent(window, new Event('afterprint'))
+  vi.advanceTimersByTime(60_000)
+  expect(onIdle).toHaveBeenCalledTimes(1)
+})

@@ -11,7 +11,7 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
   const idleMinutes = useOperator((s) => s.idleMinutes)
   const { setWeight, setForced, setPaper, setIdleMinutes, reset } = useOperator.getState()
   const dialogRef = useRef<HTMLDivElement>(null)
-  // Close only on a press that started on the backdrop, not a slider drag released over it.
+  // Close only on a press that started and ended on the backdrop, not a drag between it and the panel.
   const downOnBackdrop = useRef(false)
 
   function trapTab(e: KeyboardEvent) {
@@ -20,7 +20,10 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
     const first = items[0]
     const last = items[items.length - 1]
     const active = document.activeElement
-    if (e.shiftKey && (active === first || active === dialogRef.current)) {
+    if (!dialogRef.current?.contains(active)) {
+      e.preventDefault()
+      first.focus()
+    } else if (e.shiftKey && (active === first || active === dialogRef.current)) {
       e.preventDefault()
       last.focus()
     } else if (!e.shiftKey && active === last) {
@@ -49,6 +52,9 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
     <div
       className="operator-backdrop"
       onPointerDown={(e) => (downOnBackdrop.current = e.target === e.currentTarget)}
+      onPointerUp={(e) => {
+        if (e.target !== e.currentTarget) downOnBackdrop.current = false
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget && downOnBackdrop.current) onClose()
         downOnBackdrop.current = false

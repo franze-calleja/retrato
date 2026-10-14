@@ -169,3 +169,11 @@ test('after the idle time the booth returns to the shop and empties the tray', (
   expect(useTray.getState().items).toHaveLength(0)
   vi.useRealTimers()
 })
+
+test('Ctrl/Cmd+P on an empty tray does nothing, even if a card arrives later', () => {
+  render(<Tray />)
+  fireEvent.keyDown(window, { key: 'p', metaKey: true })
+  act(() => { add() })
+  printImgs().forEach((img) => fireEvent.load(img))
+  expect(window.print).not.toHaveBeenCalled()
+})

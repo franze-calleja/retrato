@@ -3,6 +3,7 @@ import { getEdition } from '../editions/registry'
 import { packSheets, printableArea, type Page, type PaperId } from '../print/layout'
 import { PrintSheets } from '../print/PrintSheets'
 import { useOperator } from '../store/operator'
+import { isPrintShortcut } from '../ui/printShortcut'
 import { MAX_COPIES, trayCopies, traySheetItems, useTray } from '../store/tray'
 
 const pageWord = (n: number) => (n === 1 ? 'page' : 'pages')
@@ -67,7 +68,7 @@ export function Tray() {
     const onAfter = () => setAskClear(true)
     // Ctrl/Cmd+P prints through the same path as the button, so it waits for the images.
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p') {
+      if (isPrintShortcut(e)) {
         e.preventDefault()
         printRef.current()
       }
@@ -85,6 +86,7 @@ export function Tray() {
   })
 
   function print() {
+    if (!items.length) return
     if (readyFor.current === sheetKey) window.print()
     else pending.current = true
   }

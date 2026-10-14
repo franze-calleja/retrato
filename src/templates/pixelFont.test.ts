@@ -74,3 +74,8 @@ test('letters that grow when uppercased (ß, ﬁ) still take one slot', () => {
   expect(measureText('ß')).toBe(measureText('A'))
   expect(measureText('ﬁx')).toBe(measureText('AB'))
 })
+
+test('ß and ﬁ draw as a letter, not as ?', () => {
+  expect(glyphFor('ß')).toBe(GLYPHS.S)
+  expect(glyphFor('ﬁ')).toBe(GLYPHS.F)
+})

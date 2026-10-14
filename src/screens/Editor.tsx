@@ -5,7 +5,9 @@ import { composeStamp } from '../render/composeStamp'
 import { EXPORT_SCALE, PREVIEW_SCALE, exportFileName } from '../render/export'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
+import { isPrintShortcut } from '../ui/printShortcut'
 import { TRAY_MAX, useTray } from '../store/tray'
+import { fitEdit } from '../templates/fields'
 import { getTemplate } from '../templates/registry'
 import { SNAPSHOT_ANGLE } from '../editions/angle'
 import { getEdition } from '../editions/registry'
@@ -37,7 +39,7 @@ export function Editor() {
     mounted.current = true
     // Ctrl/Cmd+P prints the current card through the same path as the Print button.
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p') {
+      if (isPrintShortcut(e)) {
         e.preventDefault()
         printBtn.current?.click()
       }
@@ -140,7 +142,7 @@ export function Editor() {
             <input
               value={values[f.key] ?? ''}
               maxLength={f.maxLength * 2 /* emoji are 2 UTF-16 units; the store clamps by code point */}
-              onChange={(e) => setValue(f.key, e.target.value)}
+              onChange={(e) => setValue(f.key, fitEdit(e.target.value, e.target.selectionStart ?? e.target.value.length, f.maxLength))}
             />
           </label>
         ))}

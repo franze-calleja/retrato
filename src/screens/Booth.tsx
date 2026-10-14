@@ -79,6 +79,13 @@ export function Booth() {
     [mode, template, setCapture],
   )
 
+  // A camera that drops mid-countdown cancels it rather than capturing a frozen frame.
+  const [countStatus, setCountStatus] = useState(status)
+  if (countStatus !== status) {
+    setCountStatus(status)
+    if (status !== 'live' && count !== null) setCount(null)
+  }
+
   // Countdown 3 → 2 → 1 → capture.
   useEffect(() => {
     if (count === null) return

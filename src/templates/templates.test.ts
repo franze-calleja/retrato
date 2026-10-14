@@ -74,3 +74,23 @@ test('every card prints with the same proportions as its art (within 0.1%)', () 
     expect(Math.abs(print / art - 1), t.id).toBeLessThan(0.001)
   }
 })
+
+describe('fitEdit', () => {
+  test('typing mid-field in a full field drops the new character, not the last one', async () => {
+    const { fitEdit } = await import('./fields')
+    expect(fitEdit('ABCXDEFGHIJKLMN', 4, 14)).toBe('ABCDEFGHIJKLMN')
+  })
+  test('select-all then paste longer text keeps as much as fits', async () => {
+    const { fitEdit } = await import('./fields')
+    expect(fitEdit('VIP-PASS-2026', 13, 10)).toBe('VIP-PASS-2')
+  })
+  test('replacing 2 characters with 3 in a full field trims just before the caret', async () => {
+    const { fitEdit } = await import('./fields')
+    // 'NO. 123456' with '12' replaced by 'ABC' → 'NO. ABC3456' (11), caret after C
+    expect(fitEdit('NO. ABC3456', 7, 10)).toBe('NO. AB3456')
+  })
+  test('counts emoji as one character', async () => {
+    const { fitEdit } = await import('./fields')
+    expect(fitEdit('😀😀x😀😀😀', 5, 5)).toBe('😀😀😀😀😀')
+  })
+})

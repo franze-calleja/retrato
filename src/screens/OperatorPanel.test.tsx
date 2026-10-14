@@ -100,3 +100,22 @@ test('Tab stays inside the panel', () => {
   fireEvent.keyDown(first, { key: 'Tab', shiftKey: true })
   expect(document.activeElement).toBe(last)
 })
+
+test('a press that starts on the backdrop but ends inside the panel does not close it', () => {
+  render(<App />)
+  fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
+  const backdrop = document.querySelector('.operator-backdrop')!
+  fireEvent.pointerDown(backdrop)
+  fireEvent.pointerUp(screen.getByRole('dialog'))
+  fireEvent.click(backdrop)
+  expect(screen.queryByRole('dialog')).not.toBeNull()
+})
+
+test('Tab from outside the panel goes into it', () => {
+  render(<App />)
+  fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
+  const first = screen.getByRole('dialog').querySelector<HTMLElement>('input, select, button')!
+  ;(document.activeElement as HTMLElement).blur()
+  fireEvent.keyDown(document.body, { key: 'Tab' })
+  expect(document.activeElement).toBe(first)
+})
