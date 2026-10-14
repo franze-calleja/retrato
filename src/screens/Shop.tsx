@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { displayedOdds } from '../editions/odds'
 import { editions } from '../editions/registry'
 import { packArt } from '../packs/packArt'
@@ -20,13 +20,13 @@ function CardTile({ template, delay }: { template: Template; delay: number }) {
   const values = useMemo(() => resolveDefaults(template), [template])
   return (
     <div className="tile">
-      <div className="info" role="tooltip" id={infoId}>{template.description}</div>
+      <span className="tag" aria-hidden="true">{template.name}</span>
       <TiltCard delay={delay}>
         <button className="tile-btn" aria-label={template.name} aria-describedby={infoId} onClick={() => selectTemplate(template.id)}>
           <StampCanvas template={template} photo={photo} values={values} scale={2} />
         </button>
       </TiltCard>
-      <span className="tag" aria-hidden="true">{template.name}</span>
+      <div className="info" role="tooltip" id={infoId}>{template.description}</div>
     </div>
   )
 }
@@ -40,30 +40,29 @@ function PackTile() {
   }, [])
   return (
     <div className="tile">
-      <div className="info" role="tooltip" id={infoId}>{PACK_INFO}</div>
+      <span className="tag" aria-hidden="true">Booster Pack</span>
       <TiltCard>
         <button className="tile-btn pack-btn" aria-label="Booster Pack" aria-describedby={infoId} onClick={selectPack}>
           <canvas ref={ref} className="stamp-canvas" aria-hidden="true" />
         </button>
       </TiltCard>
-      <span className="tag" aria-hidden="true">Booster Pack</span>
+      <div className="info" role="tooltip" id={infoId}>{PACK_INFO}</div>
     </div>
   )
 }
 
-function OddsPanel() {
+function OddsTiles() {
   const weights = useOperator((s) => s.weights)
   const forced = useOperator((s) => s.forced)
   const pct = displayedOdds({ weights, forced })
   return (
-    <section className="panel-box">
-      <h3>Odds</h3>
-      <ul className="odds">
+    <section className="odds-box" aria-labelledby="odds-title">
+      <h3 id="odds-title">Odds</h3>
+      <ul className="odds-tiles">
         {editions.map((e) => (
-          <li key={e.id} className="odds-row">
-            <span className={`swatch swatch-${e.id}`} aria-hidden="true" />
-            <span>{e.name}</span>
+          <li key={e.id} className={`odds-tile odds-${e.id}`}>
             <span className="num" data-testid={`odds-${e.id}`}>{pct[e.id]}%</span>
+            <span className="odds-name">{e.name}</span>
           </li>
         ))}
       </ul>
@@ -72,39 +71,48 @@ function OddsPanel() {
 }
 
 export function Shop() {
+  const selectPack = useBooth((s) => s.selectPack)
+  const [howOpen, setHowOpen] = useState(false)
+  const howId = useId()
   return (
-    <div className="shop">
-      <div className="shop-main">
-        <section className="panel-box tray" aria-labelledby="cards-title">
-          <h3 id="cards-title">Cards</h3>
-          <div className="felt">
-            <div className="tile-grid">
+    <div className="counter">
+      <h2 className="shop-sign">SHOP</h2>
+      <div className="counter-body">
+        <aside className="counter-side">
+          <OddsTiles />
+          <button className="btn red big" onClick={selectPack}>Open pack</button>
+          <button className="btn blue big" aria-expanded={howOpen} aria-controls={howId} onClick={() => setHowOpen((o) => !o)}>
+            How it works
+          </button>
+          <ol id={howId} className="how" hidden={!howOpen}>
+            {howOpen && (
+              <>
+                <li>Pick a card or a pack</li>
+                <li>Strike a pose</li>
+                <li>Keep, download or print</li>
+              </>
+            )}
+          </ol>
+        </aside>
+        <div className="shelves">
+          <section className="shelf" aria-label="Cards">
+            <div className="shelf-row">
               {templates.map((t, i) => (
                 <CardTile key={t.id} template={t} delay={i * 0.35} />
               ))}
             </div>
-          </div>
-        </section>
-        <section className="panel-box tray" aria-labelledby="packs-title">
-          <h3 id="packs-title">Packs</h3>
-          <div className="felt">
-            <div className="tile-grid">
+          </section>
+          <section className="shelf" aria-label="Packs">
+            <div className="shelf-row">
               <PackTile />
+              <div className="slot-soon" role="img" aria-label="More coming soon">
+                <span className="slot-mark" aria-hidden="true">?</span>
+                <span aria-hidden="true">SOON</span>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
-      <aside className="shop-side">
-        <OddsPanel />
-        <section className="panel-box">
-          <h3>How it works</h3>
-          <ol className="how">
-            <li>Pick a card or a pack</li>
-            <li>Strike a pose</li>
-            <li>Keep, download or print</li>
-          </ol>
-        </section>
-      </aside>
     </div>
   )
 }

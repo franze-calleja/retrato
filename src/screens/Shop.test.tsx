@@ -51,3 +51,32 @@ test('odds panel shows a forced edition as certain', () => {
   expect(screen.getByTestId('odds-poly').textContent).toBe('100%')
   expect(screen.getByTestId('odds-common').textContent).toBe('0%')
 })
+
+test('the OPEN PACK button starts pack mode too', () => {
+  render(<Shop />)
+  fireEvent.click(screen.getByRole('button', { name: /open pack/i }))
+  expect([useBooth.getState().screen, useBooth.getState().mode]).toEqual(['booth', 'pack'])
+})
+
+test('HOW IT WORKS expands its steps in place', () => {
+  render(<Shop />)
+  const toggle = screen.getByRole('button', { name: /how it works/i })
+  expect(toggle.getAttribute('aria-expanded')).toBe('false')
+  expect(screen.queryByText('Strike a pose')).toBeNull()
+  fireEvent.click(toggle)
+  expect(toggle.getAttribute('aria-expanded')).toBe('true')
+  expect(document.getElementById(toggle.getAttribute('aria-controls')!)?.textContent).toMatch(/strike a pose/i)
+})
+
+test('the coming-soon slot is decoration, not a button', () => {
+  render(<Shop />)
+  expect(screen.getByRole('img', { name: /more coming soon/i })).toBeTruthy()
+  expect(screen.queryByRole('button', { name: /soon/i })).toBeNull()
+})
+
+test('the shop has its sign and two shelves', () => {
+  render(<Shop />)
+  expect(screen.getByRole('heading', { name: 'SHOP' })).toBeTruthy()
+  expect(screen.getByRole('region', { name: 'Cards' })).toBeTruthy()
+  expect(screen.getByRole('region', { name: 'Packs' })).toBeTruthy()
+})
