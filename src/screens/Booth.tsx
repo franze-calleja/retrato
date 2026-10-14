@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useCamera, type CameraStatus } from '../camera/useCamera'
+import { capturePackPhoto } from '../packs/capture'
+import { packViewfinder } from '../packs/viewfinder'
 import { cropPhoto, type PhotoSource } from '../photo/crop'
 import { composeStamp } from '../render/composeStamp'
 import { EXPORT_SCALE, PREVIEW_SCALE } from '../render/export'
@@ -17,7 +19,8 @@ export function Booth() {
   const templateId = useBooth((s) => s.templateId)
   const values = useBooth((s) => s.values)
   const { setCapture, goToPicker } = useBooth.getState()
-  const template = getTemplate(templateId)
+  const mode = useBooth((s) => s.mode)
+  const template = mode === 'pack' ? packViewfinder : getTemplate(templateId)
 
   const { videoRef, status, start } = useCamera()
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -57,10 +60,11 @@ export function Booth() {
 
   const keep = useCallback(
     (photo: PhotoSource) => {
+      if (mode === 'pack') return setCapture(capturePackPhoto(photo))
       const r = template.photoRect
       setCapture(cropPhoto(photo, r.w * EXPORT_SCALE, r.h * EXPORT_SCALE))
     },
-    [template, setCapture],
+    [mode, template, setCapture],
   )
 
   // Countdown 3 → 2 → 1 → capture.
