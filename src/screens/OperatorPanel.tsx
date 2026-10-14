@@ -95,7 +95,7 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
         </label>
         <label className="operator-row">
           <span>Reset when idle</span>
-          <select value={idleMinutes} onChange={(ev) => setIdleMinutes(Number(ev.target.value))}>
+          <select className="num" value={idleMinutes} onChange={(ev) => setIdleMinutes(Number(ev.target.value))}>
             {IDLE_CHOICES.map((m) => (
               <option key={m} value={m}>{m === 0 ? 'Off' : `After ${m} min`}</option>
             ))}
