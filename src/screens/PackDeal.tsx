@@ -15,7 +15,7 @@ export function PackDeal() {
   const { pickPackCard, goToPicker } = useBooth.getState()
   const [reducedMotion] = useState(prefersReducedMotion)
   const count = pack?.length ?? 0
-  const { revealed, revealAll } = useDeal(count, reducedMotion)
+  const { revealed, pickable, revealAll } = useDeal(count, reducedMotion)
   const [chosen, setChosen] = useState<number | null>(null)
 
   // Let the chosen card lift before switching screens.
@@ -45,7 +45,7 @@ export function PackDeal() {
               aria-label={faceUp ? `${template.name}, ${edition.name} edition` : 'Face-down card'}
               onClick={() => {
                 if (dealing) return revealAll()
-                if (chosen === null) setChosen(i)
+                if (pickable && chosen === null) setChosen(i)
               }}
             >
               <div className="deal-inner">

@@ -44,3 +44,10 @@ test('odds panel follows the operator settings', () => {
   expect(screen.getByTestId('odds-holo').textContent).toBe('50%')
   expect(screen.getByTestId('odds-common').textContent).toBe('0%')
 })
+
+test('odds panel shows a forced edition as certain', () => {
+  useOperator.getState().setForced('poly')
+  render(<Shop />)
+  expect(screen.getByTestId('odds-poly').textContent).toBe('100%')
+  expect(screen.getByTestId('odds-common').textContent).toBe('0%')
+})

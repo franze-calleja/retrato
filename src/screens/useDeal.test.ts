@@ -39,3 +39,18 @@ test('unmounting mid-deal leaves no timers', () => {
   unmount()
   expect(vi.getTimerCount()).toBe(0)
 })
+
+test('cards become pickable only after the last flip has settled', () => {
+  const { result } = renderHook(() => useDeal(3, false))
+  act(() => result.current.revealAll())
+  expect(result.current.pickable).toBe(false)
+  act(() => vi.advanceTimersByTime(DEAL_TIMING.settle - 1))
+  expect(result.current.pickable).toBe(false)
+  act(() => vi.advanceTimersByTime(1))
+  expect(result.current.pickable).toBe(true)
+})
+
+test('reduced motion is pickable straight away', () => {
+  const { result } = renderHook(() => useDeal(3, true))
+  expect(result.current.pickable).toBe(true)
+})

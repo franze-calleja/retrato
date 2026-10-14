@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef } from 'react'
-import { editionPercents } from '../editions/odds'
+import { displayedOdds } from '../editions/odds'
 import { editions } from '../editions/registry'
 import { packArt } from '../packs/packArt'
 import { useBooth } from '../store/booth'
@@ -53,7 +53,8 @@ function PackTile() {
 
 function OddsPanel() {
   const weights = useOperator((s) => s.weights)
-  const pct = editionPercents(weights)
+  const forced = useOperator((s) => s.forced)
+  const pct = displayedOdds({ weights, forced })
   return (
     <section className="panel-box">
       <h3>Odds</h3>

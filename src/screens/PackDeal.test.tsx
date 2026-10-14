@@ -59,3 +59,16 @@ test('choosing a card opens the editor with it; a second tap is ignored', () => 
   const s = useBooth.getState()
   expect([s.screen, s.templateId, s.edition, s.revealed]).toEqual(['editor', 'ticket', 'holo', true])
 })
+
+test('a double-tap while dealing reveals but does not keep an unseen card', () => {
+  setup(false)
+  const [first] = screen.getAllByRole('button', { name: 'Face-down card' })
+  fireEvent.click(first)
+  fireEvent.click(screen.getByRole('button', { name: 'Stamp, Common edition' }))
+  act(() => vi.advanceTimersByTime(DEAL_TIMING.choose))
+  expect(useBooth.getState().screen).toBe('pack')
+  act(() => vi.advanceTimersByTime(DEAL_TIMING.settle))
+  fireEvent.click(screen.getByRole('button', { name: 'Stamp, Common edition' }))
+  act(() => vi.advanceTimersByTime(DEAL_TIMING.choose))
+  expect([useBooth.getState().screen, useBooth.getState().templateId]).toEqual(['editor', 'stamp'])
+})
