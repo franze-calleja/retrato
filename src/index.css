@@ -160,9 +160,9 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen;
   background: linear-gradient(115deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%);
   background-size: 300% 100%; background-position: 150% 0;
-  animation: glint 7s ease-in-out infinite; animation-delay: var(--glint-delay, 0s);
+  animation: shelf-glint 7s ease-in-out infinite; animation-delay: var(--glint-delay, 0s);
 }
-@keyframes glint { 0% { background-position: 150% 0; } 14%, 100% { background-position: -50% 0; } }
+@keyframes shelf-glint { 0% { background-position: 150% 0; } 14%, 100% { background-position: -50% 0; } }
 .tilt-inner.sway { animation: sway 4s ease-in-out infinite; }
 .tilt:hover .tilt-inner.sway, .tilt:focus-within .tilt-inner.sway { animation: rustle 400ms ease-in-out 1, sway 4s ease-in-out 400ms infinite; }
 @keyframes sway { 0%, 100% { rotate: -2deg; } 50% { rotate: 2deg; } }
@@ -367,8 +367,10 @@ h2[tabindex="-1"]:focus { outline: none; }
 .sheet-mini span { position: absolute; background: #c9c9c9; outline: 1px solid #7a7a7a; }
 
 /* Editor card glare (display only) */
+/* Reduced motion: the same shadow, held still. */
+.card-shadow { filter: drop-shadow(0 8px 0 rgb(0 0 0 / 0.3)); }
 .card-glare {
-  position: relative; display: inline-block; line-height: 0;
+  position: relative; display: block; line-height: 0;
   filter: drop-shadow(calc(var(--tilt-x, 0) * -0.6px) calc(8px + var(--tilt-y, 0) * 0.6px) 0 rgb(0 0 0 / 0.3));
   transition: filter 120ms ease-out;
 }
@@ -414,7 +416,7 @@ h2[tabindex="-1"]:focus { outline: none; }
   .deal-card { animation: none; transition: none; }
   .deal-inner { transition: none; }
   .deal-card.glint .deal-front::after { display: none; }
-  .pack-stage .pack-shaker, .pack-stage canvas, .pack-flash { animation: none; }
+  .pack-stage[data-phase] .pack-shaker, .pack-stage[data-phase] canvas, .pack-stage[data-phase] .pack-flash { animation: none; }
   .deal.from-pack .deal-card { animation: none; }
   .card-glare, .card-glare .glare, .sparkle-dot { animation: none; transition: none; }
   .tilt-inner { transform: none; }

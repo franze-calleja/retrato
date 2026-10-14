@@ -4,6 +4,7 @@ import { editions } from '../editions/registry'
 import { PACKS, type PackDef } from '../packs/catalog'
 import { packArt } from '../packs/packArt'
 import { nextFeatured } from '../shop/featured'
+import { glintDelay } from '../shop/glint'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
 import { useStats } from '../store/stats'
@@ -18,7 +19,8 @@ const TEMPLATE_IDS = templates.map((t) => t.id)
 const BULBS_ACROSS = 12
 const BULBS_DOWN = 4
 
-function CardTile({ template, delay, glint, index, spin }: { template: Template; delay: number; glint: number; index: number; spin: boolean }) {
+function CardTile({ template, delay, slot, total, index, spin }: { template: Template; delay: number; slot: number; total: number; index: number; spin: boolean }) {
+  const [glint] = useState(() => glintDelay(slot, total, performance.now()))
   const infoId = useId()
   const selectTemplate = useBooth((s) => s.selectTemplate)
   const photo = useMemo(() => placeholderPhoto(template), [template])
@@ -43,7 +45,8 @@ function CardTile({ template, delay, glint, index, spin }: { template: Template;
   )
 }
 
-function PackTile({ pack, delay, glint }: { pack: PackDef; delay: number; glint: number }) {
+function PackTile({ pack, delay, slot, total }: { pack: PackDef; delay: number; slot: number; total: number }) {
+  const [glint] = useState(() => glintDelay(slot, total, performance.now()))
   const infoId = useId()
   const selectPack = useBooth((s) => s.selectPack)
   const ref = useRef<HTMLCanvasElement>(null)
@@ -134,6 +137,7 @@ export function Shop() {
   const howId = useId()
   const shelfId = useId()
   const shown = showAll ? templates : featured.map(getTemplate)
+  const shelfItems = shown.length + PACKS.length
 
   return (
     <div className="shop">
@@ -171,9 +175,10 @@ export function Shop() {
             </button>
           </div>
           <section className="shelf" aria-label="Cards" id={shelfId}>
-            <div className="shelf-row" key={rolls}>
+            {/* Remount on reroll so the new cards spin in; with every card shown nothing changes, so no spin. */}
+            <div className="shelf-row" key={showAll ? 'all' : rolls}>
               {shown.map((t, i) => (
-                <CardTile key={t.id} template={t} delay={i * 0.35} glint={i * 1.4} index={i} spin={rolls > 0} />
+                <CardTile key={t.id} template={t} delay={i * 0.35} slot={i} total={shelfItems} index={i} spin={!showAll && rolls > 0} />
               ))}
             </div>
           </section>
@@ -185,7 +190,7 @@ export function Shop() {
           <section className="shelf" aria-label="Packs">
             <div className="shelf-row">
               {PACKS.map((p, i) => (
-                <PackTile key={p.id} pack={p} delay={i * 0.35} glint={(shown.length + i) * 1.4} />
+                <PackTile key={p.id} pack={p} delay={i * 0.35} slot={shown.length + i} total={shelfItems} />
               ))}
             </div>
           </section>

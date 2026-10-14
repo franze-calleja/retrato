@@ -179,3 +179,13 @@ test('reduced motion: no glare element', () => {
   expect(document.querySelector('.card-glare')).toBeNull()
   Reflect.deleteProperty(window, 'matchMedia')
 })
+
+test('reduced motion still gets a static card shadow', () => {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (q: string) => ({ matches: q.includes('reduce'), addEventListener() {}, removeEventListener() {} }),
+  })
+  open(true)
+  expect(document.querySelector('.card-shadow')).not.toBeNull()
+  Reflect.deleteProperty(window, 'matchMedia')
+})

@@ -30,6 +30,22 @@ test('reduced motion switches off every new animation', () => {
   const block = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'))
   const end = block.indexOf('\n}\n')
   const body = block.slice(0, end)
-  for (const sel of ['.tile-btn::before', '.tilt-inner.sway', '.tile-btn.spin-in', '.pack-stage .pack-shaker', '.deal.from-pack .deal-card', '.card-glare'])
+  for (const sel of ['.tile-btn::before', '.tilt-inner.sway', '.tile-btn.spin-in', '.pack-stage[data-phase] .pack-shaker', '.deal.from-pack .deal-card', '.card-glare'])
     expect(body, sel).toContain(sel)
+})
+
+test('the glare wrapper is a block so the card keeps its full width', () => {
+  expect(rule('.card-glare')).toMatch(/display:\s*block/)
+})
+
+test('no two @keyframes share a name (the last one would silently win)', () => {
+  const names = [...css.matchAll(/@keyframes\s+([\w-]+)/g)].map((m) => m[1])
+  expect(names.length - new Set(names).size).toBe(0)
+})
+
+test('reduced motion beats the pack-stage phase rules on specificity', () => {
+  const block = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'))
+  expect(block).toContain(".pack-stage[data-phase] .pack-shaker")
+  expect(block).toContain(".pack-stage[data-phase] canvas")
+  expect(block).toContain(".pack-stage[data-phase] .pack-flash")
 })

@@ -134,8 +134,10 @@ test('packs sway on the shelf; cards bob', () => {
 test('each shelf item shines in turn', () => {
   render(<Shop />)
   const delays = [...document.querySelectorAll<HTMLElement>('.tile-btn')].map((b) => b.style.getPropertyValue('--glint-delay'))
-  expect(new Set(delays).size).toBe(delays.length)
-  expect(delays.every((d) => /^\d+(\.\d+)?s$/.test(d))).toBe(true)
+  expect(delays.every((d) => /^-?\d+(\.\d+)?s$/.test(d))).toBe(true)
+  // Distinct within one 7 s cycle (0 s and 7 s would shine together).
+  const phases = delays.map((d) => (((parseFloat(d) % 7) + 7) % 7).toFixed(2))
+  expect(new Set(phases).size).toBe(delays.length)
 })
 
 test('reroll spins the new featured cards in', () => {
@@ -143,4 +145,11 @@ test('reroll spins the new featured cards in', () => {
   expect(document.querySelectorAll('.spin-in')).toHaveLength(0)
   fireEvent.click(screen.getByRole('button', { name: /reroll/i }))
   expect(document.querySelectorAll('.spin-in')).toHaveLength(3)
+})
+
+test('rerolling while every card is shown does not replay the spin', () => {
+  render(<Shop />)
+  fireEvent.click(screen.getByRole('button', { name: /see all cards/i }))
+  fireEvent.click(screen.getByRole('button', { name: /reroll/i }))
+  expect(document.querySelectorAll('.spin-in')).toHaveLength(0)
 })

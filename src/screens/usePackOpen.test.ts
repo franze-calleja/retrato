@@ -81,3 +81,23 @@ test('rare tint picks the rarest edition in the pack', () => {
   expect(rareTint(['holo', 'common'])).toBe('#7fd6ff')
   expect(rareTint(['holo', 'poly', 'foil'])).toBe('#ff7fe1')
 })
+
+test.each([
+  ['Tab', { key: 'Tab' }],
+  ['a modifier on its own', { key: 'Shift', shiftKey: true }],
+  ['Alt held', { key: 'o', altKey: true }],
+  ['a held-down key', { key: 'x', repeat: true }],
+])('%s does not advance the opening', (_name, init) => {
+  const { result } = renderHook(() => usePackOpen(false))
+  fireEvent.keyDown(window, init)
+  expect(result.current.phase).toBe('sealed')
+})
+
+test('typing in a field (operator panel) does not advance the opening', () => {
+  const { result } = renderHook(() => usePackOpen(false))
+  const input = document.createElement('input')
+  document.body.appendChild(input)
+  fireEvent.keyDown(input, { key: 'a' })
+  expect(result.current.phase).toBe('sealed')
+  input.remove()
+})

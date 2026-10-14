@@ -15,6 +15,15 @@ export function rareTint(editionIds: string[]): string | null {
   return null
 }
 
+const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Alt', 'Control', 'Meta', 'CapsLock', 'Escape'])
+
+/** A deliberate key press on the page: not Tab, a lone modifier, a shortcut, a held key, or typing in a field. */
+export function isAdvanceKey(e: KeyboardEvent): boolean {
+  if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || IGNORED_KEYS.has(e.key)) return false
+  const t = e.target
+  return !(t instanceof Element && t.closest('input, textarea, select, [role="dialog"]'))
+}
+
 /** Pack-opening phases: sealed (until tap or 3 s) → shake → tear → burst → done. Reduced motion starts done. */
 export function usePackOpen(reducedMotion: boolean) {
   const [phase, setPhase] = useState<OpenPhase>(reducedMotion ? 'done' : 'sealed')
@@ -31,6 +40,7 @@ export function usePackOpen(reducedMotion: boolean) {
   useEffect(() => {
     if (phase === 'done') return
     const onKey = (e: KeyboardEvent) => {
+      if (!isAdvanceKey(e)) return
       if (e.target instanceof HTMLButtonElement && (e.key === 'Enter' || e.key === ' ')) return
       if (phase === 'sealed') open()
       else skip()

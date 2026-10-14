@@ -118,7 +118,7 @@ export function Editor() {
           <div className="reveal-face reveal-front">
             <TiltCard>
               {reducedMotion ? (
-                card
+                <div className="card-shadow">{card}</div>
               ) : (
                 <CardGlare template={template} edition={edition}>
                   {card}
