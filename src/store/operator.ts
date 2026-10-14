@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { DEFAULT_WEIGHTS, editions } from '../editions/registry'
 import type { EditionSettings } from '../editions/roll'
+import type { PaperId } from '../print/layout'
 import { readJson, writeJson } from './storage'
 
 export const OPERATOR_KEY = 'pixel-booth:operator'
@@ -27,18 +28,28 @@ export function loadSettings(): EditionSettings {
   return sanitize(readJson(OPERATOR_KEY))
 }
 
-function save({ weights, forced }: EditionSettings) {
-  writeJson(OPERATOR_KEY, { weights, forced })
+export const isPaper = (v: unknown): v is PaperId => v === 'a4' || v === 'letter'
+
+export function loadPaper(): PaperId {
+  const raw = readJson(OPERATOR_KEY) as { paper?: unknown } | null
+  return raw && typeof raw === 'object' && isPaper(raw.paper) ? raw.paper : 'a4'
+}
+
+function save({ weights, forced, paper }: EditionSettings & { paper: PaperId }) {
+  writeJson(OPERATOR_KEY, { weights, forced, paper })
 }
 
 interface OperatorState extends EditionSettings {
+  paper: PaperId
   setWeight(id: string, weight: number): void
   setForced(forced: string): void
+  setPaper(paper: string): void
   reset(): void
 }
 
 export const useOperator = create<OperatorState>()((set, get) => ({
   ...loadSettings(),
+  paper: loadPaper(),
   setWeight(id, weight) {
     if (!isEdition(id) || !Number.isFinite(weight)) return
     set({ weights: { ...get().weights, [id]: clampWeight(weight) } })
@@ -49,8 +60,13 @@ export const useOperator = create<OperatorState>()((set, get) => ({
     set({ forced })
     save(get())
   },
+  setPaper(paper) {
+    if (!isPaper(paper)) return
+    set({ paper })
+    save(get())
+  },
   reset() {
-    set(defaultSettings())
+    set({ ...defaultSettings(), paper: 'a4' })
     save(get())
   },
 }))

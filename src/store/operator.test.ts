@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { OPERATOR_KEY, defaultSettings, loadSettings, sanitize, useOperator } from './operator'
+import { OPERATOR_KEY, defaultSettings, loadPaper, loadSettings, sanitize, useOperator } from './operator'
 
 beforeEach(() => {
   localStorage.clear()
@@ -18,6 +18,7 @@ test('setWeight and setForced persist; loadSettings restores them', () => {
   expect(JSON.parse(localStorage.getItem(OPERATOR_KEY)!)).toEqual({
     weights: { common: 60, foil: 25, holo: 50, poly: 3 },
     forced: 'poly',
+    paper: 'a4',
   })
   expect(loadSettings()).toEqual({ weights: { common: 60, foil: 25, holo: 50, poly: 3 }, forced: 'poly' })
 })
@@ -65,4 +66,27 @@ test('storage that throws never breaks reads or writes', () => {
   expect(loadSettings()).toEqual(defaultSettings())
   expect(() => useOperator.getState().setWeight('foil', 40)).not.toThrow()
   expect(useOperator.getState().weights.foil).toBe(40)
+})
+
+test('paper defaults to A4, persists, and restores', () => {
+  expect(useOperator.getState().paper).toBe('a4')
+  useOperator.getState().setPaper('letter')
+  expect(useOperator.getState().paper).toBe('letter')
+  expect(JSON.parse(localStorage.getItem(OPERATOR_KEY)!).paper).toBe('letter')
+  expect(loadPaper()).toBe('letter')
+})
+
+test('unknown or corrupt paper falls back to A4', () => {
+  useOperator.getState().setPaper('tabloid')
+  expect(useOperator.getState().paper).toBe('a4')
+  localStorage.setItem(OPERATOR_KEY, JSON.stringify({ paper: 42 }))
+  expect(loadPaper()).toBe('a4')
+  localStorage.setItem(OPERATOR_KEY, '{nope')
+  expect(loadPaper()).toBe('a4')
+})
+
+test('reset puts paper back to A4', () => {
+  useOperator.getState().setPaper('letter')
+  useOperator.getState().reset()
+  expect(useOperator.getState().paper).toBe('a4')
 })

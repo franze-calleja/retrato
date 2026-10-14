@@ -56,3 +56,10 @@ test('the operator can reset the photo counter', () => {
   fireEvent.click(screen.getByRole('button', { name: /reset photo counter/i }))
   expect(useStats.getState().photos).toBe(0)
 })
+
+test('paper select sets the paper size', () => {
+  render(<App />)
+  fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
+  fireEvent.change(screen.getByLabelText(/paper/i), { target: { value: 'letter' } })
+  expect(useOperator.getState().paper).toBe('letter')
+})

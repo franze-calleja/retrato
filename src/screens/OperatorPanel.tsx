@@ -7,7 +7,8 @@ import { useStats } from '../store/stats'
 export function OperatorPanel({ onClose }: { onClose: () => void }) {
   const weights = useOperator((s) => s.weights)
   const forced = useOperator((s) => s.forced)
-  const { setWeight, setForced, reset } = useOperator.getState()
+  const paper = useOperator((s) => s.paper)
+  const { setWeight, setForced, setPaper, reset } = useOperator.getState()
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,6 +58,13 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
             {editions.map((e) => (
               <option key={e.id} value={e.id}>{e.name}</option>
             ))}
+          </select>
+        </label>
+        <label className="operator-row">
+          <span>Paper</span>
+          <select value={paper} onChange={(ev) => setPaper(ev.target.value)}>
+            <option value="a4">A4</option>
+            <option value="letter">Letter</option>
           </select>
         </label>
         <div className="row">
