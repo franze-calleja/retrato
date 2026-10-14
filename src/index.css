@@ -299,6 +299,24 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .deal-card.chosen { transform: translateY(-16px) scale(1.06); }
 .deal-card.dismissed { opacity: 0; transform: scale(.9); pointer-events: none; }
 .deal-hint { margin: 0; font-weight: 700; text-shadow: 2px 2px 0 var(--dark); }
+/* Pack opening */
+.pack-stage { position: relative; background: none; border: 0; padding: 0; cursor: pointer; --glow: transparent; }
+.pack-stage:focus-visible { outline: 3px solid var(--gold); outline-offset: 6px; }
+.pack-shaker { position: relative; display: flex; flex-direction: column; align-items: center; }
+.pack-stage canvas { display: block; width: auto; max-width: min(70vw, 268px); height: auto; }
+.pack-stage[data-phase='sealed'] .pack-shaker { animation: pack-wiggle 1.6s ease-in-out infinite; }
+.pack-stage[data-phase='shake'] .pack-shaker { animation: pack-shake 350ms linear; filter: drop-shadow(0 0 14px var(--glow)) drop-shadow(0 0 4px var(--glow)); }
+.pack-stage[data-phase='tear'] .pack-top, .pack-stage[data-phase='burst'] .pack-top { animation: pack-tear 400ms ease-in forwards; }
+.pack-stage[data-phase='burst'] .pack-body { animation: pack-drop 600ms ease-in forwards; }
+.pack-flash { position: absolute; left: 50%; top: 6%; width: 10px; height: 10px; translate: -50% -50%; border-radius: 0; background: #fff; opacity: 0; pointer-events: none; }
+.pack-stage[data-phase='burst'] .pack-flash { animation: pack-flash 600ms ease-out forwards; }
+@keyframes pack-wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -2deg; } 75% { rotate: 2deg; } }
+@keyframes pack-shake { 0%, 100% { translate: 0 0; } 20% { translate: -6px 2px; } 40% { translate: 6px -2px; } 60% { translate: -4px -2px; } 80% { translate: 4px 2px; } }
+@keyframes pack-tear { to { translate: -40px -110px; rotate: -38deg; opacity: 0; } }
+@keyframes pack-drop { to { translate: 0 70px; opacity: 0; } }
+@keyframes pack-flash { 0% { opacity: 0; scale: 1; } 25% { opacity: 1; scale: 18; box-shadow: 0 0 0 4px var(--gold); } 100% { opacity: 0; scale: 26; } }
+.deal.from-pack .deal-card { animation: deal-from-pack 450ms cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(var(--i) * 90ms); }
+@keyframes deal-from-pack { from { transform: translateY(140px) scale(.55); opacity: 0; } }
 
 /* Operator panel */
 .logo { user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -347,6 +365,8 @@ h2[tabindex="-1"]:focus { outline: none; }
   .deal-card { animation: none; transition: none; }
   .deal-inner { transition: none; }
   .deal-card.glint .deal-front::after { display: none; }
+  .pack-stage .pack-shaker, .pack-stage canvas, .pack-flash { animation: none; }
+  .deal.from-pack .deal-card { animation: none; }
   .tilt-inner { transform: none; }
   .btn, .tile-btn { transition: none; }
   .bulb { animation: none; }
