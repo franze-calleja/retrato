@@ -116,8 +116,12 @@ export function Booth() {
       <div className="preview-wrap">
         <canvas ref={canvasRef} className="stamp-canvas" role="img" aria-label={`${template.name} live preview`} />
         {count !== null && count > 0 && (
-          <div key={count} className="countdown" aria-live="assertive">{count}</div>
+          <div key={count} className="countdown" aria-hidden="true">{count}</div>
         )}
+        {/* The visible number remounts for its animation; announce through one region that stays put. */}
+        <div className="visually-hidden" data-testid="countdown-live" aria-live="assertive">
+          {count !== null && count > 0 ? count : ''}
+        </div>
       </div>
 
       {message && (

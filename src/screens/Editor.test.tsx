@@ -87,7 +87,7 @@ test('Add to tray stores the card with its copies and confirms', async () => {
   expect(useTray.getState().items[0]).toMatchObject({
     templateId: 'ticket', name: getTemplate('ticket').name, edition: 'holo', copies: 2, size: getTemplate('ticket').printSizeMm,
   })
-  expect(screen.getByRole('status').textContent).toMatch(/added to tray/i)
+  expect(document.querySelector('.editor-note')!.textContent).toMatch(/added to tray/i)
 })
 
 test('a full tray disables Add and says why', () => {
@@ -101,7 +101,7 @@ test('a failed render adds nothing and says so', async () => {
   vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(function (cb: BlobCallback) { cb(null) })
   open(true)
   fireEvent.click(screen.getByRole('button', { name: /add to tray/i }))
-  await waitFor(() => expect(screen.getByRole('status').textContent).toMatch(/couldn.t add this card/i))
+  await waitFor(() => expect(document.querySelector('.editor-note')!.textContent).toMatch(/couldn.t add this card/i))
   expect(useTray.getState().items).toHaveLength(0)
   vi.restoreAllMocks()
 })
@@ -150,4 +150,17 @@ test('a card that finishes rendering after the editor closes is still added, wit
   expect(vi.getTimerCount()).toBe(0)
   vi.useRealTimers()
   vi.restoreAllMocks()
+})
+
+test('the rare-edition banner appears inside an already-mounted live region', () => {
+  vi.useFakeTimers()
+  open(false)
+  const live = document.querySelector('[data-testid="reveal-live"]')!
+  expect(live.getAttribute('role')).toBe('status')
+  expect(live.textContent).toBe('')
+  act(() => { vi.advanceTimersByTime(300) }) // back → flip
+  act(() => { vi.advanceTimersByTime(700) }) // flip → shown + celebrate
+  expect(document.querySelector('[data-testid="reveal-live"]')).toBe(live)
+  expect(live.textContent).toMatch(/holographic!/i)
+  vi.useRealTimers()
 })

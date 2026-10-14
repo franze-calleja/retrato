@@ -16,7 +16,7 @@ const MAX_REROLLS = 25
 export function pickDistinct<T>(items: readonly T[], n: number, rand: () => number): T[] {
   const pool = [...items]
   for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1))
+    const j = Math.min(i, Math.floor(rand() * (i + 1))) // rand() should be < 1; guard an injected 1
     ;[pool[i], pool[j]] = [pool[j], pool[i]]
   }
   return pool.slice(0, Math.min(n, pool.length))

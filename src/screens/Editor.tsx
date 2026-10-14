@@ -117,9 +117,12 @@ export function Editor() {
             <CardBackCanvas template={template} scale={PREVIEW_SCALE} />
           </div>
         </div>
+        {/* Always mounted so the banner text is announced when it appears. */}
+        <div className="reveal-live" role="status" data-testid="reveal-live">
+          {celebrate && <div className="edition-banner">{edition.name.toUpperCase()}!</div>}
+        </div>
         {celebrate && (
           <>
-            <div className="edition-banner" role="status">{edition.name.toUpperCase()}!</div>
             {Array.from({ length: 10 }, (_, i) => (
               <span key={i} className="sparkle" style={{ '--a': `${i * 36}deg` } as CSSProperties} />
             ))}

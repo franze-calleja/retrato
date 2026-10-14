@@ -36,3 +36,10 @@ test('an upload that finishes after leaving the booth does not open the editor',
   vi.unstubAllGlobals()
   useBooth.setState(useBooth.getInitialState(), true)
 })
+
+test('the countdown announces through one live region that stays mounted', () => {
+  render(<Booth />)
+  const live = document.querySelector('[aria-live="assertive"]')
+  expect(live).not.toBeNull()
+  expect(live!.closest('[data-testid="countdown-live"]')).not.toBeNull()
+})

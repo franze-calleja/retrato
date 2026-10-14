@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { getEdition } from '../editions/registry'
 import { useBooth } from '../store/booth'
 import { getTemplate } from '../templates/registry'
@@ -17,6 +17,8 @@ export function PackDeal() {
   const count = pack?.length ?? 0
   const { revealed, pickable, revealAll } = useDeal(count, reducedMotion)
   const [chosen, setChosen] = useState<number | null>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  useEffect(() => headingRef.current?.focus(), [])
 
   // Let the chosen card lift before switching screens.
   useEffect(() => {
@@ -30,7 +32,7 @@ export function PackDeal() {
 
   return (
     <section className="screen">
-      <h2>Pick one to keep</h2>
+      <h2 ref={headingRef} tabIndex={-1}>Pick one to keep</h2>
       <div className="deal">
         {pack.map((card, i) => {
           const template = getTemplate(card.templateId)

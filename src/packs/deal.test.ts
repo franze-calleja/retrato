@@ -70,3 +70,10 @@ test('themed packs keep remembered text for their card', () => {
   const cards = dealPack(getPack('jester'), settings(), { jester: { name: 'ZOE', effect: 'OLD' } }, seeded(4))
   for (const c of cards) expect(c.values.name).toBe('ZOE')
 })
+
+test('pickDistinct copes with a rand() that returns exactly 1', () => {
+  const picks = pickDistinct(['a', 'b', 'c', 'd'], 3, () => 1)
+  expect(picks).toHaveLength(3)
+  expect(picks.every((p) => p !== undefined)).toBe(true)
+  expect(new Set(picks).size).toBe(3)
+})

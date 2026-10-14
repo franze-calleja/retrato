@@ -93,3 +93,8 @@ test('three cards of the same type get distinct labels', () => {
     expect(screen.getByRole('button', { name: `Tarot Card: ${t}, Common edition` })).toBeTruthy()
   }
 })
+
+test('focus moves to the deal heading so screen readers know the screen changed', () => {
+  setup(true)
+  expect(document.activeElement).toBe(screen.getByRole('heading', { name: /pick one to keep/i }))
+})
