@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { PhotoSource } from '../photo/crop'
 import { useBooth } from './booth'
 import { useOperator } from './operator'
@@ -102,5 +102,76 @@ describe('editions', () => {
     s().setCapture(photo())
     s().selectTemplate('voucher')
     expect(s().edition).toBe('common')
+  })
+})
+
+describe('remembered values and packs', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useOperator.getState().reset()
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  test('edits are remembered per card type across switches', () => {
+    s().selectTemplate('ticket')
+    s().setValue('event', 'GRAD NIGHT')
+    s().selectTemplate('stamp')
+    expect(s().values.title).toBe('FIRST STAMP')
+    s().selectTemplate('ticket')
+    expect(s().values.event).toBe('GRAD NIGHT')
+  })
+
+  test('selectPack enters pack mode on the booth', () => {
+    s().selectPack()
+    expect([s().mode, s().screen, s().capture, s().pack]).toEqual(['pack', 'booth', null, null])
+  })
+
+  test('a pack capture deals three cards using remembered values and shows the pack screen', () => {
+    s().selectTemplate('ticket')
+    s().setValue('event', 'GRAD NIGHT')
+    useOperator.getState().setForced('foil')
+    s().selectPack()
+    vi.spyOn(Math, 'random').mockReturnValue(0) // deals voucher, ticket, trading
+    s().setCapture(photo())
+    expect(s().screen).toBe('pack')
+    expect(s().pack).toHaveLength(3)
+    expect(s().pack!.every((c) => c.edition === 'foil')).toBe(true)
+    expect(s().pack!.find((c) => c.templateId === 'ticket')!.values.event).toBe('GRAD NIGHT')
+  })
+
+  test('pickPackCard opens the editor with that card, already revealed, and remembers its text', () => {
+    s().selectPack()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    s().setCapture(photo())
+    const card = s().pack![1]
+    s().pickPackCard(1)
+    expect([s().screen, s().templateId, s().edition, s().revealed]).toEqual(['editor', card.templateId, card.edition, true])
+    expect(s().values).toEqual(card.values)
+    expect(s().saved[card.templateId]).toEqual(card.values)
+  })
+
+  test('pickPackCard ignores bad indexes and missing packs', () => {
+    s().pickPackCard(0)
+    expect(s().screen).toBe('picker')
+    s().selectPack()
+    s().setCapture(photo())
+    s().pickPackCard(7)
+    expect(s().screen).toBe('pack')
+  })
+
+  test('retake keeps pack mode and clears the deal', () => {
+    s().selectPack()
+    s().setCapture(photo())
+    s().pickPackCard(0)
+    s().retake()
+    expect([s().mode, s().screen, s().pack, s().revealed, s().capture]).toEqual(['pack', 'booth', null, false, null])
+  })
+
+  test('selecting a single card leaves pack mode and resets revealed', () => {
+    s().selectPack()
+    s().setCapture(photo())
+    s().pickPackCard(0)
+    s().selectTemplate('stamp')
+    expect([s().mode, s().revealed]).toEqual(['single', false])
   })
 })
