@@ -2,6 +2,7 @@ import { quantizeAngle } from '../editions/angle'
 import { applyEdition } from '../editions/apply'
 import type { Edition } from '../editions/types'
 import { drawCover, type PhotoSource } from '../photo/crop'
+import { shapeSpans } from '../templates/shapes'
 import type { Template } from '../templates/types'
 
 export interface ComposeOptions {
@@ -59,6 +60,19 @@ export function composeStamp(
   ctx.drawImage(art, 0, 0, out.width, out.height)
 
   const r = template.photoRect
+  const shape = template.photoShape ?? 'rect'
+  if (shape === 'rect') {
+    drawCover(ctx, photo, r.x * scale, r.y * scale, r.w * scale, r.h * scale)
+    return out
+  }
+  // Clip to the window shape on the art-pixel grid so its edge stays as crisp as the frame.
+  ctx.save()
+  ctx.beginPath()
+  for (const [y, x0, x1] of shapeSpans(r.w, r.h, shape)) {
+    ctx.rect((r.x + x0) * scale, (r.y + y) * scale, (x1 - x0) * scale, scale)
+  }
+  ctx.clip()
   drawCover(ctx, photo, r.x * scale, r.y * scale, r.w * scale, r.h * scale)
+  ctx.restore()
   return out
 }

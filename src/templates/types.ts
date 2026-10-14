@@ -1,5 +1,6 @@
 import type { BadgeAnchor } from '../editions/apply'
 import type { Rect } from './draw'
+import type { PhotoShape } from './shapes'
 
 export type { Rect }
 
@@ -22,6 +23,8 @@ export interface Template {
   size: { w: number; h: number }
   /** Art pixels. The composer draws the photo here; render() must not. */
   photoRect: Rect
+  /** Window shape the composer clips the photo to. Defaults to 'rect'. */
+  photoShape?: PhotoShape
   fields: readonly TemplateField[]
   /** Where the edition badge sits (art pixels); must stay clear of photoRect. Defaults to the top-left corner. */
   badgeAt?: BadgeAnchor

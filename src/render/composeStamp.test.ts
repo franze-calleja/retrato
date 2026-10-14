@@ -86,3 +86,13 @@ test('common edition ignores angle for caching', () => {
   expect(render).toHaveBeenCalledTimes(1)
   render.mockRestore()
 })
+
+test('round and arched photo windows are clipped; rectangles are not', () => {
+  for (const [id, clipped] of [['planet', true], ['tarot', true], ['stamp', false]] as const) {
+    const tpl = getTemplate(id)
+    const target = document.createElement('canvas')
+    const clip = vi.spyOn(target.getContext('2d')!, 'clip')
+    composeStamp(tpl, placeholderPhoto(tpl), resolveDefaults(tpl), 2, target)
+    expect(clip.mock.calls.length > 0, id).toBe(clipped)
+  }
+})

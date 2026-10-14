@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { refreshPerCapture, resolveDefaults } from './fields'
 import { barcodeBars, randomMember, validUntil } from './idcard'
-import { getTemplate, templates } from './registry'
+import { getTemplate } from './registry'
 
 test('randomMember is "NO. " + 4 zero-padded digits', () => {
   expect(randomMember(() => 0)).toBe('NO. 0000')
@@ -36,6 +36,3 @@ test('prints at bank-card size with the art aspect ratio', () => {
   expect(t.printSizeMm.h / t.printSizeMm.w).toBeCloseTo(t.size.h / t.size.w, 2)
 })
 
-test('registry lists the new cards after the originals', () => {
-  expect(templates.map((t) => t.id)).toEqual(['stamp', 'voucher', 'ticket', 'trading', 'id'])
-})

@@ -113,3 +113,31 @@ export function drawTextRight(
 ) {
   drawText(ctx, text, right - measureText(text, scale), y, color, scale, shadow)
 }
+
+/** Greedy word wrap to maxWidth (art px); words wider than a line are split; at most maxLines lines. */
+export function wrapText(text: string, maxWidth: number, maxLines: number): string[] {
+  const lines: string[] = []
+  let line = ''
+  const push = (l: string) => {
+    if (l) lines.push(l)
+  }
+  for (const word of text.split(/\s+/).filter(Boolean)) {
+    let w = word
+    while (measureText(w) > maxWidth) {
+      let cut = Array.from(w).length - 1
+      while (cut > 1 && measureText(Array.from(w).slice(0, cut).join('')) > maxWidth) cut--
+      push(line)
+      line = ''
+      push(Array.from(w).slice(0, cut).join(''))
+      w = Array.from(w).slice(cut).join('')
+    }
+    const candidate = line ? `${line} ${w}` : w
+    if (measureText(candidate) <= maxWidth) line = candidate
+    else {
+      push(line)
+      line = w
+    }
+  }
+  push(line)
+  return lines.slice(0, maxLines)
+}
