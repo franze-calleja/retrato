@@ -3,7 +3,7 @@ import { Booth } from './screens/Booth'
 import { Editor } from './screens/Editor'
 import { OperatorPanel } from './screens/OperatorPanel'
 import { PackDeal } from './screens/PackDeal'
-import { TemplatePicker } from './screens/TemplatePicker'
+import { Shop } from './screens/Shop'
 import { useBooth } from './store/booth'
 import { SwirlBackground } from './ui/SwirlBackground'
 import { registerTap } from './ui/taps'
@@ -33,7 +33,7 @@ export default function App() {
       <SwirlBackground />
       <main className="app">
         <h1 className="logo" onClick={onLogoTap}>PIXEL BOOTH</h1>
-        {screen === 'picker' && <TemplatePicker />}
+        {screen === 'picker' && <Shop />}
         {screen === 'booth' && <Booth />}
         {screen === 'pack' && <PackDeal />}
         {screen === 'editor' && <Editor />}

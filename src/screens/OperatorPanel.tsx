@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { editionPercents } from '../editions/odds'
 import { editions } from '../editions/registry'
 import { useOperator } from '../store/operator'
 
@@ -21,9 +22,7 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
     }
   }, [onClose])
 
-  const total = editions.reduce((sum, e) => sum + Math.max(0, weights[e.id] ?? 0), 0)
-  const pct = (id: string) =>
-    total > 0 ? Math.round((Math.max(0, weights[id] ?? 0) / total) * 100) : id === 'common' ? 100 : 0
+  const pct = editionPercents(weights)
 
   return (
     <div className="operator-backdrop" onClick={onClose}>
@@ -47,7 +46,7 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
               value={weights[e.id] ?? 0}
               onChange={(ev) => setWeight(e.id, Number(ev.target.value))}
             />
-            <output data-testid={`pct-${e.id}`}>{pct(e.id)}%</output>
+            <output className="num" data-testid={`pct-${e.id}`}>{pct[e.id]}%</output>
           </label>
         ))}
         <label className="operator-row">
