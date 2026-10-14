@@ -148,6 +148,7 @@ export function Booth() {
         onShutter={() => setCount(3)}
         screenRef={setScreen}
         flashing={flashing}
+        printing={printing !== null}
       >
         {printing && (
           <InstantPrint
@@ -177,6 +178,14 @@ export function Booth() {
       {status === 'requesting' && <p>Waiting for camera permission…</p>}
 
       <div className="row">
+        <button className="btn" onClick={goToPicker}>Back</button>
+        <button className="btn red" disabled={status !== 'live' || count !== null || printing !== null} onClick={() => setCount(3)}>
+          Take photo
+        </button>
+        <label className="btn blue" aria-disabled={printing !== null}>
+          Upload photo
+          <input type="file" accept="image/*" className="visually-hidden" disabled={printing !== null} onChange={onUpload} />
+        </label>
         <button
           className="btn"
           aria-pressed={side === 'back'}
@@ -185,14 +194,6 @@ export function Booth() {
         >
           {side === 'front' ? 'Show back' : 'Show front'}
         </button>
-        <button className="btn" onClick={goToPicker}>Back</button>
-        <button className="btn red" disabled={status !== 'live' || count !== null || printing !== null} onClick={() => setCount(3)}>
-          Take photo
-        </button>
-        <label className="btn blue">
-          Upload photo
-          <input type="file" accept="image/*" className="visually-hidden" disabled={printing !== null} onChange={onUpload} />
-        </label>
       </div>
       {uploadError && <p className="error" role="alert">{uploadError}</p>}
     </section>

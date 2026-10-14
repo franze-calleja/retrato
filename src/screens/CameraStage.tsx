@@ -23,6 +23,8 @@ interface Props {
   /** Receives the canvas of the screen currently facing the guest. */
   screenRef: (canvas: HTMLCanvasElement | null) => void
   flashing: boolean
+  /** A print is coming out: make room above the camera. */
+  printing?: boolean
   children?: ReactNode
 }
 
@@ -34,14 +36,14 @@ function Art({ side }: { side: CameraSide }) {
   return <canvas ref={ref} className="camera-art" aria-hidden="true" />
 }
 
-export function CameraStage({ side, template, title, count, shutterEnabled, onShutter, screenRef, flashing, children }: Props) {
+export function CameraStage({ side, template, title, count, shutterEnabled, onShutter, screenRef, flashing, printing = false, children }: Props) {
   const size = screenSize(template, SCREEN_W)
   const countdown = count !== null && count > 0 && (
     <div key={count} className="countdown" aria-hidden="true">{count}</div>
   )
   const label = `${template.name} live preview`
   return (
-    <div className={`camera-stage ${side}`}>
+    <div className={`camera-stage ${side} ${printing ? 'printing' : ''}`}>
       <div className="camera-holder">
         {children}
         <TiltCard>

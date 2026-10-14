@@ -214,7 +214,8 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .btn.gold { background: var(--gold); color: var(--dark); text-shadow: none; box-shadow: 0 5px 0 var(--gold-dark), 0 5px 0 3px var(--dark); }
 .btn:hover:not(:disabled) { transform: translateY(-2px); }
 .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--dark); }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled, .btn[aria-disabled='true'] { opacity: 0.45; cursor: not-allowed; }
+.btn[aria-disabled='true'] { pointer-events: none; }
 .btn:focus-visible, .btn:has(.visually-hidden:focus-visible) { outline: 3px solid var(--gold); outline-offset: 3px; }
 .btn { position: relative; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
@@ -249,7 +250,7 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .side-screen .countdown, .rear-screen .countdown { font-size: 64px; }
 @media (max-width: 559px) {
   .camera-stage { position: relative; display: block; }
-  .camera-stage .side-screen { position: absolute; right: 2%; bottom: -6%; width: 34%; z-index: 2; }
+  .camera-stage .side-screen { position: absolute; right: 1%; bottom: -12%; width: 27%; z-index: 2; }
   .camera-stage .hinge { display: none; }
 }
 .countdown {
@@ -259,8 +260,12 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 @keyframes count-pop { from { transform: scale(1.6); opacity: 0; } 30% { transform: scale(1); opacity: 1; } }
 /* Instant print */
+/* Room above the camera for the print; sized in the holder's width so it scales with the camera. */
+.camera-holder { container-type: inline-size; }
+.camera-holder > .tilt { transition: margin-top 250ms ease-out; }
+.camera-stage.printing .camera-holder > .tilt { margin-top: 47cqw; }
 .instant-print {
-  position: absolute; left: 50%; bottom: 96%; z-index: 0; width: 30%; translate: -50% 0;
+  position: absolute; left: 50%; top: 2cqw; z-index: 0; width: 30%; translate: -50% 0;
   background: none; border: 0; padding: 0; cursor: pointer;
 }
 .print-paper {
@@ -279,11 +284,11 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .instant-print[data-mode='single'][data-phase='handoff'] { animation: print-flip 450ms ease-in both; }
 @keyframes print-flip { to { transform: perspective(700px) rotateY(90deg); } }
-.print-pack { position: absolute; left: 50%; top: 120%; width: 130%; translate: -50% 0; opacity: 0; }
+.print-pack { position: absolute; left: 50%; top: 4%; z-index: 1; width: 115%; translate: -50% 0; opacity: 0; }
 .instant-print[data-mode='pack'][data-phase='handoff'] .print-paper { animation: print-into-pack 450ms ease-in both; }
 .instant-print[data-mode='pack'][data-phase='handoff'] .print-pack { animation: pack-rise 450ms ease-out both; }
-@keyframes print-into-pack { to { translate: 0 140%; scale: 0.6; opacity: 0; } }
-@keyframes pack-rise { from { opacity: 0; translate: -50% 40%; } to { opacity: 1; translate: -50% 0; } }
+@keyframes print-into-pack { 40% { opacity: 1; } to { translate: 0 30%; scale: 0.7; opacity: 0; } }
+@keyframes pack-rise { from { opacity: 0; translate: -50% -30%; scale: 0.8; } 60% { opacity: 1; } to { opacity: 1; translate: -50% 0; scale: 1; } }
 .camera-holder .tilt { position: relative; z-index: 1; }
 .screen-flash { position: fixed; inset: 0; z-index: 20; background: #fff; pointer-events: none; animation: screen-flash 300ms ease-out forwards; }
 @keyframes screen-flash { from { opacity: 0.9; } to { opacity: 0; } }
@@ -474,7 +479,7 @@ h2[tabindex="-1"]:focus { outline: none; }
   .pack-stage[data-phase] .pack-shaker, .pack-stage[data-phase] canvas, .pack-stage[data-phase] .pack-flash { animation: none; }
   .deal.from-pack .deal-card { animation: none; }
   .card-glare, .card-glare .glare, .sparkle-dot { animation: none; transition: none; }
-  .camera-flip { transition: none; }
+  .camera-flip, .camera-holder > .tilt { transition: none; }
   .camera-flash.on { animation: none; }
   .instant-print, .instant-print *, .screen-flash { animation: none; }
   .tilt-inner { transform: none; }

@@ -30,7 +30,7 @@ test('reduced motion switches off every new animation', () => {
   const block = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'))
   const end = block.indexOf('\n}\n')
   const body = block.slice(0, end)
-  for (const sel of ['.tile-btn::before', '.tilt-inner.sway', '.tile-btn.spin-in', '.pack-stage[data-phase] .pack-shaker', '.deal.from-pack .deal-card', '.card-glare'])
+  for (const sel of ['.tile-btn::before', '.tilt-inner.sway', '.tile-btn.spin-in', '.pack-stage[data-phase] .pack-shaker', '.deal.from-pack .deal-card', '.card-glare', '.camera-flip', '.camera-flash.on', '.instant-print', '.screen-flash'])
     expect(body, sel).toContain(sel)
 })
 
