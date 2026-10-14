@@ -316,6 +316,20 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .operator-row select { grid-column: 2 / 4; font: 700 16px var(--font); padding: 6px; background: var(--dark); color: var(--ink); border: 3px solid var(--dark); border-radius: 6px; }
 .operator-row input[type='range'] { accent-color: var(--gold); width: 100%; }
 
+/* Print tray */
+.tray-btn { padding: 8px 14px; font-size: 16px; }
+.tray-banner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 10px 14px; background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; }
+.tray-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: min(100%, 560px); }
+.tray-item { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px; background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; }
+.tray-thumb { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+.tray-name { flex: 1 1 8em; font-weight: 700; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper .btn { padding: 4px 12px; }
+.stepper output { min-width: 2ch; text-align: center; font-weight: 700; }
+.sheet-preview { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.sheet-mini { position: relative; width: 90px; background: #fff; border: 2px solid var(--dark); }
+.sheet-mini span { position: absolute; background: #c9c9c9; outline: 1px solid #7a7a7a; }
+
 .print-only { display: none; }
 .print-page { position: relative; overflow: visible; break-after: page; }
 .print-page:last-child { break-after: auto; }
