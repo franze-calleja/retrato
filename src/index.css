@@ -363,6 +363,40 @@ h2[tabindex="-1"]:focus { outline: none; }
 .sheet-mini { position: relative; width: 90px; background: #fff; border: 2px solid var(--dark); }
 .sheet-mini span { position: absolute; background: #c9c9c9; outline: 1px solid #7a7a7a; }
 
+/* Editor card glare (display only) */
+.card-glare {
+  position: relative; display: inline-block; line-height: 0;
+  filter: drop-shadow(calc(var(--tilt-x, 0) * -0.6px) calc(8px + var(--tilt-y, 0) * 0.6px) 0 rgb(0 0 0 / 0.3));
+  transition: filter 120ms ease-out;
+}
+.card-glare .glare {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 220ms ease-out;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.95), transparent 45%);
+  mix-blend-mode: soft-light;
+}
+.card-glare[data-active] .glare { opacity: 0.18; }
+.card-glare[data-glare='foil'] .glare {
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(235 240 255 / 0.95), rgb(160 170 190 / 0.4) 30%, transparent 55%);
+  mix-blend-mode: screen;
+}
+.card-glare[data-glare='holo'] .glare, .card-glare[data-glare='poly'] .glare {
+  background:
+    radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.8), transparent 40%),
+    linear-gradient(115deg, #ff5f6d, #ffc371, #7fffb2, #7fd6ff, #c77dff, #ff5f6d);
+  background-size: 100% 100%, 300% 300%;
+  background-position: 0 0, var(--gx, 50%) var(--gy, 50%);
+  mix-blend-mode: color-dodge;
+}
+.card-glare[data-active][data-glare='foil'] .glare,
+.card-glare[data-active][data-glare='holo'] .glare,
+.card-glare[data-active][data-glare='poly'] .glare { opacity: 0.3; }
+.sparkle-dot {
+  position: absolute; width: 6px; height: 6px; background: #fff;
+  left: calc(12% + var(--s) * 15%); top: calc(14% + var(--s) * 13%);
+  animation: twinkle 1.8s ease-in-out infinite; animation-delay: calc(var(--s) * 0.3s); opacity: 0;
+}
+@keyframes twinkle { 50% { opacity: 1; scale: 1.4; } }
+
 .print-only { display: none; }
 .print-page { position: relative; overflow: visible; break-after: page; }
 .print-page:last-child { break-after: auto; }
@@ -378,6 +412,7 @@ h2[tabindex="-1"]:focus { outline: none; }
   .deal-card.glint .deal-front::after { display: none; }
   .pack-stage .pack-shaker, .pack-stage canvas, .pack-flash { animation: none; }
   .deal.from-pack .deal-card { animation: none; }
+  .card-glare, .card-glare .glare, .sparkle-dot { animation: none; transition: none; }
   .tilt-inner { transform: none; }
   .btn, .tile-btn { transition: none; }
   .bulb { animation: none; }

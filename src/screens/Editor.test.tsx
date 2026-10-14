@@ -164,3 +164,18 @@ test('the rare-edition banner appears inside an already-mounted live region', ()
   expect(live.textContent).toMatch(/holographic!/i)
   vi.useRealTimers()
 })
+
+test('the editor card gets a glare unless motion is reduced', () => {
+  open(true)
+  expect(document.querySelector('.card-glare')).not.toBeNull()
+})
+
+test('reduced motion: no glare element', () => {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: (q: string) => ({ matches: q.includes('reduce'), addEventListener() {}, removeEventListener() {} }),
+  })
+  open(true)
+  expect(document.querySelector('.card-glare')).toBeNull()
+  Reflect.deleteProperty(window, 'matchMedia')
+})

@@ -14,6 +14,7 @@ import { getEdition } from '../editions/registry'
 import { TiltCard } from '../ui/TiltCard'
 import { prefersReducedMotion } from '../ui/motion'
 import { CardBackCanvas } from './CardBackCanvas'
+import { CardGlare } from './CardGlare'
 import { ShimmerCard } from './ShimmerCard'
 import { useReveal } from './useReveal'
 
@@ -97,6 +98,18 @@ export function Editor() {
     }, 'image/png')
   }
 
+  const card = (
+    <ShimmerCard
+      template={template}
+      photo={capture}
+      values={values}
+      edition={edition}
+      scale={PREVIEW_SCALE}
+      label={`Your ${edition.hasEffect ? `${edition.name.toLowerCase()} ` : ''}${template.name.toLowerCase()}`}
+      live={phase === 'shown' && !reducedMotion}
+    />
+  )
+
   return (
     <section className="screen">
       <h2>{template.name}</h2>
@@ -104,15 +117,13 @@ export function Editor() {
         <div className="reveal-card">
           <div className="reveal-face reveal-front">
             <TiltCard>
-              <ShimmerCard
-                template={template}
-                photo={capture}
-                values={values}
-                edition={edition}
-                scale={PREVIEW_SCALE}
-                label={`Your ${edition.hasEffect ? `${edition.name.toLowerCase()} ` : ''}${template.name.toLowerCase()}`}
-                live={phase === 'shown' && !reducedMotion}
-              />
+              {reducedMotion ? (
+                card
+              ) : (
+                <CardGlare template={template} edition={edition}>
+                  {card}
+                </CardGlare>
+              )}
             </TiltCard>
           </div>
           <div className="reveal-face reveal-back">
