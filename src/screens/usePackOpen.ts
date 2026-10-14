@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { isAdvanceKey } from '../ui/keys'
 
 export type OpenPhase = 'sealed' | 'shake' | 'tear' | 'burst' | 'done'
 
@@ -13,15 +14,6 @@ export function rareTint(editionIds: string[]): string | null {
   if (editionIds.includes('poly')) return RARE_TINT.poly
   if (editionIds.includes('holo')) return RARE_TINT.holo
   return null
-}
-
-const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Alt', 'Control', 'Meta', 'CapsLock', 'Escape'])
-
-/** A deliberate key press on the page: not Tab, a lone modifier, a shortcut, a held key, or typing in a field. */
-export function isAdvanceKey(e: KeyboardEvent): boolean {
-  if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || IGNORED_KEYS.has(e.key)) return false
-  const t = e.target
-  return !(t instanceof Element && t.closest('input, textarea, select, [role="dialog"]'))
 }
 
 /** Pack-opening phases: sealed (until tap or 3 s) → shake → tear → burst → done. Reduced motion starts done. */
