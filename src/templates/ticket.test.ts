@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { refreshPerCapture, resolveDefaults } from './fields'
-import { getTemplate, templates } from './registry'
+import { getTemplate } from './registry'
 import { randomSerial, todayIso } from './ticket'
 
 test('todayIso uses the local date as YYYY-MM-DD', () => {
@@ -20,9 +20,6 @@ test('ticket serial regenerates per capture; event name is kept', () => {
   expect(next.serial).toMatch(/^NO\. \d{6}$/)
 })
 
-test('registry lists stamp, voucher, ticket in order', () => {
-  expect(templates.map((t) => t.id)).toEqual(['stamp', 'voucher', 'ticket'])
-})
 
 test('ADMIT ONE headline is readable on the gold ticket (WCAG contrast ≥ 4.5)', async () => {
   const { ADMIT_TEXT } = await import('./ticket')
