@@ -314,6 +314,10 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .operator-row input[type='range'] { accent-color: var(--gold); width: 100%; }
 
 .print-only { display: none; }
+.print-page { position: relative; overflow: visible; break-after: page; }
+.print-page:last-child { break-after: auto; }
+.print-page img { position: absolute; display: block; }
+.cut-mark { position: absolute; background: #8a8a8a; }
 
 @media (prefers-reduced-motion: reduce) {
   .tilt-inner, .countdown { animation: none; }
