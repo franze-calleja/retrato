@@ -143,6 +143,32 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .edition-note { margin: 0; font-weight: 700; color: var(--gold); text-shadow: 2px 2px 0 var(--dark); }
 
+/* Pack deal */
+.deal { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; max-width: 100%; }
+.deal-card {
+  background: none; border: 0; padding: 0; cursor: pointer; max-width: 100%; perspective: 1000px;
+  animation: deal-in 400ms cubic-bezier(.2, 1.2, .4, 1) backwards;
+  animation-delay: calc(var(--i) * 120ms);
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+@keyframes deal-in { from { transform: translateY(-80px) rotate(-10deg); opacity: 0; } }
+.deal-card:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+.deal-inner { position: relative; transform-style: preserve-3d; transform: rotateY(180deg); transition: transform 500ms cubic-bezier(.3, 1.4, .5, 1); }
+.deal-card.up .deal-inner { transform: none; }
+.deal-face { backface-visibility: hidden; }
+.deal-front { position: relative; }
+.deal-back { position: absolute; inset: 0; transform: rotateY(180deg); }
+.deal-card canvas { display: block; width: auto; height: auto; max-width: 100%; max-height: 260px; }
+.deal-card.glint .deal-front::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.75) 45%, transparent 60%);
+  background-size: 250% 100%; animation: glint 900ms ease-out 450ms both;
+}
+@keyframes glint { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.deal-card.chosen { transform: translateY(-16px) scale(1.06); }
+.deal-card.dismissed { opacity: 0; transform: scale(.9); pointer-events: none; }
+.deal-hint { margin: 0; font-weight: 700; text-shadow: 2px 2px 0 var(--dark); }
+
 /* Operator panel */
 .logo { user-select: none; -webkit-tap-highlight-color: transparent; }
 .operator-backdrop {
@@ -165,6 +191,9 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
   .tilt-inner, .countdown { animation: none; }
   .reveal-card { transition: none; }
   .edition-banner, .sparkle { animation: none; }
+  .deal-card { animation: none; transition: none; }
+  .deal-inner { transition: none; }
+  .deal-card.glint .deal-front::after { display: none; }
   .tilt-inner { transform: none; }
   .btn, .picker-card { transition: none; }
 }

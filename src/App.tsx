@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Booth } from './screens/Booth'
 import { Editor } from './screens/Editor'
 import { OperatorPanel } from './screens/OperatorPanel'
+import { PackDeal } from './screens/PackDeal'
 import { TemplatePicker } from './screens/TemplatePicker'
 import { useBooth } from './store/booth'
 import { SwirlBackground } from './ui/SwirlBackground'
@@ -34,6 +35,7 @@ export default function App() {
         <h1 className="logo" onClick={onLogoTap}>PIXEL BOOTH</h1>
         {screen === 'picker' && <TemplatePicker />}
         {screen === 'booth' && <Booth />}
+        {screen === 'pack' && <PackDeal />}
         {screen === 'editor' && <Editor />}
         {panelOpen && <OperatorPanel onClose={closePanel} />}
       </main>
