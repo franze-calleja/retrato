@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { createEvent, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, expect, test } from 'vitest'
 import App from '../App'
 import { useBooth } from '../store/booth'
@@ -62,4 +62,41 @@ test('paper select sets the paper size', () => {
   fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
   fireEvent.change(screen.getByLabelText(/paper/i), { target: { value: 'letter' } })
   expect(useOperator.getState().paper).toBe('letter')
+})
+
+test('Shift+Alt+O does not type Ø into the focused field', () => {
+  render(<App />)
+  const input = document.createElement('input')
+  document.body.appendChild(input)
+  const ev = createEvent.keyDown(input, { code: 'KeyO', key: 'Ø', shiftKey: true, altKey: true })
+  fireEvent(input, ev)
+  expect(ev.defaultPrevented).toBe(true)
+  input.remove()
+})
+
+test('a drag that ends over the backdrop does not close the panel', () => {
+  render(<App />)
+  fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
+  const backdrop = document.querySelector('.operator-backdrop')!
+  fireEvent.pointerDown(screen.getByLabelText(/holographic/i))
+  fireEvent.click(backdrop)
+  expect(screen.queryByRole('dialog')).not.toBeNull()
+  fireEvent.pointerDown(backdrop)
+  fireEvent.click(backdrop)
+  expect(screen.queryByRole('dialog')).toBeNull()
+})
+
+test('Tab stays inside the panel', () => {
+  render(<App />)
+  fireEvent.keyDown(window, { code: 'KeyO', shiftKey: true, altKey: true })
+  const dialog = screen.getByRole('dialog')
+  const focusables = dialog.querySelectorAll<HTMLElement>('input, select, button')
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  last.focus()
+  fireEvent.keyDown(last, { key: 'Tab' })
+  expect(document.activeElement).toBe(first)
+  first.focus()
+  fireEvent.keyDown(first, { key: 'Tab', shiftKey: true })
+  expect(document.activeElement).toBe(last)
 })

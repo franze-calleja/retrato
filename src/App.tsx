@@ -19,7 +19,10 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.altKey && e.code === 'KeyO') setPanelOpen(true)
+      if (e.shiftKey && e.altKey && e.code === 'KeyO') {
+        e.preventDefault() // macOS would otherwise type Ø into a focused field
+        setPanelOpen(true)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
