@@ -48,6 +48,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 export const voucher: Template = {
   id: 'voucher',
   name: 'Voucher',
+  description: 'Coupon with a tear-off stub · title, amount & expiry',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   badgeAt: { x: BW - 1, y: 0, align: 'right' }, // top of the stub

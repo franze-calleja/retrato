@@ -21,6 +21,11 @@ describe.each(templates.map((t) => [t.id, t] as const))('template %s', (_id, t) 
     }
   })
 
+  test('has a one-line description for the shop', () => {
+    expect(t.description.trim().length).toBeGreaterThan(0)
+    expect(t.description).not.toMatch(/\n/)
+  })
+
   test('renders with defaults, max-length junk, and empty values without throwing', () => {
     const ctx = document.createElement('canvas').getContext('2d')!
     expect(() => t.render(ctx, resolveDefaults(t))).not.toThrow()

@@ -63,6 +63,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 export const idcard: Template = {
   id: 'id',
   name: 'ID Card',
+  description: 'Member card · club name, member no. & barcode',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   printSizeMm: { w: 85.6, h: Math.round(((85.6 * (BH + SHADOW_OFFSET)) / (BW + SHADOW_OFFSET)) * 10) / 10 },

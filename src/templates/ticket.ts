@@ -62,6 +62,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 export const ticket: Template = {
   id: 'ticket',
   name: 'Ticket',
+  description: 'Admit-one ticket · event, date & a fresh serial',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   badgeAt: { x: BW - 1, y: BH - 9, align: 'right' }, // bottom of the stub, below the serial

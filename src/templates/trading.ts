@@ -56,6 +56,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 export const trading: Template = {
   id: 'trading',
   name: 'Trading Card',
+  description: 'Collectible card · rolls CHARM, CHAOS & LUCK',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   badgeAt: { x: 0, y: BH - 9 }, // over the stats box's bottom-left corner, clear of the name banner

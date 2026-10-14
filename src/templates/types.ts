@@ -16,6 +16,8 @@ export interface TemplateField {
 export interface Template {
   id: string
   name: string
+  /** One line for the shop's info box. */
+  description: string
   /** Art pixels, including drop-shadow margin. */
   size: { w: number; h: number }
   /** Art pixels. The composer draws the photo here; render() must not. */

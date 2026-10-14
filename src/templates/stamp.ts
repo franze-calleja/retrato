@@ -41,6 +41,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 export const stamp: Template = {
   id: 'stamp',
   name: 'Stamp',
+  description: 'Postage stamp · perforated edge, title & value',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   printSizeMm: { w: 50, h: 62 },
