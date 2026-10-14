@@ -351,7 +351,9 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 
 @media print {
   @page { margin: 10mm; }
-  body { background: #fff; }
+  body { background: #fff; min-height: 0; }
+  /* Screen padding would push each sheet past its page and add blank pages. */
+  .app { padding: 0; margin: 0; max-width: none; }
   .swirl, .app > *:not(.print-only) { display: none !important; }
   .print-only { display: block; }
 }

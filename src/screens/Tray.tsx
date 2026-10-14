@@ -5,7 +5,7 @@ import { PrintSheets } from '../print/PrintSheets'
 import { useOperator } from '../store/operator'
 import { MAX_COPIES, trayCopies, traySheetItems, useTray } from '../store/tray'
 
-const plural = (n: number) => `${n} ${n === 1 ? 'page' : 'pages'}`
+const pageWord = (n: number) => (n === 1 ? 'page' : 'pages')
 
 export function TrayButton() {
   const count = useTray((s) => trayCopies(s.items))
@@ -101,9 +101,12 @@ export function Tray() {
         </ul>
       )}
       <SheetPreview pages={pages} paper={paper} />
-      <p className="num" data-testid="page-count">{plural(pages.length)}</p>
+      <p data-testid="page-count"><span className="num">{pages.length}</span> {pageWord(pages.length)}</p>
       <div className="row">
-        <button className="btn blue" disabled={!items.length} onClick={print}>Print {plural(pages.length)}</button>
+        <button className="btn blue" disabled={!items.length} onClick={print}>
+          {/* One span: .btn is a flex box and would drop the spaces between loose text and the number. */}
+          <span>Print <span className="num">{pages.length}</span> {pageWord(pages.length)}</span>
+        </button>
         <button className="btn" disabled={!items.length} onClick={clear}>Clear tray</button>
         <button className="btn gold" onClick={hide}>Back</button>
       </div>
