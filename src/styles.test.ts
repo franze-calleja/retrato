@@ -25,3 +25,11 @@ test('an empty tray live region takes no space in the column', () => {
 test('headings focused by script show no focus ring', () => {
   expect(rule('h2[tabindex="-1"]:focus')).toMatch(/outline:\s*none/)
 })
+
+test('reduced motion switches off every new animation', () => {
+  const block = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'))
+  const end = block.indexOf('\n}\n')
+  const body = block.slice(0, end)
+  for (const sel of ['.tile-btn::before', '.tilt-inner.sway', '.tile-btn.spin-in', '.pack-stage .pack-shaker', '.deal.from-pack .deal-card', '.card-glare'])
+    expect(body, sel).toContain(sel)
+})
