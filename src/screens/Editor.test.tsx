@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { fitCount } from '../print/layout'
 import { useBooth } from '../store/booth'
@@ -104,4 +104,12 @@ test('a failed render adds nothing and says so', async () => {
   await waitFor(() => expect(screen.getByRole('status').textContent).toMatch(/couldn.t add this card/i))
   expect(useTray.getState().items).toHaveLength(0)
   vi.restoreAllMocks()
+})
+
+test('a printed job keeps the paper it was laid out for', () => {
+  open(true)
+  fireEvent.click(screen.getByRole('button', { name: 'Print' }))
+  act(() => useOperator.getState().setPaper('letter'))
+  expect(document.querySelector('.print-sheets style')?.textContent).toMatch(/size:\s*A4/)
+  expect((document.querySelector('.print-page') as HTMLElement).style.height).toBe('277mm')
 })

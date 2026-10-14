@@ -17,8 +17,8 @@ test('renders one page box per page, sized to the printable area', () => {
 test('cards are placed at real size in mm, with 8 cut marks each', () => {
   render(<PrintSheets pages={packSheets(items(2, 50, 62), 'a4')} paper="a4" />)
   const [a, b] = imgs()
-  expect([a.style.left, a.style.top, a.style.width, a.style.height]).toEqual(['0mm', '0mm', '50mm', '62mm'])
-  expect(b.style.left).toBe('54mm')
+  expect([a.style.left, a.style.top, a.style.width, a.style.height]).toEqual(['3.5mm', '3.5mm', '50mm', '62mm'])
+  expect(b.style.left).toBe('57.5mm')
   expect(document.querySelectorAll('.cut-mark')).toHaveLength(16)
 })
 

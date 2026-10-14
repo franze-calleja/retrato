@@ -13,6 +13,8 @@ export const CUT_OFFSET = 0.5
 export const CUT_WIDTH = 0.2
 
 const EPS = 1e-6
+/** Cards keep this far from the printable edge so their cut marks fit on the page. */
+export const INSET = CUT_OFFSET + CUT_MARK
 
 export interface SheetItem { src: string; w: number; h: number }
 export interface Placed extends SheetItem { x: number; y: number }
@@ -24,9 +26,15 @@ export function printableArea(paper: PaperId) {
   return { w: p.w - 2 * MARGIN, h: p.h - 2 * MARGIN }
 }
 
+/** Room for cards on a page: the printable area minus the cut-mark inset. */
+function usableArea(paper: PaperId) {
+  const a = printableArea(paper)
+  return { w: a.w - 2 * INSET, h: a.h - 2 * INSET }
+}
+
 /** Shelf packing in input order: left to right, new row when the width runs out, new page when the height does. */
 export function packSheets(items: SheetItem[], paper: PaperId): Page[] {
-  const area = printableArea(paper)
+  const area = usableArea(paper)
   const pages: Page[] = []
   let page: Page | null = null
   let x = 0
@@ -43,7 +51,7 @@ export function packSheets(items: SheetItem[], paper: PaperId): Page[] {
     let p: Page = page ?? newPage()
     if (oversized) {
       if (p.cards.length) p = newPage()
-      p.cards.push({ ...it, x: 0, y: 0 })
+      p.cards.push({ ...it, x: INSET, y: INSET })
       page = null
       continue
     }
@@ -53,7 +61,7 @@ export function packSheets(items: SheetItem[], paper: PaperId): Page[] {
       rowH = 0
     }
     if (p.cards.length && y + it.h > area.h + EPS) p = newPage()
-    p.cards.push({ ...it, x, y })
+    p.cards.push({ ...it, x: x + INSET, y: y + INSET })
     x += it.w + GAP
     rowH = Math.max(rowH, it.h)
   }
@@ -62,7 +70,7 @@ export function packSheets(items: SheetItem[], paper: PaperId): Page[] {
 
 /** How many copies of one card size fit on a single page (at least 1). */
 export function fitCount(size: { w: number; h: number }, paper: PaperId): number {
-  const area = printableArea(paper)
+  const area = usableArea(paper)
   const cols = Math.floor((area.w + GAP) / (size.w + GAP) + EPS)
   const rows = Math.floor((area.h + GAP) / (size.h + GAP) + EPS)
   return Math.max(1, cols * rows)

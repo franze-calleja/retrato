@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { fitCount, packSheets, type Page } from '../print/layout'
+import { fitCount, packSheets, type Page, type PaperId } from '../print/layout'
 import { PrintSheets } from '../print/PrintSheets'
 import { composeStamp } from '../render/composeStamp'
 import { EXPORT_SCALE, PREVIEW_SCALE, exportFileName } from '../render/export'
@@ -28,7 +28,7 @@ export function Editor() {
   const paper = useOperator((s) => s.paper)
   const trayFull = useTray((s) => s.items.length >= TRAY_MAX)
   const [copies, setCopies] = useState('1')
-  const [job, setJob] = useState<{ pages: Page[]; n: number } | null>(null)
+  const [job, setJob] = useState<{ pages: Page[]; paper: PaperId; n: number } | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => () => clearTimeout(noteTimer.current), [])
@@ -62,7 +62,7 @@ export function Editor() {
     const src = renderFull().toDataURL('image/png')
     const items = Array.from({ length: copyCount }, () => ({ src, ...template.printSizeMm }))
     // New key per press so the sheet remounts and waits for its own images.
-    setJob((j) => ({ pages: packSheets(items, paper), n: (j?.n ?? 0) + 1 }))
+    setJob((j) => ({ pages: packSheets(items, paper), paper, n: (j?.n ?? 0) + 1 }))
   }
 
   function addToTray() {
@@ -147,7 +147,7 @@ export function Editor() {
         <button className="btn" onClick={goToPicker}>Change card</button>
       </div>
 
-      {job && <PrintSheets key={job.n} pages={job.pages} paper={paper} onReady={() => window.print()} />}
+      {job && <PrintSheets key={job.n} pages={job.pages} paper={job.paper} onReady={() => window.print()} />}
     </section>
   )
 }
