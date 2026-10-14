@@ -28,7 +28,7 @@ function SheetPreview({ pages, paper }: { pages: Page[]; paper: PaperId }) {
           key={i}
           className="sheet-mini"
           role="img"
-          aria-label={`Page ${i + 1}: ${p.cards.length} cards`}
+          aria-label={`Page ${i + 1}: ${p.cards.length} ${p.cards.length === 1 ? 'card' : 'cards'}`}
           style={{ aspectRatio: `${area.w} / ${area.h}` }}
         >
           {p.cards.map((c, j) => (
@@ -53,11 +53,36 @@ export function Tray() {
   const pending = useRef(false)
   const [askClear, setAskClear] = useState(false)
 
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const printRef = useRef(() => {})
+
+  useEffect(() => headingRef.current?.focus(), [])
+
+  // A new layout remounts the sheet; it is not ready until its own images load, even if it matches an older one.
+  useEffect(() => {
+    readyFor.current = null
+  }, [sheetKey])
+
   useEffect(() => {
     const onAfter = () => setAskClear(true)
+    // Ctrl/Cmd+P prints through the same path as the button, so it waits for the images.
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        printRef.current()
+      }
+    }
     window.addEventListener('afterprint', onAfter)
-    return () => window.removeEventListener('afterprint', onAfter)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('afterprint', onAfter)
+      window.removeEventListener('keydown', onKey)
+    }
   }, [])
+
+  useEffect(() => {
+    printRef.current = print
+  })
 
   function print() {
     if (readyFor.current === sheetKey) window.print()
@@ -74,14 +99,17 @@ export function Tray() {
 
   return (
     <section className="screen tray">
-      <h2>Print tray</h2>
-      {askClear && (
-        <div className="tray-banner">
-          <span>Done printing?</span>
-          <button className="btn green" onClick={clear}>Clear tray</button>
-          <button className="btn" onClick={() => setAskClear(false)}>Keep</button>
-        </div>
-      )}
+      <h2 ref={headingRef} tabIndex={-1}>Print tray</h2>
+      {/* Always mounted so screen readers announce the question when it appears. */}
+      <div role="status" data-testid="tray-live" className="tray-live">
+        {askClear && (
+          <div className="tray-banner">
+            <span>Done printing?</span>
+            <button className="btn green" onClick={clear}>Clear tray</button>
+            <button className="btn" onClick={() => setAskClear(false)}>Keep</button>
+          </div>
+        )}
+      </div>
       {items.length === 0 ? (
         <p>Your tray is empty</p>
       ) : (
@@ -95,7 +123,7 @@ export function Tray() {
                 <output className="num">{i.copies}</output>
                 <button className="btn" aria-label="More copies" disabled={i.copies >= MAX_COPIES} onClick={() => setCopies(i.id, i.copies + 1)}>+</button>
               </div>
-              <button className="btn red" onClick={() => remove(i.id)}>Remove</button>
+              <button className="btn red" aria-label={`Remove ${i.name}`} onClick={() => remove(i.id)}>Remove</button>
             </li>
           ))}
         </ul>

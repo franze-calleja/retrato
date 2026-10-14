@@ -13,6 +13,14 @@ import { registerTap } from './ui/taps'
 export default function App() {
   const screen = useBooth((s) => s.screen)
   const trayOpen = useTray((s) => s.open)
+  const wasTrayOpen = useRef(false)
+
+  // Leaving the tray: put focus back on the tray button (or the logo when the tray was cleared).
+  useEffect(() => {
+    if (wasTrayOpen.current && !trayOpen)
+      (document.querySelector<HTMLElement>('.tray-btn') ?? document.querySelector<HTMLElement>('.logo'))?.focus()
+    wasTrayOpen.current = trayOpen
+  }, [trayOpen])
   const [panelOpen, setPanelOpen] = useState(false)
   const taps = useRef<number[]>([])
   const closePanel = useCallback(() => setPanelOpen(false), [])
@@ -38,7 +46,7 @@ export default function App() {
     <>
       <SwirlBackground palette={screen === 'picker' ? 'shop' : 'booth'} />
       <main className="app">
-        <h1 className="logo" onClick={onLogoTap}>PIXEL BOOTH</h1>
+        <h1 className="logo" tabIndex={-1} onClick={onLogoTap}>PIXEL BOOTH</h1>
         <TrayButton />
         {trayOpen ? (
           <Tray />

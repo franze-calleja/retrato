@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { fitCount } from '../print/layout'
 import { useBooth } from '../store/booth'
@@ -112,4 +112,42 @@ test('a printed job keeps the paper it was laid out for', () => {
   act(() => useOperator.getState().setPaper('letter'))
   expect(document.querySelector('.print-sheets style')?.textContent).toMatch(/size:\s*A4/)
   expect((document.querySelector('.print-page') as HTMLElement).style.height).toBe('277mm')
+})
+
+test('Ctrl/Cmd+P in the editor prints the current card like the Print button', () => {
+  open(true)
+  const ev = createEvent.keyDown(window, { key: 'p', ctrlKey: true })
+  fireEvent(window, ev)
+  expect(ev.defaultPrevented).toBe(true)
+  const imgs = printImgs()
+  expect(imgs).toHaveLength(1)
+  imgs.forEach((img) => fireEvent.load(img))
+  expect(window.print).toHaveBeenCalledTimes(1)
+})
+
+test('if the tray fills before the card finishes rendering, its image is freed', async () => {
+  const revoke = vi.spyOn(URL, 'revokeObjectURL')
+  vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(function (cb: BlobCallback) { setTimeout(() => cb(new Blob(['x']))) })
+  open(true)
+  fireEvent.click(screen.getByRole('button', { name: /add to tray/i }))
+  for (let i = 0; i < TRAY_MAX; i++)
+    useTray.getState().add({ templateId: 'stamp', name: 'Stamp', edition: 'common', url: `blob:${i}`, size: { w: 50, h: 62 }, copies: 1 })
+  await waitFor(() => expect(screen.getByText(/tray full \(20\)/i, { selector: '.editor-note' })).toBeTruthy())
+  expect(revoke).toHaveBeenCalledTimes(1)
+  expect(useTray.getState().items).toHaveLength(TRAY_MAX)
+  vi.restoreAllMocks()
+})
+
+test('a card that finishes rendering after the editor closes is still added, with no message timer left behind', async () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  const { unmount } = open(true)
+  let finish!: () => void
+  vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(function (cb: BlobCallback) { finish = () => cb(new Blob(['x'])) })
+  fireEvent.click(screen.getByRole('button', { name: /add to tray/i }))
+  unmount()
+  finish()
+  expect(useTray.getState().items).toHaveLength(1)
+  expect(vi.getTimerCount()).toBe(0)
+  vi.useRealTimers()
+  vi.restoreAllMocks()
 })

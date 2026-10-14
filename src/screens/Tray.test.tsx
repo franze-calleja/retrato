@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, createEvent, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
 import App from '../App'
 import { useBooth } from '../store/booth'
@@ -103,4 +103,58 @@ test('header button shows total copies, opens the tray, and Back returns to the 
   fireEvent.click(screen.getByRole('button', { name: /back/i }))
   expect(screen.queryByRole('heading', { name: /print tray/i })).toBeNull()
   expect(screen.getByRole('button', { name: /print tray \(3\)/i })).toBeTruthy()
+})
+
+test('a layout that comes back after an edit waits for its reloaded images', () => {
+  add()
+  render(<Tray />)
+  printImgs().forEach((img) => fireEvent.load(img))
+  fireEvent.click(screen.getByRole('button', { name: /more copies/i }))
+  fireEvent.click(screen.getByRole('button', { name: /fewer copies/i }))
+  fireEvent.click(screen.getByRole('button', { name: /print 1 page/i }))
+  expect(window.print).not.toHaveBeenCalled()
+  printImgs().forEach((img) => fireEvent.load(img))
+  expect(window.print).toHaveBeenCalledTimes(1)
+})
+
+test('each Remove button names its card', () => {
+  add()
+  add({ name: 'Stamp', templateId: 'stamp', size: { w: 50, h: 62 } })
+  render(<Tray />)
+  expect(screen.getByRole('button', { name: 'Remove Ticket' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'Remove Stamp' })).toBeTruthy()
+})
+
+test('the after-print question is announced in a live region', () => {
+  add()
+  render(<Tray />)
+  const live = screen.getByTestId('tray-live')
+  expect(live.getAttribute('role')).toBe('status')
+  act(() => { window.dispatchEvent(new Event('afterprint')) })
+  expect(live.textContent).toMatch(/done printing\?/i)
+})
+
+test('page preview labels use singular for one card', () => {
+  add()
+  render(<Tray />)
+  expect(screen.getByRole('img', { name: 'Page 1: 1 card' })).toBeTruthy()
+})
+
+test('Ctrl/Cmd+P on the tray screen runs the tray print', () => {
+  add()
+  render(<Tray />)
+  printImgs().forEach((img) => fireEvent.load(img))
+  const ev = createEvent.keyDown(window, { key: 'p', metaKey: true })
+  fireEvent(window, ev)
+  expect(ev.defaultPrevented).toBe(true)
+  expect(window.print).toHaveBeenCalledTimes(1)
+})
+
+test('focus moves to the tray heading on open and back to the tray button on Back', () => {
+  render(<App />)
+  act(() => { add() })
+  fireEvent.click(screen.getByRole('button', { name: /print tray \(1\)/i }))
+  expect(document.activeElement).toBe(screen.getByRole('heading', { name: /print tray/i }))
+  fireEvent.click(screen.getByRole('button', { name: /back/i }))
+  expect(document.activeElement).toBe(screen.getByRole('button', { name: /print tray \(1\)/i }))
 })

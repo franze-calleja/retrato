@@ -31,7 +31,24 @@ export function Editor() {
   const [job, setJob] = useState<{ pages: Page[]; paper: PaperId; n: number } | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(noteTimer.current), [])
+  const mounted = useRef(true)
+  const printBtn = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    mounted.current = true
+    // Ctrl/Cmd+P prints the current card through the same path as the Print button.
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        printBtn.current?.click()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      mounted.current = false
+      clearTimeout(noteTimer.current)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [])
 
   if (!capture) return null
 
@@ -53,6 +70,7 @@ export function Editor() {
   const copyCount = copies === 'fill' ? fitCount(template.printSizeMm, paper) : Number(copies)
 
   function flash(text: string) {
+    if (!mounted.current) return // the card can finish rendering after the editor closed
     setNote(text)
     clearTimeout(noteTimer.current)
     noteTimer.current = setTimeout(() => setNote(null), 2000)
@@ -136,7 +154,7 @@ export function Editor() {
             <option value="fill">Fill page</option>
           </select>
         </label>
-        <button className="btn blue" onClick={startPrint}>Print</button>
+        <button ref={printBtn} className="btn blue" onClick={startPrint}>Print</button>
         <button className="btn green" onClick={addToTray} disabled={trayFull}>
           {trayFull ? `Tray full (${TRAY_MAX})` : 'Add to tray'}
         </button>
