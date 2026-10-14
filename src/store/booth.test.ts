@@ -67,6 +67,16 @@ describe('booth store', () => {
     expect(s().values.title).toBe('HELLO')
   })
 
+  test('camera side defaults to front and survives retake and change card', () => {
+    expect(s().cameraSide).toBe('front')
+    s().setCameraSide('back')
+    s().selectTemplate('stamp')
+    s().setCapture(photo())
+    s().retake()
+    s().goToPicker()
+    expect(s().cameraSide).toBe('back')
+  })
+
   test('setValue clamps pasted text to maxLength by code point', () => {
     s().setValue('value', '😀😀😀😀😀😀😀')
     expect(Array.from(s().values.value)).toHaveLength(5)

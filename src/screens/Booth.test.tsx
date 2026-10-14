@@ -64,3 +64,26 @@ test('a camera that disconnects mid-countdown cancels the countdown', async () =
   vi.restoreAllMocks()
   useBooth.setState(useBooth.getInitialState(), true)
 })
+
+test('the booth shows the camera front with a side screen named after the card', () => {
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', templateId: 'tarot' }, true)
+  render(<Booth />)
+  expect(document.querySelector('.camera-flip')!.getAttribute('data-side')).toBe('front')
+  expect(screen.getByRole('img', { name: /tarot card live preview/i }).closest('.side-screen')).not.toBeNull()
+  expect(screen.getByText('Tarot Card', { selector: '.side-screen *' })).toBeTruthy()
+  useBooth.setState(useBooth.getInitialState(), true)
+})
+
+test('Show back turns the camera; only the rear screen is the live preview then', () => {
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth' }, true)
+  render(<Booth />)
+  const toggle = screen.getByRole('button', { name: /show back/i })
+  fireEvent.click(toggle)
+  expect(useBooth.getState().cameraSide).toBe('back')
+  expect(document.querySelector('.camera-flip')!.getAttribute('data-side')).toBe('back')
+  expect(screen.getByRole('button', { name: /show front/i }).getAttribute('aria-pressed')).toBe('true')
+  const previews = screen.getAllByRole('img', { name: /live preview/i })
+  expect(previews).toHaveLength(1)
+  expect(previews[0].closest('.rear-screen')).not.toBeNull()
+  useBooth.setState(useBooth.getInitialState(), true)
+})

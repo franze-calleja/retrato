@@ -224,8 +224,34 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center; }
 
 /* Booth */
-.preview-wrap { position: relative; }
-.preview-wrap canvas { width: min(100%, 520px); }
+.camera-stage { display: flex; align-items: center; justify-content: center; gap: 14px; width: min(100%, 760px); }
+.camera-holder { position: relative; flex: 1 1 auto; max-width: 524px; min-width: 0; }
+.camera-flip { position: relative; transform-style: preserve-3d; transition: transform 500ms cubic-bezier(.3, 1.3, .5, 1); }
+.camera-flip[data-side='back'] { transform: rotateY(180deg); }
+.camera-face { position: relative; backface-visibility: hidden; }
+.camera-back { position: absolute; inset: 0; transform: rotateY(180deg); }
+.camera-art { display: block; width: 100%; height: auto; }
+.camera-flash { position: absolute; background: #fff; opacity: 0; pointer-events: none; border-radius: 4px; }
+.camera-flash.on { animation: camera-flash 300ms ease-out; }
+@keyframes camera-flash { 0% { opacity: 1; box-shadow: 0 0 40px 20px #fff; } 100% { opacity: 0; } }
+.shutter-hit { position: absolute; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
+.shutter-hit:disabled { cursor: default; }
+.rear-screen { position: absolute; display: grid; place-items: center; overflow: hidden; }
+.rear-screen canvas { max-width: 100%; max-height: 100%; width: auto; height: 100%; }
+.side-screen { position: relative; flex: 0 0 150px; display: grid; gap: 6px; justify-items: center; }
+.side-screen-glass {
+  position: relative; width: 100%; aspect-ratio: var(--aspect); background: #10121c;
+  border: 6px solid #2a2c3c; border-radius: 6px; box-shadow: 0 4px 0 var(--dark), inset 0 0 0 2px #000;
+}
+.side-screen-glass canvas { display: block; width: 100%; height: 100%; }
+.side-screen-name { font-size: 15px; font-weight: 700; text-shadow: 2px 2px 0 var(--dark); text-align: center; }
+.hinge { position: absolute; left: -14px; top: 30%; width: 14px; height: 24px; background: #8a8ea0; border: 3px solid var(--dark); border-radius: 3px; }
+.side-screen .countdown, .rear-screen .countdown { font-size: 64px; }
+@media (max-width: 559px) {
+  .camera-stage { position: relative; display: block; }
+  .camera-stage .side-screen { position: absolute; right: 2%; bottom: -6%; width: 34%; z-index: 2; }
+  .camera-stage .hinge { display: none; }
+}
 .countdown {
   position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
   font: 700 120px var(--font); color: var(--ink); text-shadow: 6px 6px 0 var(--dark), -3px -3px 0 var(--red);
@@ -419,6 +445,8 @@ h2[tabindex="-1"]:focus { outline: none; }
   .pack-stage[data-phase] .pack-shaker, .pack-stage[data-phase] canvas, .pack-stage[data-phase] .pack-flash { animation: none; }
   .deal.from-pack .deal-card { animation: none; }
   .card-glare, .card-glare .glare, .sparkle-dot { animation: none; transition: none; }
+  .camera-flip { transition: none; }
+  .camera-flash.on { animation: none; }
   .tilt-inner { transform: none; }
   .btn, .tile-btn { transition: none; }
   .bulb { animation: none; }

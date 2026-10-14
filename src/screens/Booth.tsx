@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { drawLiveCrop } from '../camera/liveCrop'
 import { useCamera, type CameraStatus } from '../camera/useCamera'
 import { getPack } from '../packs/catalog'
 import { capturePackPhoto } from '../packs/capture'
 import { packViewfinder } from '../packs/viewfinder'
 import { cropPhoto, type PhotoSource } from '../photo/crop'
-import { composeStamp } from '../render/composeStamp'
-import { EXPORT_SCALE, PREVIEW_SCALE } from '../render/export'
+import { EXPORT_SCALE } from '../render/export'
 import { useBooth } from '../store/booth'
 import { placeholderPhoto } from '../templates/placeholder'
 import { getTemplate } from '../templates/registry'
+import { CameraStage } from './CameraStage'
 
 const MESSAGES: Partial<Record<CameraStatus, string>> = {
   insecure: 'The camera only works over HTTPS (or on localhost). You can still upload a photo.',
@@ -19,14 +20,17 @@ const MESSAGES: Partial<Record<CameraStatus, string>> = {
 
 export function Booth() {
   const templateId = useBooth((s) => s.templateId)
-  const values = useBooth((s) => s.values)
   const { setCapture, goToPicker } = useBooth.getState()
   const mode = useBooth((s) => s.mode)
   const packId = useBooth((s) => s.packId)
   const template = mode === 'pack' ? packViewfinder(getPack(packId)) : getTemplate(templateId)
 
   const { videoRef, status, start } = useCamera()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const side = useBooth((s) => s.cameraSide)
+  const screenCanvas = useRef<HTMLCanvasElement | null>(null)
+  const setScreen = useCallback((c: HTMLCanvasElement | null) => {
+    screenCanvas.current = c
+  }, [])
   const [count, setCount] = useState<number | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
@@ -51,9 +55,10 @@ export function Booth() {
 
   // Idle preview: placeholder until the camera is live.
   useEffect(() => {
-    if (status === 'live' || !canvasRef.current) return
-    composeStamp(template, placeholderPhoto(template), values, PREVIEW_SCALE, canvasRef.current)
-  }, [status, template, values])
+    const c = screenCanvas.current
+    if (status === 'live' || !c) return
+    drawLiveCrop(c.getContext('2d')!, placeholderPhoto(template), template, c.width, c.height)
+  }, [status, template, side])
 
   // Live preview loop.
   useEffect(() => {
@@ -61,9 +66,8 @@ export function Booth() {
     let raf = 0
     const tick = () => {
       const photo = liveSource()
-      if (photo && canvasRef.current) {
-        composeStamp(template, photo, useBooth.getState().values, PREVIEW_SCALE, canvasRef.current)
-      }
+      const c = screenCanvas.current
+      if (photo && c) drawLiveCrop(c.getContext('2d')!, photo, template, c.width, c.height)
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
@@ -120,15 +124,19 @@ export function Booth() {
       <h2>{template.name}</h2>
       <video ref={videoRef} className="video-feed" muted playsInline aria-hidden="true" />
 
-      <div className="preview-wrap">
-        <canvas ref={canvasRef} className="stamp-canvas" role="img" aria-label={`${template.name} live preview`} />
-        {count !== null && count > 0 && (
-          <div key={count} className="countdown" aria-hidden="true">{count}</div>
-        )}
-        {/* The visible number remounts for its animation; announce through one region that stays put. */}
-        <div className="visually-hidden" data-testid="countdown-live" aria-live="assertive">
-          {count !== null && count > 0 ? count : ''}
-        </div>
+      <CameraStage
+        side={side}
+        template={template}
+        title={template.name}
+        count={count}
+        shutterEnabled={status === 'live' && count === null}
+        onShutter={() => setCount(3)}
+        screenRef={setScreen}
+        flashing={false}
+      />
+      {/* The visible number remounts for its animation; announce through one region that stays put. */}
+      <div className="visually-hidden" data-testid="countdown-live" aria-live="assertive">
+        {count !== null && count > 0 ? count : ''}
       </div>
 
       {message && (
@@ -140,6 +148,13 @@ export function Booth() {
       {status === 'requesting' && <p>Waiting for camera permission…</p>}
 
       <div className="row">
+        <button
+          className="btn"
+          aria-pressed={side === 'back'}
+          onClick={() => useBooth.getState().setCameraSide(side === 'front' ? 'back' : 'front')}
+        >
+          {side === 'front' ? 'Show back' : 'Show front'}
+        </button>
         <button className="btn" onClick={goToPicker}>Back</button>
         <button className="btn red" disabled={status !== 'live' || count !== null} onClick={() => setCount(3)}>
           Take photo

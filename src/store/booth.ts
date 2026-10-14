@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { CameraSide } from '../camera/cameraArt'
 import { rollEdition } from '../editions/roll'
 import { getPack } from '../packs/catalog'
 import { dealPack, type PackCard } from '../packs/deal'
@@ -26,6 +27,9 @@ interface BoothState {
   packId: string
   /** The card was already revealed (pack pick), so the editor skips its flip. */
   revealed: boolean
+  /** Which side of the booth camera faces the guest; kept for the session. */
+  cameraSide: CameraSide
+  setCameraSide(side: CameraSide): void
   selectTemplate(id: string): void
   selectPack(packId?: string): void
   setCapture(photo: PhotoSource): void
@@ -48,7 +52,9 @@ export const useBooth = create<BoothState>()((set, get) => ({
   pack: null,
   packId: 'classic',
   revealed: false,
+  cameraSide: 'front',
 
+  setCameraSide: (cameraSide) => set({ cameraSide }),
   selectTemplate(id) {
     set({
       ...cleared,
