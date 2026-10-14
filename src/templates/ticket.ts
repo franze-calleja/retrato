@@ -77,7 +77,7 @@ export const ticket: Template = {
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   badgeAt: { x: BW - 1, y: BH - 9, align: 'right' }, // bottom of the stub, below the serial
-  printSizeMm: { w: 144, h: 60 },
+  printSizeMm: { w: 144, h: Math.round(((144 * (BH + SHADOW_OFFSET)) / (BW + SHADOW_OFFSET)) * 10) / 10 },
   fields: [
     { key: 'event', label: 'Event', default: 'PIXEL PARTY', maxLength: 14 },
     { key: 'date', label: 'Date', default: () => todayIso(), maxLength: 10 },

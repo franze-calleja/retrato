@@ -44,7 +44,7 @@ export const stamp: Template = {
   description: 'Postage stamp · perforated edge, title & value',
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
-  printSizeMm: { w: 50, h: 62 },
+  printSizeMm: { w: 50, h: Math.round(((50 * (BH + SHADOW_OFFSET)) / (BW + SHADOW_OFFSET)) * 10) / 10 },
   fields: [
     { key: 'title', label: 'Title', default: 'FIRST STAMP', maxLength: 14 },
     { key: 'value', label: 'Value', default: '25¢', maxLength: 5 },

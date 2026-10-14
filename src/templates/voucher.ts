@@ -52,7 +52,7 @@ export const voucher: Template = {
   size: { w: BW + SHADOW_OFFSET, h: BH + SHADOW_OFFSET },
   photoRect: PHOTO,
   badgeAt: { x: BW - 1, y: 0, align: 'right' }, // top of the stub
-  printSizeMm: { w: 120, h: 60 },
+  printSizeMm: { w: 120, h: Math.round(((120 * (BH + SHADOW_OFFSET)) / (BW + SHADOW_OFFSET)) * 10) / 10 },
   fields: [
     { key: 'title', label: 'Title', default: 'VOUCHER', maxLength: 14 },
     { key: 'amount', label: 'Amount', default: 'FREE HUG', maxLength: 12 },

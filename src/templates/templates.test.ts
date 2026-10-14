@@ -66,3 +66,11 @@ describe('placeholderPhoto', () => {
     expect(p.mirror).toBeUndefined()
   })
 })
+
+test('every card prints with the same proportions as its art (within 0.1%)', () => {
+  for (const t of templates) {
+    const art = t.size.w / t.size.h
+    const print = t.printSizeMm.w / t.printSizeMm.h
+    expect(Math.abs(print / art - 1), t.id).toBeLessThan(0.001)
+  }
+})
