@@ -122,3 +122,25 @@ test('the marquee sign has its tagline', () => {
   render(<Shop />)
   expect(screen.getByText('Strike a pose!')).toBeTruthy()
 })
+
+test('packs sway on the shelf; cards bob', () => {
+  render(<Shop />)
+  const pack = screen.getByRole('button', { name: 'Classic Pack' })
+  expect(pack.closest('.tilt-inner')!.classList.contains('sway')).toBe(true)
+  const card = screen.getAllByRole('button').find((b) => b.classList.contains('tile-btn') && !b.classList.contains('pack-btn'))!
+  expect(card.closest('.tilt-inner')!.classList.contains('sway')).toBe(false)
+})
+
+test('each shelf item shines in turn', () => {
+  render(<Shop />)
+  const delays = [...document.querySelectorAll<HTMLElement>('.tile-btn')].map((b) => b.style.getPropertyValue('--glint-delay'))
+  expect(new Set(delays).size).toBe(delays.length)
+  expect(delays.every((d) => /^\d+(\.\d+)?s$/.test(d))).toBe(true)
+})
+
+test('reroll spins the new featured cards in', () => {
+  render(<Shop />)
+  expect(document.querySelectorAll('.spin-in')).toHaveLength(0)
+  fireEvent.click(screen.getByRole('button', { name: /reroll/i }))
+  expect(document.querySelectorAll('.spin-in')).toHaveLength(3)
+})

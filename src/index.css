@@ -147,11 +147,28 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .shelf-row > * { flex: none; scroll-snap-align: center; }
 .tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .tile-btn {
-  display: block; background: none; border: 0; padding: 0; cursor: pointer;
-  transition: transform 120ms ease-out, filter 120ms ease-out;
+  position: relative; display: block; background: none; border: 0; padding: 0; cursor: pointer;
+  transition: transform 160ms ease-out, filter 160ms ease-out;
 }
 .tile-btn canvas { height: 150px; width: auto; max-width: none; }
-.tile-btn:hover, .tile-btn:focus-visible { transform: scale(1.06); filter: drop-shadow(0 10px 0 rgb(0 0 0 / 0.35)); outline: none; }
+.tile-btn:hover, .tile-btn:focus-visible {
+  transform: translateY(-8px) scale(1.06);
+  filter: drop-shadow(0 14px 0 rgb(0 0 0 / 0.25)) drop-shadow(0 6px 8px rgb(0 0 0 / 0.35)); outline: none;
+}
+/* One shine at a time across the shelf: each item sweeps once per 7 s cycle, offset by --glint-delay. */
+.tile-btn::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen;
+  background: linear-gradient(115deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%);
+  background-size: 300% 100%; background-position: 150% 0;
+  animation: glint 7s ease-in-out infinite; animation-delay: var(--glint-delay, 0s);
+}
+@keyframes glint { 0% { background-position: 150% 0; } 14%, 100% { background-position: -50% 0; } }
+.tilt-inner.sway { animation: sway 4s ease-in-out infinite; }
+.tilt:hover .tilt-inner.sway, .tilt:focus-within .tilt-inner.sway { animation: rustle 400ms ease-in-out 1, sway 4s ease-in-out 400ms infinite; }
+@keyframes sway { 0%, 100% { rotate: -2deg; } 50% { rotate: 2deg; } }
+@keyframes rustle { 0%, 100% { rotate: 0deg; } 20% { rotate: -6deg; } 50% { rotate: 5deg; } 80% { rotate: -3deg; } }
+.tile-btn.spin-in { animation: spin-in 350ms ease-out backwards; animation-delay: calc(var(--i, 0) * 80ms); }
+@keyframes spin-in { from { transform: perspective(600px) rotateY(90deg); opacity: 0; } }
 .tile-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
 /* Price tag hanging on a string above each item. */
 .tag {
@@ -169,12 +186,6 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .tile:hover .info, .tile:focus-within .info { display: block; }
 .pack-btn { position: relative; overflow: hidden; }
-.pack-btn::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
-  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
-  background-size: 300% 100%; animation: sheen 3.5s ease-in-out infinite;
-}
-@keyframes sheen { from { background-position: 150% 0; } to { background-position: -50% 0; } }
 @media (max-width: 719px) {
   .shop { grid-template-columns: 1fr; }
   .marquee-title { font-size: 42px; }
@@ -370,7 +381,9 @@ h2[tabindex="-1"]:focus { outline: none; }
   .tilt-inner { transform: none; }
   .btn, .tile-btn { transition: none; }
   .bulb { animation: none; }
-  .pack-btn::after { animation: none; display: none; }
+  .tile-btn::before { animation: none; display: none; }
+  .tilt-inner.sway, .tilt:hover .tilt-inner.sway, .tilt:focus-within .tilt-inner.sway { animation: none; }
+  .tile-btn.spin-in { animation: none; }
 }
 
 @media print {

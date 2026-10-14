@@ -18,7 +18,7 @@ const TEMPLATE_IDS = templates.map((t) => t.id)
 const BULBS_ACROSS = 12
 const BULBS_DOWN = 4
 
-function CardTile({ template, delay }: { template: Template; delay: number }) {
+function CardTile({ template, delay, glint, index, spin }: { template: Template; delay: number; glint: number; index: number; spin: boolean }) {
   const infoId = useId()
   const selectTemplate = useBooth((s) => s.selectTemplate)
   const photo = useMemo(() => placeholderPhoto(template), [template])
@@ -27,7 +27,13 @@ function CardTile({ template, delay }: { template: Template; delay: number }) {
     <div className="tile">
       <span className="tag" aria-hidden="true">FREE</span>
       <TiltCard delay={delay}>
-        <button className="tile-btn" aria-label={template.name} aria-describedby={infoId} onClick={() => selectTemplate(template.id)}>
+        <button
+          className={`tile-btn ${spin ? 'spin-in' : ''}`}
+          style={{ '--glint-delay': `${glint}s`, '--i': index } as CSSProperties}
+          aria-label={template.name}
+          aria-describedby={infoId}
+          onClick={() => selectTemplate(template.id)}
+        >
           <StampCanvas template={template} photo={photo} values={values} scale={2} />
         </button>
       </TiltCard>
@@ -37,7 +43,7 @@ function CardTile({ template, delay }: { template: Template; delay: number }) {
   )
 }
 
-function PackTile({ pack, delay }: { pack: PackDef; delay: number }) {
+function PackTile({ pack, delay, glint }: { pack: PackDef; delay: number; glint: number }) {
   const infoId = useId()
   const selectPack = useBooth((s) => s.selectPack)
   const ref = useRef<HTMLCanvasElement>(null)
@@ -47,8 +53,14 @@ function PackTile({ pack, delay }: { pack: PackDef; delay: number }) {
   return (
     <div className="tile">
       <span className="tag" aria-hidden="true">FREE</span>
-      <TiltCard delay={delay}>
-        <button className="tile-btn pack-btn" aria-label={pack.name} aria-describedby={infoId} onClick={() => selectPack(pack.id)}>
+      <TiltCard delay={delay} motion="sway">
+        <button
+          className="tile-btn pack-btn"
+          style={{ '--glint-delay': `${glint}s` } as CSSProperties}
+          aria-label={pack.name}
+          aria-describedby={infoId}
+          onClick={() => selectPack(pack.id)}
+        >
           <canvas ref={ref} className="stamp-canvas" aria-hidden="true" />
         </button>
       </TiltCard>
@@ -115,6 +127,8 @@ export function Shop() {
   const selectPack = useBooth((s) => s.selectPack)
   const photos = useStats((s) => s.photos)
   const [featured, setFeatured] = useState(() => nextFeatured(TEMPLATE_IDS, [], Math.random))
+  // Bumped on every reroll: remounts the featured row so the new cards spin in.
+  const [rolls, setRolls] = useState(0)
   const [showAll, setShowAll] = useState(false)
   const [howOpen, setHowOpen] = useState(false)
   const howId = useId()
@@ -148,14 +162,18 @@ export function Shop() {
         <div className="counter-top">
           <div className="counter-buttons">
             <button className="btn red big" onClick={() => selectPack('classic')}>Open pack</button>
-            <button className="btn green big" onClick={() => setFeatured((cur) => nextFeatured(TEMPLATE_IDS, cur, Math.random))}>
+            <button className="btn green big" onClick={() => {
+                setFeatured((cur) => nextFeatured(TEMPLATE_IDS, cur, Math.random))
+                setRolls((n) => n + 1)
+              }}
+            >
               Reroll <small>FREE</small>
             </button>
           </div>
           <section className="shelf" aria-label="Cards" id={shelfId}>
-            <div className="shelf-row">
+            <div className="shelf-row" key={rolls}>
               {shown.map((t, i) => (
-                <CardTile key={t.id} template={t} delay={i * 0.35} />
+                <CardTile key={t.id} template={t} delay={i * 0.35} glint={i * 1.4} index={i} spin={rolls > 0} />
               ))}
             </div>
           </section>
@@ -167,7 +185,7 @@ export function Shop() {
           <section className="shelf" aria-label="Packs">
             <div className="shelf-row">
               {PACKS.map((p, i) => (
-                <PackTile key={p.id} pack={p} delay={i * 0.35} />
+                <PackTile key={p.id} pack={p} delay={i * 0.35} glint={(shown.length + i) * 1.4} />
               ))}
             </div>
           </section>
