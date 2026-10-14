@@ -54,7 +54,7 @@ Pixel art drawn with the existing helpers (`panel`, `fill`, `outline`, `withDrop
 | phase | duration | what shows |
 |---|---|---|
 | `flash` | 150 ms | flash window lights; full-screen white flash overlay fades |
-| `eject` | 900 ms | a print (white instax-style frame: thin border, thicker bottom) slides up out of the top slot |
+| `eject` | 900 ms | a print (white instant-film frame: thin border, thicker bottom) slides up out of the top slot |
 | `develop` | 1200 ms | photo on the print fades from pale/washed (high brightness, low saturation and contrast) to full colour |
 | `handoff` | 450 ms | single: print flips to 90°; pack: pack art rises below, print drops into it |
 | `done` | — | Booth calls the existing `keep(photo)` → `setCapture` |

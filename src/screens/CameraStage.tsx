@@ -33,7 +33,8 @@ function Art({ side }: { side: CameraSide }) {
   useEffect(() => {
     if (ref.current) cameraArt(side, ART_SCALE, ref.current)
   }, [side])
-  return <canvas ref={ref} className="camera-art" aria-hidden="true" />
+  // Sized up front so the first paint already has the camera's shape.
+  return <canvas ref={ref} width={CAMERA_SIZE.w * ART_SCALE} height={CAMERA_SIZE.h * ART_SCALE} className="camera-art" aria-hidden="true" />
 }
 
 export function CameraStage({ side, template, title, count, shutterEnabled, onShutter, screenRef, flashing, printing = false, children }: Props) {

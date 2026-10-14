@@ -81,7 +81,8 @@ export function Booth() {
 
   const keep = useCallback(
     (photo: PhotoSource) => {
-      if (mode === 'pack') return setCapture(capturePackPhoto(photo))
+      // Every capture is already frozen (and capped) by `capture`, so a pack keeps it as is.
+      if (mode === 'pack') return setCapture(photo)
       const r = template.photoRect
       setCapture(cropPhoto(photo, r.w * EXPORT_SCALE, r.h * EXPORT_SCALE))
     },
@@ -89,8 +90,13 @@ export function Booth() {
   )
 
   // Freeze the frame now (the video keeps moving), then print it before handing off.
+  // One capture at a time: a countdown that finishes during an upload's print must not replace it.
+  const busy = useRef(false)
   const capture = useCallback(
     (photo: PhotoSource) => {
+      if (busy.current) return
+      busy.current = true
+      setCount(null)
       const frozen = capturePackPhoto(photo)
       if (reducedMotion) return keep(frozen)
       setPrinting(frozen)
@@ -182,7 +188,7 @@ export function Booth() {
         <button className="btn red" disabled={status !== 'live' || count !== null || printing !== null} onClick={() => setCount(3)}>
           Take photo
         </button>
-        <label className="btn blue" aria-disabled={printing !== null}>
+        <label className={`btn blue ${printing ? 'is-disabled' : ''}`}>
           Upload photo
           <input type="file" accept="image/*" className="visually-hidden" disabled={printing !== null} onChange={onUpload} />
         </label>

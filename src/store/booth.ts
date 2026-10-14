@@ -60,7 +60,7 @@ export const useBooth = create<BoothState>()((set, get) => ({
       ...cleared,
       mode: 'single',
       templateId: id,
-      // Roll per-capture fields now so the booth preview shows what the card will get.
+      // Roll per-capture fields (serials, member numbers) fresh for each visit to the booth.
       values: refreshPerCapture(getTemplate(id), get().saved[id] ?? resolveDefaults(getTemplate(id))),
       screen: 'booth',
     })

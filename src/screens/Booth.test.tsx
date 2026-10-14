@@ -165,20 +165,58 @@ test('leaving mid-print captures nothing', async () => {
   useBooth.setState(useBooth.getInitialState(), true)
 })
 
-test('the frozen frame is copied once at capture time', async () => {
+test('the print keeps the frame frozen at capture, not the (released) upload', async () => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
-  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', templateId: 'stamp' }, true)
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', mode: 'pack', packId: 'classic' }, true)
   const bmp = fakeBitmap()
+  // A real ImageBitmap is unusable once closed: nothing may draw from it after close().
+  let closed = false
+  bmp.close.mockImplementation(() => (closed = true))
+  const lateDraws: unknown[] = []
+  const draw = CanvasRenderingContext2D.prototype.drawImage
+  vi.spyOn(CanvasRenderingContext2D.prototype, 'drawImage').mockImplementation(function (this: CanvasRenderingContext2D, ...a: unknown[]) {
+    if (closed && a[0] === bmp) lateDraws.push(a)
+    return (draw as (...x: unknown[]) => void).apply(this, a)
+  })
   vi.stubGlobal('createImageBitmap', () => Promise.resolve(bmp))
   render(<Booth />)
   const input = screen.getByLabelText(/upload photo/i) as HTMLInputElement
   await act(async () => {
     fireEvent.change(input, { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } })
   })
-  // The bitmap is released right after freezing, before the print finishes.
   expect(bmp.close).toHaveBeenCalled()
   for (const ms of [150, 900, 1200, 450]) act(() => { vi.advanceTimersByTime(ms) })
-  expect(useBooth.getState().capture!.source).not.toBe(bmp)
+  expect(useBooth.getState().screen).toBe('pack')
+  expect(lateDraws).toHaveLength(0)
+  vi.restoreAllMocks()
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+  useBooth.setState(useBooth.getInitialState(), true)
+})
+
+test('an upload during the countdown wins; the countdown is cancelled', async () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true })
+  Object.defineProperty(navigator, 'mediaDevices', {
+    configurable: true,
+    value: { getUserMedia: () => Promise.resolve({ getTracks: () => [{ stop() {}, addEventListener() {} }] }) },
+  })
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
+  Object.defineProperty(HTMLVideoElement.prototype, 'videoWidth', { configurable: true, get: () => 640 })
+  Object.defineProperty(HTMLVideoElement.prototype, 'videoHeight', { configurable: true, get: () => 480 })
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', mode: 'pack', packId: 'classic' }, true)
+  render(<Booth />)
+  await act(async () => {})
+  fireEvent.click(screen.getByRole('button', { name: /take photo/i }))
+  await uploadInto()
+  expect(screen.getByTestId('countdown-live').textContent).toBe('')
+  act(() => { vi.advanceTimersByTime(3000) })
+  for (const ms of [150, 900, 1200, 450]) act(() => { vi.advanceTimersByTime(ms) })
+  expect(useBooth.getState().screen).toBe('pack')
+  expect(useBooth.getState().capture!.w).toBe(800)
+  Reflect.deleteProperty(HTMLVideoElement.prototype, 'videoWidth')
+  Reflect.deleteProperty(HTMLVideoElement.prototype, 'videoHeight')
+  vi.restoreAllMocks()
   vi.useRealTimers()
   vi.unstubAllGlobals()
   useBooth.setState(useBooth.getInitialState(), true)
