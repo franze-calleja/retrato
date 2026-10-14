@@ -158,3 +158,14 @@ test('focus moves to the tray heading on open and back to the tray button on Bac
   fireEvent.click(screen.getByRole('button', { name: /back/i }))
   expect(document.activeElement).toBe(screen.getByRole('button', { name: /print tray \(1\)/i }))
 })
+
+test('after the idle time the booth returns to the shop and empties the tray', () => {
+  vi.useFakeTimers()
+  useBooth.getState().selectTemplate('ticket')
+  add()
+  render(<App />)
+  act(() => { vi.advanceTimersByTime(3 * 60_000) })
+  expect(useBooth.getState().screen).toBe('picker')
+  expect(useTray.getState().items).toHaveLength(0)
+  vi.useRealTimers()
+})

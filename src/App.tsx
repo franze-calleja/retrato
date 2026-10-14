@@ -6,9 +6,11 @@ import { PackDeal } from './screens/PackDeal'
 import { Shop } from './screens/Shop'
 import { Tray, TrayButton } from './screens/Tray'
 import { useBooth } from './store/booth'
+import { useOperator } from './store/operator'
 import { useTray } from './store/tray'
 import { SwirlBackground } from './ui/SwirlBackground'
 import { registerTap } from './ui/taps'
+import { useIdleReset } from './ui/useIdleReset'
 
 export default function App() {
   const screen = useBooth((s) => s.screen)
@@ -24,6 +26,17 @@ export default function App() {
   const [panelOpen, setPanelOpen] = useState(false)
   const taps = useRef<number[]>([])
   const closePanel = useCallback(() => setPanelOpen(false), [])
+  const idleMinutes = useOperator((s) => s.idleMinutes)
+
+  // Next guest: back to the shop with an empty tray so nobody sees the previous guest's photos.
+  useIdleReset(
+    idleMinutes,
+    () => {
+      useTray.getState().clear()
+      useBooth.getState().goToPicker()
+    },
+    panelOpen,
+  )
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { editionPercents } from '../editions/odds'
 import { editions } from '../editions/registry'
-import { useOperator } from '../store/operator'
+import { IDLE_CHOICES, useOperator } from '../store/operator'
 import { useStats } from '../store/stats'
 
 export function OperatorPanel({ onClose }: { onClose: () => void }) {
   const weights = useOperator((s) => s.weights)
   const forced = useOperator((s) => s.forced)
   const paper = useOperator((s) => s.paper)
-  const { setWeight, setForced, setPaper, reset } = useOperator.getState()
+  const idleMinutes = useOperator((s) => s.idleMinutes)
+  const { setWeight, setForced, setPaper, setIdleMinutes, reset } = useOperator.getState()
   const dialogRef = useRef<HTMLDivElement>(null)
   // Close only on a press that started on the backdrop, not a slider drag released over it.
   const downOnBackdrop = useRef(false)
@@ -90,6 +91,14 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
           <select value={paper} onChange={(ev) => setPaper(ev.target.value)}>
             <option value="a4">A4</option>
             <option value="letter">Letter</option>
+          </select>
+        </label>
+        <label className="operator-row">
+          <span>Reset when idle</span>
+          <select value={idleMinutes} onChange={(ev) => setIdleMinutes(Number(ev.target.value))}>
+            {IDLE_CHOICES.map((m) => (
+              <option key={m} value={m}>{m === 0 ? 'Off' : `After ${m} min`}</option>
+            ))}
           </select>
         </label>
         <div className="row">

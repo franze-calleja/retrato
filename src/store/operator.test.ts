@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { OPERATOR_KEY, defaultSettings, loadPaper, loadSettings, sanitize, useOperator } from './operator'
+import { OPERATOR_KEY, defaultSettings, loadIdleMinutes, loadPaper, loadSettings, sanitize, useOperator } from './operator'
 
 beforeEach(() => {
   localStorage.clear()
@@ -19,6 +19,7 @@ test('setWeight and setForced persist; loadSettings restores them', () => {
     weights: { common: 60, foil: 25, holo: 50, poly: 3 },
     forced: 'poly',
     paper: 'a4',
+    idleMinutes: 3,
   })
   expect(loadSettings()).toEqual({ weights: { common: 60, foil: 25, holo: 50, poly: 3 }, forced: 'poly' })
 })
@@ -89,4 +90,18 @@ test('reset puts paper back to A4', () => {
   useOperator.getState().setPaper('letter')
   useOperator.getState().reset()
   expect(useOperator.getState().paper).toBe('a4')
+})
+
+test('idle reset defaults to 3 minutes, persists, and rejects unknown values', () => {
+  expect(useOperator.getState().idleMinutes).toBe(3)
+  useOperator.getState().setIdleMinutes(0)
+  expect(useOperator.getState().idleMinutes).toBe(0)
+  expect(JSON.parse(localStorage.getItem(OPERATOR_KEY)!).idleMinutes).toBe(0)
+  expect(loadIdleMinutes()).toBe(0)
+  useOperator.getState().setIdleMinutes(7)
+  expect(useOperator.getState().idleMinutes).toBe(0)
+  localStorage.setItem(OPERATOR_KEY, JSON.stringify({ idleMinutes: 'x' }))
+  expect(loadIdleMinutes()).toBe(3)
+  useOperator.getState().reset()
+  expect(useOperator.getState().idleMinutes).toBe(3)
 })

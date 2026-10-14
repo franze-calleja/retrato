@@ -35,21 +35,34 @@ export function loadPaper(): PaperId {
   return raw && typeof raw === 'object' && isPaper(raw.paper) ? raw.paper : 'a4'
 }
 
-function save({ weights, forced, paper }: EditionSettings & { paper: PaperId }) {
-  writeJson(OPERATOR_KEY, { weights, forced, paper })
+/** Minutes without input before the booth resets for the next guest; 0 = off. */
+export const IDLE_CHOICES = [0, 1, 3, 5, 10] as const
+export const DEFAULT_IDLE = 3
+const isIdle = (v: unknown): v is number => IDLE_CHOICES.some((c) => c === v)
+
+export function loadIdleMinutes(): number {
+  const raw = readJson(OPERATOR_KEY) as { idleMinutes?: unknown } | null
+  return raw && typeof raw === 'object' && isIdle(raw.idleMinutes) ? raw.idleMinutes : DEFAULT_IDLE
+}
+
+function save({ weights, forced, paper, idleMinutes }: EditionSettings & { paper: PaperId; idleMinutes: number }) {
+  writeJson(OPERATOR_KEY, { weights, forced, paper, idleMinutes })
 }
 
 interface OperatorState extends EditionSettings {
   paper: PaperId
+  idleMinutes: number
   setWeight(id: string, weight: number): void
   setForced(forced: string): void
   setPaper(paper: string): void
+  setIdleMinutes(minutes: number): void
   reset(): void
 }
 
 export const useOperator = create<OperatorState>()((set, get) => ({
   ...loadSettings(),
   paper: loadPaper(),
+  idleMinutes: loadIdleMinutes(),
   setWeight(id, weight) {
     if (!isEdition(id) || !Number.isFinite(weight)) return
     set({ weights: { ...get().weights, [id]: clampWeight(weight) } })
@@ -65,8 +78,13 @@ export const useOperator = create<OperatorState>()((set, get) => ({
     set({ paper })
     save(get())
   },
+  setIdleMinutes(minutes) {
+    if (!isIdle(minutes)) return
+    set({ idleMinutes: minutes })
+    save(get())
+  },
   reset() {
-    set({ ...defaultSettings(), paper: 'a4' })
+    set({ ...defaultSettings(), paper: 'a4', idleMinutes: DEFAULT_IDLE })
     save(get())
   },
 }))
