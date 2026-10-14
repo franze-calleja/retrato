@@ -44,7 +44,7 @@ export function CameraStage({ side, template, title, count, shutterEnabled, onSh
   )
   const label = `${template.name} live preview`
   return (
-    <div className={`camera-stage ${side} ${printing ? 'printing' : ''}`}>
+    <div className={`camera-stage ${side} ${printing ? 'printing' : ''}`} data-side={side}>
       <div className="camera-holder">
         {children}
         <TiltCard>

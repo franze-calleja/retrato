@@ -49,3 +49,8 @@ test('reduced motion beats the pack-stage phase rules on specificity', () => {
   expect(block).toContain(".pack-stage[data-phase] canvas")
   expect(block).toContain(".pack-stage[data-phase] .pack-flash")
 })
+
+test('the print comes out of the side: the camera makes room sideways on wide screens', () => {
+  expect(rule(".camera-stage.printing[data-side='front'] .camera-holder > .tilt")).toMatch(/translate:\s*16cqw/)
+  expect(rule(".camera-stage.printing[data-side='back'] .camera-holder > .tilt")).toMatch(/translate:\s*-16cqw/)
+})

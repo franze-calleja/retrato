@@ -37,3 +37,12 @@ test('the only lettering on the camera is PIXEL BOOTH', () => {
   cameraArt('back', 1, document.createElement('canvas'))
   expect(new Set(texts.filter(Boolean))).toEqual(new Set(['PIXEL BOOTH']))
 })
+
+test('the print slot is on the left edge of the front and the right edge of the back', async () => {
+  const { PRINT_SLOT, PRINT_SLOT_BACK } = await import('./cameraArt')
+  expect(PRINT_SLOT.x).toBeLessThanOrEqual(3)
+  expect(PRINT_SLOT.h).toBeGreaterThan(PRINT_SLOT.w * 10)
+  expect(PRINT_SLOT_BACK.x + PRINT_SLOT_BACK.w).toBeGreaterThanOrEqual(CAMERA_ART.w - 3)
+  expect(PRINT_SLOT_BACK.y).toBe(PRINT_SLOT.y)
+  for (const r of [PRINT_SLOT, PRINT_SLOT_BACK]) expect(inside(r)).toBe(true)
+})

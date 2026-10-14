@@ -235,3 +235,12 @@ test('reduced motion skips the print entirely', async () => {
   vi.unstubAllGlobals()
   useBooth.setState(useBooth.getInitialState(), true)
 })
+
+test('the camera stage says which side faces the guest, so the print knows where to come out', () => {
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth' }, true)
+  render(<Booth />)
+  expect(document.querySelector('.camera-stage')!.getAttribute('data-side')).toBe('front')
+  fireEvent.click(screen.getByRole('button', { name: /show back/i }))
+  expect(document.querySelector('.camera-stage')!.getAttribute('data-side')).toBe('back')
+  useBooth.setState(useBooth.getInitialState(), true)
+})

@@ -18,6 +18,9 @@ export const CAMERA_SIZE = { w: CAMERA_ART.w + SHADOW_OFFSET, h: CAMERA_ART.h + 
 export const SHUTTER: Rect = { x: 77, y: 3, w: 15, h: 15 }
 export const FLASH: Rect = { x: 98, y: 4, w: 26, h: 14 }
 export const REAR_SCREEN: Rect = { x: 10, y: 12, w: 70, h: 56 }
+/** Print slot on the left edge of the front; the same slot seen from the back is on the right edge. */
+export const PRINT_SLOT: Rect = { x: 1, y: 28, w: 2, h: 40 }
+export const PRINT_SLOT_BACK: Rect = { x: CAMERA_ART.w - 3, y: PRINT_SLOT.y, w: 2, h: PRINT_SLOT.h }
 const LEATHER_RECT: Rect = { x: 6, y: 22, w: 116, h: 58 }
 const LENS: Rect = { x: 40, y: 27, w: 48, h: 48 }
 
@@ -32,8 +35,6 @@ function body(ctx: CanvasRenderingContext2D) {
   panel(ctx, SILVER, 1, 1, w - 2, h - 2, 3)
   fill(ctx, SILVER_LIGHT, 4, 2, w - 8, 1)
   fill(ctx, SILVER_DARK, 4, h - 3, w - 8, 1)
-  // Print slot along the top edge.
-  fill(ctx, OUTLINE, 34, 2, 60, 1)
 }
 
 function leather(ctx: CanvasRenderingContext2D, r: Rect) {
@@ -47,8 +48,14 @@ function ring(ctx: CanvasRenderingContext2D, r: Rect, colors: Parameters<typeof 
   colors.forEach((c, i) => fillShape(ctx, c, grow(r, -i), 'circle'))
 }
 
+function slot(ctx: CanvasRenderingContext2D, r: Rect, darkX: number, lightX: number) {
+  fill(ctx, OUTLINE, darkX, r.y, 1, r.h)
+  fill(ctx, SILVER_LIGHT, lightX, r.y, 1, r.h)
+}
+
 export function drawCameraFront(ctx: CanvasRenderingContext2D) {
   body(ctx)
+  slot(ctx, PRINT_SLOT, PRINT_SLOT.x + 1, PRINT_SLOT.x + 2)
   drawText(ctx, 'PIXEL BOOTH', 8, 8, OUTLINE)
   // Viewfinder window.
   panel(ctx, OUTLINE, 54, 5, 16, 12, 1)
@@ -77,6 +84,7 @@ export function drawCameraFront(ctx: CanvasRenderingContext2D) {
 
 export function drawCameraBack(ctx: CanvasRenderingContext2D) {
   body(ctx)
+  slot(ctx, PRINT_SLOT_BACK, PRINT_SLOT_BACK.x, PRINT_SLOT_BACK.x - 1)
   const s = REAR_SCREEN
   panel(ctx, OUTLINE, s.x - 2, s.y - 2, s.w + 4, s.h + 4, 2)
   fill(ctx, NAVY_DARK, s.x, s.y, s.w, s.h)
