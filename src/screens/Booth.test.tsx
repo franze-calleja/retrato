@@ -11,10 +11,10 @@ test('upload control stays in the tab order (camera fallback must be keyboard re
   expect(input.tabIndex).toBeGreaterThanOrEqual(0)
 })
 
-test('pack mode shows the booster pack viewfinder', () => {
-  useBooth.setState({ ...useBooth.getInitialState(), mode: 'pack', screen: 'booth' }, true)
+test('pack mode shows the viewfinder for the chosen pack', () => {
+  useBooth.setState({ ...useBooth.getInitialState(), mode: 'pack', packId: 'arcana', screen: 'booth' }, true)
   render(<Booth />)
-  expect(screen.getByRole('heading', { name: 'Booster Pack' })).toBeTruthy()
-  expect(screen.getByRole('img', { name: /booster pack live preview/i })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'Arcana Pack' })).toBeTruthy()
+  expect(screen.getByRole('img', { name: /arcana pack live preview/i })).toBeTruthy()
   useBooth.setState(useBooth.getInitialState(), true)
 })

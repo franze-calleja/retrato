@@ -1,6 +1,7 @@
 import { rollEdition, type EditionSettings } from '../editions/roll'
 import { refreshPerCapture, resolveDefaults } from '../templates/fields'
-import { templates } from '../templates/registry'
+import { getTemplate } from '../templates/registry'
+import type { PackDef } from './catalog'
 
 export interface PackCard {
   templateId: string
@@ -9,6 +10,7 @@ export interface PackCard {
 }
 
 export const PACK_SIZE = 3
+const MAX_REROLLS = 25
 
 /** Fisher–Yates shuffle, then take n (never more than there are items). */
 export function pickDistinct<T>(items: readonly T[], n: number, rand: () => number): T[] {
@@ -21,13 +23,22 @@ export function pickDistinct<T>(items: readonly T[], n: number, rand: () => numb
 }
 
 export function dealPack(
+  pack: PackDef,
   settings: EditionSettings,
   saved: Record<string, Record<string, string>>,
   rand: () => number = Math.random,
 ): PackCard[] {
-  return pickDistinct(templates, PACK_SIZE, rand).map((t) => ({
-    templateId: t.id,
-    edition: rollEdition(settings, rand),
-    values: refreshPerCapture(t, saved[t.id] ?? resolveDefaults(t)),
-  }))
+  const pool = pack.pool.map(getTemplate)
+  // Enough card types: three different ones. Otherwise repeat the types but re-roll until each card differs.
+  const picks = pool.length >= PACK_SIZE ? pickDistinct(pool, PACK_SIZE, rand) : Array.from({ length: PACK_SIZE }, (_, i) => pool[i % pool.length])
+  const seen = new Set<string>()
+  return picks.map((t) => {
+    const base = saved[t.id] ?? resolveDefaults(t)
+    let values = refreshPerCapture(t, base)
+    for (let i = 0; i < MAX_REROLLS && seen.has(`${t.id}:${JSON.stringify(values)}`); i++) {
+      values = refreshPerCapture(t, base)
+    }
+    seen.add(`${t.id}:${JSON.stringify(values)}`)
+    return { templateId: t.id, edition: rollEdition(settings, rand), values }
+  })
 }

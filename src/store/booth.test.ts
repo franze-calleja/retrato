@@ -175,3 +175,32 @@ describe('remembered values and packs', () => {
     expect([s().mode, s().revealed]).toEqual(['single', false])
   })
 })
+
+describe('themed packs', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useOperator.getState().reset()
+  })
+
+  test('selectPack remembers which pack; a capture deals from it', () => {
+    s().selectPack('arcana')
+    expect(s().packId).toBe('arcana')
+    s().setCapture(photo())
+    expect(s().pack!.map((c) => c.templateId)).toEqual(['tarot', 'tarot', 'tarot'])
+    expect(new Set(s().pack!.map((c) => c.values.title)).size).toBe(3)
+  })
+
+  test('selectPack with no id opens a classic pack', () => {
+    s().selectPack('jester')
+    s().selectPack()
+    expect(s().packId).toBe('classic')
+  })
+
+  test('retake reopens the same pack type', () => {
+    s().selectPack('cosmic')
+    s().setCapture(photo())
+    s().pickPackCard(0)
+    s().retake()
+    expect([s().mode, s().packId]).toEqual(['pack', 'cosmic'])
+  })
+})

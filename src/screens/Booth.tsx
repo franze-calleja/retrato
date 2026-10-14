@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useCamera, type CameraStatus } from '../camera/useCamera'
+import { getPack } from '../packs/catalog'
 import { capturePackPhoto } from '../packs/capture'
 import { packViewfinder } from '../packs/viewfinder'
 import { cropPhoto, type PhotoSource } from '../photo/crop'
@@ -20,7 +21,8 @@ export function Booth() {
   const values = useBooth((s) => s.values)
   const { setCapture, goToPicker } = useBooth.getState()
   const mode = useBooth((s) => s.mode)
-  const template = mode === 'pack' ? packViewfinder : getTemplate(templateId)
+  const packId = useBooth((s) => s.packId)
+  const template = mode === 'pack' ? packViewfinder(getPack(packId)) : getTemplate(templateId)
 
   const { videoRef, status, start } = useCamera()
   const canvasRef = useRef<HTMLCanvasElement>(null)

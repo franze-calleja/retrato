@@ -39,10 +39,10 @@ export function PackDeal() {
           const state = chosen === null ? '' : chosen === i ? 'chosen' : 'dismissed'
           return (
             <button
-              key={card.templateId}
+              key={i}
               className={`deal-card ${faceUp ? 'up' : ''} ${faceUp && edition.rare ? 'glint' : ''} ${state}`}
               style={{ '--i': i } as CSSProperties}
-              aria-label={faceUp ? `${template.name}, ${edition.name} edition` : 'Face-down card'}
+              aria-label={faceUp ? `${template.name}: ${card.values[template.fields[0]?.key] ?? ''}, ${edition.name} edition` : 'Face-down card'}
               onClick={() => {
                 if (dealing) return revealAll()
                 if (pickable && chosen === null) setChosen(i)

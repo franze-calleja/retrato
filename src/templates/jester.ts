@@ -24,7 +24,7 @@ export const JESTER_EFFECTS = [
 export const randomJesterEffect = (rand: () => number = Math.random) =>
   JESTER_EFFECTS[Math.floor(rand() * JESTER_EFFECTS.length)]
 
-const CAP = ['10000000001', '11000100011', '01101110110', '00111111100', '00111111100', '01111111110']
+export const JESTER_CAP = ['10000000001', '11000100011', '01101110110', '00111111100', '00111111100', '01111111110']
 
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
@@ -45,7 +45,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   drawTextCentered(ctx, name, BW / 2, s === 2 ? 12 : 14, OUTLINE, s)
 
   // Jester cap with bells.
-  drawBitmap(ctx, CAP, BW / 2 - 5, 24, RED)
+  drawBitmap(ctx, JESTER_CAP, BW / 2 - 5, 24, RED)
   fill(ctx, GOLD, BW / 2 - 6, 23, 2, 2)
   fill(ctx, GOLD, BW / 2 + 5, 23, 2, 2)
 

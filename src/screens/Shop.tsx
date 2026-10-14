@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { displayedOdds } from '../editions/odds'
 import { editions } from '../editions/registry'
+import { PACKS, type PackDef } from '../packs/catalog'
 import { packArt } from '../packs/packArt'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
@@ -10,8 +11,6 @@ import { templates } from '../templates/registry'
 import type { Template } from '../templates/types'
 import { TiltCard } from '../ui/TiltCard'
 import { StampCanvas } from './StampCanvas'
-
-const PACK_INFO = '3 different cards from one photo, each with its own edition. Keep 1.'
 
 function CardTile({ template, delay }: { template: Template; delay: number }) {
   const infoId = useId()
@@ -31,22 +30,22 @@ function CardTile({ template, delay }: { template: Template; delay: number }) {
   )
 }
 
-function PackTile() {
+function PackTile({ pack, delay }: { pack: PackDef; delay: number }) {
   const infoId = useId()
   const selectPack = useBooth((s) => s.selectPack)
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    if (ref.current) packArt(2, ref.current)
-  }, [])
+    if (ref.current) packArt(pack, 2, ref.current)
+  }, [pack])
   return (
     <div className="tile">
-      <span className="tag" aria-hidden="true">Booster Pack</span>
-      <TiltCard>
-        <button className="tile-btn pack-btn" aria-label="Booster Pack" aria-describedby={infoId} onClick={selectPack}>
+      <span className="tag" aria-hidden="true">{pack.name}</span>
+      <TiltCard delay={delay}>
+        <button className="tile-btn pack-btn" aria-label={pack.name} aria-describedby={infoId} onClick={() => selectPack(pack.id)}>
           <canvas ref={ref} className="stamp-canvas" aria-hidden="true" />
         </button>
       </TiltCard>
-      <div className="info" role="tooltip" id={infoId}>{PACK_INFO}</div>
+      <div className="info" role="tooltip" id={infoId}>{pack.description}</div>
     </div>
   )
 }
@@ -80,7 +79,7 @@ export function Shop() {
       <div className="counter-body">
         <aside className="counter-side">
           <OddsTiles />
-          <button className="btn red big" onClick={selectPack}>Open pack</button>
+          <button className="btn red big" onClick={() => selectPack('classic')}>Open pack</button>
           <button className="btn blue big" aria-expanded={howOpen} aria-controls={howId} onClick={() => setHowOpen((o) => !o)}>
             How it works
           </button>
@@ -104,11 +103,9 @@ export function Shop() {
           </section>
           <section className="shelf" aria-label="Packs">
             <div className="shelf-row">
-              <PackTile />
-              <div className="slot-soon" role="img" aria-label="More coming soon">
-                <span className="slot-mark" aria-hidden="true">?</span>
-                <span aria-hidden="true">SOON</span>
-              </div>
+              {PACKS.map((p, i) => (
+                <PackTile key={p.id} pack={p} delay={i * 0.35} />
+              ))}
             </div>
           </section>
         </div>

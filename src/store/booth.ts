@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { rollEdition } from '../editions/roll'
+import { getPack } from '../packs/catalog'
 import { dealPack, type PackCard } from '../packs/deal'
 import type { PhotoSource } from '../photo/crop'
 import { clampValue, refreshPerCapture, resolveDefaults } from '../templates/fields'
@@ -20,10 +21,12 @@ interface BoothState {
   /** Text remembered per card type, used by direct picks and pack deals. */
   saved: Record<string, Record<string, string>>
   pack: PackCard[] | null
+  /** Which pack type is open in pack mode. */
+  packId: string
   /** The card was already revealed (pack pick), so the editor skips its flip. */
   revealed: boolean
   selectTemplate(id: string): void
-  selectPack(): void
+  selectPack(packId?: string): void
   setCapture(photo: PhotoSource): void
   pickPackCard(index: number): void
   retake(): void
@@ -42,6 +45,7 @@ export const useBooth = create<BoothState>()((set, get) => ({
   values: resolveDefaults(getTemplate('stamp')),
   saved: {},
   pack: null,
+  packId: 'classic',
   revealed: false,
 
   selectTemplate(id) {
@@ -53,10 +57,10 @@ export const useBooth = create<BoothState>()((set, get) => ({
       screen: 'booth',
     })
   },
-  selectPack: () => set({ ...cleared, mode: 'pack', screen: 'booth' }),
+  selectPack: (packId = 'classic') => set({ ...cleared, mode: 'pack', packId: getPack(packId).id, screen: 'booth' }),
   setCapture(photo) {
     if (get().mode === 'pack') {
-      set({ capture: photo, pack: dealPack(useOperator.getState(), get().saved), screen: 'pack' })
+      set({ capture: photo, pack: dealPack(getPack(get().packId), useOperator.getState(), get().saved), screen: 'pack' })
       return
     }
     const t = getTemplate(get().templateId)

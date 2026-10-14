@@ -27,12 +27,13 @@ test('choosing a card opens the booth for it', () => {
   expect([useBooth.getState().screen, useBooth.getState().templateId, useBooth.getState().mode]).toEqual(['booth', 'ticket', 'single'])
 })
 
-test('the booster pack starts pack mode and has its own info box', () => {
+test.each(['Classic Pack', 'Arcana Pack', 'Cosmic Pack', 'Jester Pack'])('%s is a button with its own info box that opens that pack', (name) => {
   render(<Shop />)
-  const pack = screen.getByRole('button', { name: 'Booster Pack' })
+  const pack = screen.getByRole('button', { name })
   expect(document.getElementById(pack.getAttribute('aria-describedby')!)?.textContent).toMatch(/keep 1/i)
   fireEvent.click(pack)
-  expect([useBooth.getState().screen, useBooth.getState().mode]).toEqual(['booth', 'pack'])
+  const st = useBooth.getState()
+  expect([st.screen, st.mode, st.packId]).toEqual(['booth', 'pack', name.split(' ')[0].toLowerCase()])
 })
 
 test('odds panel follows the operator settings', () => {
@@ -55,7 +56,7 @@ test('odds panel shows a forced edition as certain', () => {
 test('the OPEN PACK button starts pack mode too', () => {
   render(<Shop />)
   fireEvent.click(screen.getByRole('button', { name: /open pack/i }))
-  expect([useBooth.getState().screen, useBooth.getState().mode]).toEqual(['booth', 'pack'])
+  expect([useBooth.getState().screen, useBooth.getState().mode, useBooth.getState().packId]).toEqual(['booth', 'pack', 'classic'])
 })
 
 test('HOW IT WORKS expands its steps in place', () => {
@@ -68,10 +69,9 @@ test('HOW IT WORKS expands its steps in place', () => {
   expect(document.getElementById(toggle.getAttribute('aria-controls')!)?.textContent).toMatch(/strike a pose/i)
 })
 
-test('the coming-soon slot is decoration, not a button', () => {
+test('the packs shelf has no placeholder slot any more', () => {
   render(<Shop />)
-  expect(screen.getByRole('img', { name: /more coming soon/i })).toBeTruthy()
-  expect(screen.queryByRole('button', { name: /soon/i })).toBeNull()
+  expect(screen.queryByRole('img', { name: /coming soon/i })).toBeNull()
 })
 
 test('the shop has its sign and two shelves', () => {
