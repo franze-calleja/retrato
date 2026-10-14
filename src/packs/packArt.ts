@@ -47,3 +47,31 @@ export function packArt(pack: PackDef, scale: number, target?: HTMLCanvasElement
   ctx.drawImage(art, 0, 0, out.width, out.height)
   return out
 }
+
+/** Art rows above this line are the crimped top strip that tears off when the pack opens. */
+export const TEAR_ROW = 9
+
+/** The pack art split into its top strip and the rest, both at `scale`; stacked they equal `packArt`. */
+export function packArtParts(
+  pack: PackDef,
+  scale: number,
+  targets: { top: HTMLCanvasElement; body: HTMLCanvasElement } = {
+    top: document.createElement('canvas'),
+    body: document.createElement('canvas'),
+  },
+) {
+  const full = packArt(pack, scale)
+  const split = TEAR_ROW * scale
+  const parts = [
+    [targets.top, 0, split],
+    [targets.body, split, full.height - split],
+  ] as const
+  for (const [canvas, sy, h] of parts) {
+    canvas.width = full.width
+    canvas.height = h
+    const ctx = canvas.getContext('2d')!
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(full, 0, sy, full.width, h, 0, 0, full.width, h)
+  }
+  return targets
+}
