@@ -32,16 +32,29 @@ describe('booth store', () => {
     expect(s().values.event).toBe('GRAD NIGHT')
   })
 
-  test('setCapture stores the photo, opens the editor, and refreshes per-capture fields only', () => {
+  test('setCapture stores the photo and opens the editor with the values the booth previewed', () => {
     s().selectTemplate('ticket')
-    s().setValue('event', 'GRAD NIGHT')
-    s().setValue('serial', 'NO. 111111')
+    const previewed = s().values.serial
     const p = photo()
     s().setCapture(p)
     expect(s().capture).toBe(p)
     expect(s().screen).toBe('editor')
+    expect(s().values.serial).toBe(previewed)
+  })
+
+  test('entering the booth rolls fresh per-capture fields and keeps the rest', () => {
+    s().selectTemplate('ticket')
+    s().setValue('event', 'GRAD NIGHT')
+    s().setValue('serial', 'NO. 111111')
+    s().goToPicker()
+    s().selectTemplate('ticket')
     expect(s().values.event).toBe('GRAD NIGHT')
     expect(s().values.serial).toMatch(/^NO\. \d{6}$/)
+    expect(s().values.serial).not.toBe('NO. 111111')
+    s().setValue('serial', 'NO. 222222')
+    s().setCapture(photo())
+    s().retake()
+    expect(s().values.serial).not.toBe('NO. 222222')
   })
 
   test('retake clears the capture, keeps values, returns to the booth', () => {

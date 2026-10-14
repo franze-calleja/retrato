@@ -14,6 +14,7 @@ const MESSAGES: Partial<Record<CameraStatus, string>> = {
   insecure: 'The camera only works over HTTPS (or on localhost). You can still upload a photo.',
   denied: 'Camera access was blocked. Allow it in your browser’s site settings, then retry — or upload a photo.',
   unavailable: 'No camera was found. Plug one in and retry, or upload a photo.',
+  disconnected: 'The camera stopped. Check it’s connected, then retry — or upload a photo.',
 }
 
 export function Booth() {
@@ -32,6 +33,15 @@ export function Booth() {
   useEffect(() => {
     void start()
   }, [start])
+
+  // An upload can still be decoding when the guest leaves; its result must not open the editor.
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
 
   const liveSource = useCallback((): PhotoSource | null => {
     const v = videoRef.current
@@ -88,9 +98,10 @@ export function Booth() {
     setUploadError(null)
     try {
       const bmp = await createImageBitmap(file)
-      keep({ source: bmp, w: bmp.width, h: bmp.height })
+      if (mounted.current) keep({ source: bmp, w: bmp.width, h: bmp.height })
       bmp.close()
     } catch {
+      if (!mounted.current) return
       setUploadError('That file couldn’t be read as an image. Try a JPG or PNG.')
     }
   }

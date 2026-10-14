@@ -78,3 +78,14 @@ test('stream that arrives after unmount is stopped immediately', async () => {
   await pending
   expect(track.stop).toHaveBeenCalled()
 })
+
+test('a camera that disconnects reports disconnected instead of staying live', async () => {
+  const listeners: Record<string, () => void> = {}
+  const track = { stop: vi.fn(), addEventListener: (t: string, fn: () => void) => (listeners[t] = fn), removeEventListener: vi.fn() }
+  mockGetUserMedia(() => Promise.resolve({ getTracks: () => [track], getVideoTracks: () => [track] } as unknown as MediaStream))
+  const { result } = renderHook(() => useCamera())
+  await act(() => result.current.start())
+  expect(result.current.status).toBe('live')
+  act(() => listeners.ended())
+  expect(result.current.status).toBe('disconnected')
+})

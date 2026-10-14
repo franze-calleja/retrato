@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export type CameraStatus = 'idle' | 'requesting' | 'live' | 'denied' | 'unavailable' | 'insecure'
+export type CameraStatus = 'idle' | 'requesting' | 'live' | 'denied' | 'unavailable' | 'insecure' | 'disconnected'
 
 const stopStream = (s: MediaStream | null) => s?.getTracks().forEach((t) => t.stop())
 
@@ -39,6 +39,11 @@ export function useCamera() {
         return
       }
       streamRef.current = stream
+      // An unplugged or suspended camera ends its track; say so instead of showing a frozen "live" feed.
+      for (const t of stream.getTracks())
+        t.addEventListener?.('ended', () => {
+          if (mine === generation.current) setStatus('disconnected')
+        })
       const video = videoRef.current
       if (video) {
         video.srcObject = stream

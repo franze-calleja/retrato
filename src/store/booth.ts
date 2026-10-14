@@ -54,7 +54,8 @@ export const useBooth = create<BoothState>()((set, get) => ({
       ...cleared,
       mode: 'single',
       templateId: id,
-      values: get().saved[id] ?? resolveDefaults(getTemplate(id)),
+      // Roll per-capture fields now so the booth preview shows what the card will get.
+      values: refreshPerCapture(getTemplate(id), get().saved[id] ?? resolveDefaults(getTemplate(id))),
       screen: 'booth',
     })
   },
@@ -65,11 +66,9 @@ export const useBooth = create<BoothState>()((set, get) => ({
       set({ capture: photo, pack: dealPack(getPack(get().packId), useOperator.getState(), get().saved), screen: 'pack' })
       return
     }
-    const t = getTemplate(get().templateId)
     set({
       capture: photo,
       edition: rollEdition(useOperator.getState()),
-      values: refreshPerCapture(t, get().values),
       screen: 'editor',
     })
   },
@@ -85,7 +84,8 @@ export const useBooth = create<BoothState>()((set, get) => ({
       screen: 'editor',
     })
   },
-  retake: () => set({ ...cleared, screen: 'booth' }),
+  retake: () =>
+    set({ ...cleared, values: refreshPerCapture(getTemplate(get().templateId), get().values), screen: 'booth' }),
   goToPicker: () => set({ ...cleared, screen: 'picker' }),
   setValue(key, value) {
     const { templateId, values, saved } = get()
