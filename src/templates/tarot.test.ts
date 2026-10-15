@@ -16,6 +16,7 @@ test('the tarot frame uses only the sepia palette', () => {
   })
   getTemplate('tarot').render(document.createElement('canvas').getContext('2d')!, { title: 'THE STAR' })
   const allowed = new Set([SEPIA_LIGHT, SEPIA_MID, SEPIA_DARK, SEPIA_INK, SHADOW].map(css))
+  expect(sets.length).toBeGreaterThan(0) // the spy must actually see the fills
   expect(sets.filter((s) => !allowed.has(s))).toEqual([])
 })
 

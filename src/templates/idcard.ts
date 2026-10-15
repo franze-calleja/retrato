@@ -49,7 +49,8 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, RED, 1, 1, BW - 2, 18, 2)
   fill(ctx, RED, 1, 10, BW - 2, 9)
   fill(ctx, OUTLINE, 1, 19, BW - 2, 1)
-  drawTitle(ctx, values.org ?? '', BW / 2, 3, 140, CREAM, RED_DARK, 2)
+  // 92 px keeps the title right of the widest edition badge (top-left, x 0–32); longer names drop to scale 1.
+  drawTitle(ctx, values.org ?? '', BW / 2, 3, 92, CREAM, RED_DARK, 2)
 
   outline(ctx, OUTLINE, PHOTO.x - 1, PHOTO.y - 1, PHOTO.w + 2, PHOTO.h + 2)
 

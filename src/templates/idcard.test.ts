@@ -73,3 +73,20 @@ test('a long name stays in its column, left of the chip', async () => {
   expect(Math.round(cx - width / 2)).toBeGreaterThanOrEqual(64)
   expect(Math.round(cx - width / 2) + width).toBeLessThanOrEqual(130) // chip border starts at x 131
 })
+
+test('the organisation name clears the widest edition badge in the top-left corner', async () => {
+  const font = await import('./pixelFontLarge')
+  const { badgeRect } = await import('../editions/apply')
+  const badge = badgeRect('★★ POLY')
+  const t = getTemplate('id')
+  for (let n = 1; n <= 12; n++) {
+    const org = 'W'.repeat(n)
+    const spy = vi.spyOn(font, 'drawTitle')
+    t.render(document.createElement('canvas').getContext('2d')!, { org, name: '', member: '', valid: '' })
+    const i = spy.mock.calls.findIndex((c) => c[1] === org)
+    const cx = spy.mock.calls[i][2]
+    const { width } = spy.mock.results[i].value as { width: number }
+    expect(Math.round(cx - width / 2), org).toBeGreaterThanOrEqual(badge.x + badge.w + 1)
+    spy.mockRestore()
+  }
+})

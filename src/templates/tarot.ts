@@ -57,9 +57,10 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   // Numeral tab.
   const numeral = numeralFor(values.title ?? '')
   if (numeral) {
-    panel(ctx, SEPIA_INK, 30, 7, 24, 11, 2)
-    panel(ctx, SEPIA_LIGHT, 31, 8, 22, 9, 1)
-    drawTextCentered(ctx, numeral, BW / 2, 10, SEPIA_INK)
+    // y 8 leaves a pixel between the tab and the edition badge's corner.
+    panel(ctx, SEPIA_INK, 30, 8, 24, 11, 2)
+    panel(ctx, SEPIA_LIGHT, 31, 9, 22, 9, 1)
+    drawTextCentered(ctx, numeral, BW / 2, 11, SEPIA_INK)
   }
 
   // Arched window: tan mat, ink rim; the composer clips the photo to the same arch.
