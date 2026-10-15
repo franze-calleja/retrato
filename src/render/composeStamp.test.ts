@@ -96,3 +96,33 @@ test('round and arched photo windows are clipped; rectangles are not', () => {
     expect(clip.mock.calls.length > 0, id).toBe(clipped)
   }
 })
+
+test('a ghostRect gets a faded greyscale copy of the photo after the main photo, with state restored', () => {
+  const t = { ...getTemplate('stamp'), id: 'ghost-test', ghostRect: { x: 2, y: 3, w: 10, h: 12 } }
+  const photo = { source: document.createElement('canvas'), w: 100, h: 100 }
+  const out = document.createElement('canvas')
+  const ctx = out.getContext('2d')!
+  const seen: { dest: number[]; alpha: number; filter: string }[] = []
+  // Record only: the canvas mock's drawImage is shared, so calling through would recurse.
+  vi.spyOn(ctx, 'drawImage').mockImplementation(((...a: unknown[]) => {
+    if (a[0] === photo.source) seen.push({ dest: (a as number[]).slice(5), alpha: ctx.globalAlpha, filter: ctx.filter })
+  }) as never)
+  composeStamp(t, photo, {}, 4, out)
+  expect(seen).toHaveLength(2)
+  expect(seen[1].dest).toEqual([8, 12, 40, 48])
+  expect(seen[1].alpha).toBeCloseTo(0.35)
+  expect(seen[1].filter).toBe('grayscale(1)')
+  expect(seen[0].alpha).toBe(1)
+  expect(ctx.globalAlpha).toBe(1)
+  expect(ctx.filter).toBe('none')
+})
+
+test('templates without a ghostRect draw the photo once', () => {
+  const t = getTemplate('stamp')
+  const photo = { source: document.createElement('canvas'), w: 100, h: 100 }
+  const out = document.createElement('canvas')
+  const ctx = out.getContext('2d')!
+  const draw = vi.spyOn(ctx, 'drawImage')
+  composeStamp(t, photo, {}, 2, out)
+  expect(draw.mock.calls.filter((c) => c[0] === photo.source)).toHaveLength(1)
+})

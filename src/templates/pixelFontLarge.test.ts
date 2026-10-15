@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import { measureText } from './pixelFont'
-import { BIG_GLYPHS, bigGlyphFor, drawTitle, measureBig } from './pixelFontLarge'
+import { BIG_GLYPHS, bigGlyphFor, drawTitle, measureBig, titleFit } from './pixelFontLarge'
 
 const ctx = () => document.createElement('canvas').getContext('2d')!
 
@@ -50,4 +50,12 @@ test('drawTitle never paints outside its slot', () => {
       expect(y + h).toBeLessThanOrEqual(10 + 14 + 2)
     }
   }
+})
+
+test('titleFit sizes without drawing and returns the text it would draw', () => {
+  expect(titleFit('HI', 100)).toEqual({ font: 'big', scale: 2, width: measureBig('HI', 2), text: 'HI' })
+  const t = titleFit('W'.repeat(40), 30)
+  expect(t.font).toBe('small')
+  expect(t.width).toBeLessThanOrEqual(30)
+  expect(Array.from(t.text).length).toBeLessThan(40)
 })

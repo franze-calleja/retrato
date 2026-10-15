@@ -32,6 +32,17 @@ function frameArt(template: Template, values: Record<string, string>, opts: Comp
   return canvas
 }
 
+/** The faded security copy some cards print next to the main photo. */
+function drawGhost(ctx: CanvasRenderingContext2D, template: Template, photo: PhotoSource, scale: number) {
+  const g = template.ghostRect
+  if (!g) return
+  ctx.save()
+  ctx.globalAlpha = 0.35
+  ctx.filter = 'grayscale(1)'
+  drawCover(ctx, photo, g.x * scale, g.y * scale, g.w * scale, g.h * scale)
+  ctx.restore()
+}
+
 /**
  * Frame art (with any edition shimmer) is drawn at art scale and upscaled with no smoothing (crisp pixels);
  * the photo is then drawn into photoRect × scale with high-quality smoothing.
@@ -63,6 +74,7 @@ export function composeStamp(
   const shape = template.photoShape ?? 'rect'
   if (shape === 'rect') {
     drawCover(ctx, photo, r.x * scale, r.y * scale, r.w * scale, r.h * scale)
+    drawGhost(ctx, template, photo, scale)
     return out
   }
   // Clip to the window shape on the art-pixel grid so its edge stays as crisp as the frame.
@@ -74,5 +86,6 @@ export function composeStamp(
   ctx.clip()
   drawCover(ctx, photo, r.x * scale, r.y * scale, r.w * scale, r.h * scale)
   ctx.restore()
+  drawGhost(ctx, template, photo, scale)
   return out
 }
