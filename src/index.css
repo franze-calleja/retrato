@@ -449,6 +449,9 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .operator-row select { grid-column: 2 / 4; font: 700 16px var(--font); padding: 6px; background: var(--dark); color: var(--ink); border: 3px solid var(--dark); border-radius: 6px; }
 .operator-row select.num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
 .operator-row input[type='range'] { accent-color: var(--gold); width: 100%; }
+.operator-heading { font: 700 18px var(--font); margin: 6px 0 0; }
+.operator-check { display: flex; gap: 10px; align-items: center; }
+.operator-check input { accent-color: var(--gold); width: 18px; height: 18px; }
 
 /* Print tray */
 h2[tabindex="-1"]:focus { outline: none; }

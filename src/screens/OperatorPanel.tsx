@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { play } from '../audio/sfx'
 import { editionPercents } from '../editions/odds'
 import { editions } from '../editions/registry'
 import { IDLE_CHOICES, useOperator } from '../store/operator'
@@ -9,7 +10,10 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
   const forced = useOperator((s) => s.forced)
   const paper = useOperator((s) => s.paper)
   const idleMinutes = useOperator((s) => s.idleMinutes)
-  const { setWeight, setForced, setPaper, setIdleMinutes, reset } = useOperator.getState()
+  const musicVolume = useOperator((s) => s.musicVolume)
+  const sfxVolume = useOperator((s) => s.sfxVolume)
+  const showSoundButton = useOperator((s) => s.showSoundButton)
+  const { setWeight, setForced, setPaper, setIdleMinutes, setMusicVolume, setSfxVolume, setShowSoundButton, reset } = useOperator.getState()
   const dialogRef = useRef<HTMLDivElement>(null)
   // Close only on a press that started and ended on the backdrop, not a drag between it and the panel.
   const downOnBackdrop = useRef(false)
@@ -107,6 +111,22 @@ export function OperatorPanel({ onClose }: { onClose: () => void }) {
             ))}
           </select>
         </label>
+        <h3 className="operator-heading">Sound</h3>
+        <label className="operator-row">
+          <span>Music volume</span>
+          <input type="range" min={0} max={100} value={musicVolume} onChange={(ev) => setMusicVolume(Number(ev.target.value))} />
+          <output className="num" data-testid="pct-music">{musicVolume}%</output>
+        </label>
+        <label className="operator-row">
+          <span>Effects volume</span>
+          <input type="range" min={0} max={100} value={sfxVolume} onChange={(ev) => setSfxVolume(Number(ev.target.value))} />
+          <output className="num" data-testid="pct-sfx">{sfxVolume}%</output>
+        </label>
+        <label className="operator-check">
+          <input type="checkbox" checked={showSoundButton} onChange={(ev) => setShowSoundButton(ev.target.checked)} />
+          Show speaker button to guests
+        </label>
+        <button className="btn" data-sfx onClick={() => play('chime')}>Test sound</button>
         <div className="row">
           <button className="btn" onClick={reset}>Reset to defaults</button>
           <button className="btn" onClick={() => useStats.getState().resetPhotos()}>Reset photo counter</button>

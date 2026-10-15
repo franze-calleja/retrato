@@ -1,9 +1,11 @@
 import { createEvent, fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 import App from '../App'
+import * as sfx from '../audio/sfx'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
 import { useStats } from '../store/stats'
+import { OperatorPanel } from './OperatorPanel'
 
 beforeEach(() => {
   localStorage.clear()
@@ -118,4 +120,18 @@ test('Tab from outside the panel goes into it', () => {
   ;(document.activeElement as HTMLElement).blur()
   fireEvent.keyDown(document.body, { key: 'Tab' })
   expect(document.activeElement).toBe(first)
+})
+
+test('sound: music and effects volumes, speaker button visibility, and a test sound', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  render(<OperatorPanel onClose={() => {}} />)
+  fireEvent.change(screen.getByLabelText(/music volume/i), { target: { value: '25' } })
+  fireEvent.change(screen.getByLabelText(/effects volume/i), { target: { value: '90' } })
+  fireEvent.click(screen.getByLabelText(/show speaker button to guests/i))
+  const s = useOperator.getState()
+  expect([s.musicVolume, s.sfxVolume, s.showSoundButton]).toEqual([25, 90, false])
+  expect(screen.getByTestId('pct-music').textContent).toBe('25%')
+  fireEvent.click(screen.getByRole('button', { name: /test sound/i }))
+  expect(play).toHaveBeenCalledWith('chime')
+  play.mockRestore()
 })
