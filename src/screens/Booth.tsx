@@ -13,6 +13,7 @@ import { resolveTemplate } from '../templates/resolve'
 import { prefersReducedMotion } from '../ui/motion'
 import { CameraStage } from './CameraStage'
 import { InstantPrint } from './InstantPrint'
+import { play } from '../audio/sfx'
 
 const MESSAGES: Partial<Record<CameraStatus, string>> = {
   insecure: 'The camera only works over HTTPS (or on localhost). You can still upload a photo.',
@@ -101,6 +102,7 @@ export function Booth() {
     (photo: PhotoSource) => {
       if (busy.current) return
       busy.current = true
+      play('shutter')
       setCount(null)
       const frozen = capturePackPhoto(photo)
       if (reducedMotion) return keep(frozen)
@@ -140,6 +142,7 @@ export function Booth() {
     } catch {
       if (!mounted.current) return
       setUploadError('That file couldn’t be read as an image. Try a JPG or PNG.')
+      play('bonk')
     }
   }
 

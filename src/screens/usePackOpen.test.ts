@@ -2,6 +2,8 @@ import { act, fireEvent, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 import { vi } from 'vitest'
 import { OPEN_TIMING, rareTint, usePackOpen } from './usePackOpen'
+import * as music from '../audio/music'
+import * as sfx from '../audio/sfx'
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -100,4 +102,47 @@ test('typing in a field (operator panel) does not advance the opening', () => {
   fireEvent.keyDown(input, { key: 'a' })
   expect(result.current.phase).toBe('sealed')
   input.remove()
+})
+
+test('opening sounds: shake, then tear (ducking the music), then burst', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  const mix = vi.spyOn(music, 'setMix')
+  const { result } = renderHook(() => usePackOpen(false))
+  expect(play).not.toHaveBeenCalled()
+  act(() => result.current.open())
+  expect(play).toHaveBeenLastCalledWith('shake')
+  act(() => { vi.advanceTimersByTime(OPEN_TIMING.shake) })
+  expect(play).toHaveBeenLastCalledWith('tear')
+  expect(mix).toHaveBeenCalledWith('duck')
+  act(() => { vi.advanceTimersByTime(OPEN_TIMING.tear) })
+  expect(play).toHaveBeenLastCalledWith('burst')
+  play.mockRestore()
+  mix.mockRestore()
+})
+
+test('skipping stops the sound still ringing and plays no more', () => {
+  const stop = vi.fn()
+  const play = vi.spyOn(sfx, 'play').mockReturnValue({ stop })
+  const { result } = renderHook(() => usePackOpen(false))
+  act(() => result.current.open())
+  act(() => result.current.skip())
+  expect(stop).toHaveBeenCalledTimes(1)
+  expect(play).toHaveBeenCalledTimes(1)
+  play.mockRestore()
+})
+
+test('skipping stops every opening sound still ringing', () => {
+  const stops: ReturnType<typeof vi.fn>[] = []
+  const play = vi.spyOn(sfx, 'play').mockImplementation(() => {
+    const stop = vi.fn()
+    stops.push(stop)
+    return { stop }
+  })
+  const { result } = renderHook(() => usePackOpen(false))
+  act(() => result.current.open())
+  act(() => { vi.advanceTimersByTime(OPEN_TIMING.shake) })
+  act(() => result.current.skip())
+  expect(stops).toHaveLength(2) // shake + tear
+  for (const stop of stops) expect(stop).toHaveBeenCalled()
+  play.mockRestore()
 })

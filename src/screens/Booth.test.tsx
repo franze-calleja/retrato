@@ -5,6 +5,7 @@ import { useStats } from '../store/stats'
 import * as registry from '../templates/registry'
 import { getTemplate } from '../templates/registry'
 import { Booth } from './Booth'
+import * as sfx from '../audio/sfx'
 
 // Restore spies even when an assertion fails, so they never leak into later tests.
 afterEach(() => vi.restoreAllMocks())
@@ -261,6 +262,31 @@ test('captures for cards with layouts keep the whole frame so any layout can cro
   expect(useBooth.getState().capture!.w).toBe(800) // uncropped frozen frame, not the photo window
   spy.mockRestore()
   vi.useRealTimers()
+  vi.unstubAllGlobals()
+  useBooth.setState(useBooth.getInitialState(), true)
+})
+
+test('a capture clicks the shutter', async () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', mode: 'single', templateId: 'stamp' }, true)
+  render(<Booth />)
+  await uploadInto()
+  expect(play).toHaveBeenCalledWith('shutter')
+  vi.unstubAllGlobals()
+  useBooth.setState(useBooth.getInitialState(), true)
+})
+
+test('a file that is not an image bonks', async () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  vi.stubGlobal('createImageBitmap', () => Promise.reject(new Error('bad')))
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', mode: 'single', templateId: 'stamp' }, true)
+  render(<Booth />)
+  const input = screen.getByLabelText(/upload photo/i) as HTMLInputElement
+  await act(async () => {
+    fireEvent.change(input, { target: { files: [new File(['x'], 'a.txt', { type: 'text/plain' })] } })
+  })
+  expect(play).toHaveBeenCalledWith('bonk')
+  expect(play).not.toHaveBeenCalledWith('shutter')
   vi.unstubAllGlobals()
   useBooth.setState(useBooth.getInitialState(), true)
 })

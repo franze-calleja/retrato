@@ -441,6 +441,8 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .operator-panel {
   display: grid; gap: 14px; width: min(100%, 440px); padding: 20px;
+  /* The Sound section made it taller than a laptop screen: scroll inside it (backdrop padding 16px × 2). */
+  max-height: calc(100dvh - 32px); overflow-y: auto;
   background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; box-shadow: 0 6px 0 var(--dark);
 }
 .operator-panel:focus { outline: none; }
@@ -449,12 +451,17 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 .operator-row select { grid-column: 2 / 4; font: 700 16px var(--font); padding: 6px; background: var(--dark); color: var(--ink); border: 3px solid var(--dark); border-radius: 6px; }
 .operator-row select.num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
 .operator-row input[type='range'] { accent-color: var(--gold); width: 100%; }
+.operator-heading { font: 700 18px var(--font); margin: 6px 0 0; }
+.operator-check { display: flex; gap: 10px; align-items: center; }
+.operator-check input { accent-color: var(--gold); width: 18px; height: 18px; }
 
 /* Print tray */
 h2[tabindex="-1"]:focus { outline: none; }
 .tray-live:empty { position: absolute; }
 .logo:focus { outline: none; }
 .tray-btn { padding: 8px 14px; font-size: 16px; }
+/* Speaker toggle: pinned to the top-right corner so it never shifts the layout. */
+.sound-btn { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 5; padding: 8px 10px; min-width: 44px; min-height: 44px; }
 .tray-banner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 10px 14px; background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; }
 .tray-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: min(100%, 560px); }
 .tray-item { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px; background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { EDITION_SFX, play } from '../audio/sfx'
 import { fitCount, packSheets, type Page, type PaperId } from '../print/layout'
 import { PrintSheets } from '../print/PrintSheets'
 import { composeStamp } from '../render/composeStamp'
@@ -26,7 +27,7 @@ export function Editor() {
   const edition = getEdition(useBooth((s) => s.edition))
   const [reducedMotion] = useState(prefersReducedMotion)
   const revealed = useBooth((s) => s.revealed)
-  const { phase, celebrate, skip } = useReveal(edition.rare, reducedMotion || revealed)
+  const { phase, celebrate, skip } = useReveal(edition.rare, reducedMotion || revealed, EDITION_SFX[edition.id])
   const { setValue, retake, goToPicker } = useBooth.getState()
   // The current layout's version (photo window etc.); the glare's photo hole follows it.
   const template = resolveTemplate(getTemplate(templateId), values)
@@ -61,6 +62,7 @@ export function Editor() {
     composeStamp(template, capture, values, EXPORT_SCALE, undefined, { edition, angle: SNAPSHOT_ANGLE })
 
   function download() {
+    play('confirm')
     renderFull().toBlob((blob) => {
       if (!blob) return
       const url = URL.createObjectURL(blob)
@@ -82,6 +84,7 @@ export function Editor() {
   }
 
   function startPrint() {
+    play('confirm')
     const src = renderFull().toDataURL('image/png')
     const items = Array.from({ length: copyCount }, () => ({ src, ...template.printSizeMm }))
     // New key per press so the sheet remounts and waits for its own images.
@@ -89,13 +92,20 @@ export function Editor() {
   }
 
   function addToTray() {
+    play('confirm')
     renderFull().toBlob((blob) => {
-      if (!blob) return flash("Couldn't add this card")
+      if (!blob) {
+        play('bonk')
+        return flash("Couldn't add this card")
+      }
       const url = URL.createObjectURL(blob)
       const added = useTray.getState().add({
         templateId: template.id, name: template.name, edition: edition.id, url, size: template.printSizeMm, copies: copyCount,
       })
-      if (!added) URL.revokeObjectURL(url)
+      if (!added) {
+        URL.revokeObjectURL(url)
+        play('bonk')
+      }
       flash(added ? 'Added to tray' : `Tray full (${TRAY_MAX})`)
     }, 'image/png')
   }
@@ -173,7 +183,7 @@ export function Editor() {
         </div>
 
         <div className="row">
-          <button className="btn gold" onClick={download}>Download PNG</button>
+          <button className="btn gold" data-sfx onClick={download}>Download PNG</button>
           <label className="copies">
             Copies
             <select value={copies} onChange={(e) => setCopies(e.target.value)}>
@@ -183,8 +193,8 @@ export function Editor() {
               <option value="fill">Fill page</option>
             </select>
           </label>
-          <button ref={printBtn} className="btn blue" onClick={startPrint}>Print</button>
-          <button className="btn green" onClick={addToTray} disabled={trayFull}>
+          <button ref={printBtn} className="btn blue" data-sfx onClick={startPrint}>Print</button>
+          <button className="btn green" data-sfx onClick={addToTray} disabled={trayFull}>
             {trayFull ? `Tray full (${TRAY_MAX})` : 'Add to tray'}
           </button>
         </div>

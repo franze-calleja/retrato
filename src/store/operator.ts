@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { DEFAULT_WEIGHTS, editions } from '../editions/registry'
 import type { EditionSettings } from '../editions/roll'
 import type { PaperId } from '../print/layout'
+import { useSound } from './sound'
 import { migrateKey, readJson, writeJson } from './storage'
 
 export const OPERATOR_KEY = 'retrato:operator'
@@ -52,17 +53,48 @@ export function loadIdleMinutes(): number {
   return raw && typeof raw === 'object' && isIdle(raw.idleMinutes) ? raw.idleMinutes : DEFAULT_IDLE
 }
 
-function save({ weights, forced, paper, idleMinutes }: EditionSettings & { paper: PaperId; idleMinutes: number }) {
-  writeJson(OPERATOR_KEY, { weights, forced, paper, idleMinutes })
+export const DEFAULT_MUSIC = 40
+export const DEFAULT_SFX = 70
+const isVolume = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 100
+const clampVolume = (v: number) => Math.round(Math.min(100, Math.max(0, v)))
+const savedField = (key: string): unknown => {
+  const raw = readSaved()
+  return raw && typeof raw === 'object' ? (raw as Record<string, unknown>)[key] : undefined
+}
+
+export function loadMusicVolume(): number {
+  const v = savedField('musicVolume')
+  return isVolume(v) ? v : DEFAULT_MUSIC
+}
+
+export function loadSfxVolume(): number {
+  const v = savedField('sfxVolume')
+  return isVolume(v) ? v : DEFAULT_SFX
+}
+
+export function loadShowSoundButton(): boolean {
+  const v = savedField('showSoundButton')
+  return typeof v === 'boolean' ? v : true
+}
+
+type Saved = EditionSettings & { paper: PaperId; idleMinutes: number; musicVolume: number; sfxVolume: number; showSoundButton: boolean }
+function save({ weights, forced, paper, idleMinutes, musicVolume, sfxVolume, showSoundButton }: Saved) {
+  writeJson(OPERATOR_KEY, { weights, forced, paper, idleMinutes, musicVolume, sfxVolume, showSoundButton })
 }
 
 interface OperatorState extends EditionSettings {
   paper: PaperId
   idleMinutes: number
+  musicVolume: number
+  sfxVolume: number
+  showSoundButton: boolean
   setWeight(id: string, weight: number): void
   setForced(forced: string): void
   setPaper(paper: string): void
   setIdleMinutes(minutes: number): void
+  setMusicVolume(v: number): void
+  setSfxVolume(v: number): void
+  setShowSoundButton(show: boolean): void
   reset(): void
 }
 
@@ -70,6 +102,9 @@ export const useOperator = create<OperatorState>()((set, get) => ({
   ...loadSettings(),
   paper: loadPaper(),
   idleMinutes: loadIdleMinutes(),
+  musicVolume: loadMusicVolume(),
+  sfxVolume: loadSfxVolume(),
+  showSoundButton: loadShowSoundButton(),
   setWeight(id, weight) {
     if (!isEdition(id) || !Number.isFinite(weight)) return
     set({ weights: { ...get().weights, [id]: clampWeight(weight) } })
@@ -90,8 +125,24 @@ export const useOperator = create<OperatorState>()((set, get) => ({
     set({ idleMinutes: minutes })
     save(get())
   },
+  setMusicVolume(v) {
+    if (!Number.isFinite(v)) return
+    set({ musicVolume: clampVolume(v) })
+    save(get())
+  },
+  setSfxVolume(v) {
+    if (!Number.isFinite(v)) return
+    set({ sfxVolume: clampVolume(v) })
+    save(get())
+  },
+  setShowSoundButton(show) {
+    // With no button a guest's mute couldn't be undone: hiding it hands control back to these volumes.
+    if (!show) useSound.getState().resetToDefault()
+    set({ showSoundButton: show })
+    save(get())
+  },
   reset() {
-    set({ ...defaultSettings(), paper: 'a4', idleMinutes: DEFAULT_IDLE })
+    set({ ...defaultSettings(), paper: 'a4', idleMinutes: DEFAULT_IDLE, musicVolume: DEFAULT_MUSIC, sfxVolume: DEFAULT_SFX, showSoundButton: true })
     save(get())
   },
 }))

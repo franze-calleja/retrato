@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useAudio } from './audio/useAudio'
+import { useTapSounds } from './audio/useTapSounds'
 import { Booth } from './screens/Booth'
 import { Editor } from './screens/Editor'
 import { OperatorPanel } from './screens/OperatorPanel'
@@ -7,12 +9,16 @@ import { Shop } from './screens/Shop'
 import { Tray, TrayButton } from './screens/Tray'
 import { useBooth } from './store/booth'
 import { useOperator } from './store/operator'
+import { useSound } from './store/sound'
 import { useTray } from './store/tray'
+import { SoundButton } from './ui/SoundButton'
 import { SwirlBackground } from './ui/SwirlBackground'
 import { registerTap } from './ui/taps'
 import { useIdleReset } from './ui/useIdleReset'
 
 export default function App() {
+  useAudio()
+  useTapSounds()
   const screen = useBooth((s) => s.screen)
   const trayOpen = useTray((s) => s.open)
   const wasTrayOpen = useRef(false)
@@ -28,12 +34,13 @@ export default function App() {
   const closePanel = useCallback(() => setPanelOpen(false), [])
   const idleMinutes = useOperator((s) => s.idleMinutes)
 
-  // Next guest: back to the shop with an empty tray so nobody sees the previous guest's photos.
+  // Next guest: back to the shop with an empty tray and sound back on, so nobody inherits the previous guest's photos or mute.
   useIdleReset(
     idleMinutes,
     () => {
       useTray.getState().clear()
       useBooth.getState().goToPicker()
+      useSound.getState().resetToDefault()
     },
     panelOpen,
   )
@@ -61,6 +68,7 @@ export default function App() {
       <main className="app">
         <h1 className="logo" tabIndex={-1} onClick={onLogoTap}>RETRATO</h1>
         <TrayButton />
+        <SoundButton keysOff={panelOpen} />
         {trayOpen ? (
           <Tray />
         ) : (

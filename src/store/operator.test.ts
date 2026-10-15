@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { OPERATOR_KEY, defaultSettings, loadIdleMinutes, loadPaper, loadSettings, sanitize, useOperator } from './operator'
+import { OPERATOR_KEY, defaultSettings, loadIdleMinutes, loadMusicVolume, loadPaper, loadSettings, loadSfxVolume, loadShowSoundButton, sanitize, useOperator } from './operator'
 
 beforeEach(() => {
   localStorage.clear()
@@ -20,6 +20,9 @@ test('setWeight and setForced persist; loadSettings restores them', () => {
     forced: 'poly',
     paper: 'a4',
     idleMinutes: 3,
+    musicVolume: 40,
+    sfxVolume: 70,
+    showSoundButton: true,
   })
   expect(loadSettings()).toEqual({ weights: { common: 60, foil: 25, holo: 50, poly: 3 }, forced: 'poly' })
 })
@@ -112,4 +115,35 @@ test('settings saved under the old pixel-booth key carry over', () => {
   expect(loadPaper()).toBe('letter')
   expect(loadIdleMinutes()).toBe(10)
   expect(OPERATOR_KEY).toBe('retrato:operator')
+})
+
+test('sound settings default to music 40, effects 70, speaker button shown', () => {
+  const s = useOperator.getState()
+  expect([s.musicVolume, s.sfxVolume, s.showSoundButton]).toEqual([40, 70, true])
+})
+
+test('sound settings persist, clamp to 0–100 and reset', () => {
+  const s = useOperator.getState()
+  s.setMusicVolume(55.4)
+  s.setSfxVolume(250)
+  s.setShowSoundButton(false)
+  s.setMusicVolume(Number.NaN)
+  const saved = JSON.parse(localStorage.getItem(OPERATOR_KEY)!)
+  expect([saved.musicVolume, saved.sfxVolume, saved.showSoundButton]).toEqual([55, 100, false])
+  expect([loadMusicVolume(), loadSfxVolume(), loadShowSoundButton()]).toEqual([55, 100, false])
+  s.reset()
+  const r = useOperator.getState()
+  expect([r.musicVolume, r.sfxVolume, r.showSoundButton]).toEqual([40, 70, true])
+})
+
+test('settings saved before sound existed load with sound defaults', () => {
+  localStorage.setItem(OPERATOR_KEY, JSON.stringify({ paper: 'letter', idleMinutes: 5 }))
+  expect([loadMusicVolume(), loadSfxVolume(), loadShowSoundButton(), loadPaper()]).toEqual([40, 70, true, 'letter'])
+})
+
+test('hiding the speaker button gives the operator volumes back (a guest mute does not linger)', async () => {
+  const { useSound } = await import('./sound')
+  useSound.setState({ mode: 'off' })
+  useOperator.getState().setShowSoundButton(false)
+  expect(useSound.getState().mode).toBe('all')
 })
