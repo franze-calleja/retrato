@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { fitCount, packSheets, type Page, type PaperId } from '../print/layout'
 import { PrintSheets } from '../print/PrintSheets'
 import { composeStamp } from '../render/composeStamp'
-import { EXPORT_SCALE, PREVIEW_SCALE, exportFileName } from '../render/export'
+import { EXPORT_SCALE, PREVIEW_SCALE, cardSlug, exportFileName } from '../render/export'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
 import { isPrintShortcut } from '../ui/printShortcut'
@@ -64,7 +64,7 @@ export function Editor() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = exportFileName(template.id)
+      a.download = exportFileName(cardSlug(template.name))
       a.click()
       setTimeout(() => URL.revokeObjectURL(url), 1000)
     }, 'image/png')
