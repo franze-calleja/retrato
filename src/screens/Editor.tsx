@@ -150,11 +150,19 @@ export function Editor() {
         {template.fields.map((f) => (
           <label key={f.key}>
             {f.label}
-            <input
-              value={values[f.key] ?? ''}
-              maxLength={f.maxLength * 2 /* emoji are 2 UTF-16 units; the store clamps by code point */}
-              onChange={(e) => setValue(f.key, fitEdit(e.target.value, e.target.selectionStart ?? e.target.value.length, f.maxLength))}
-            />
+            {f.options ? (
+              <select value={values[f.key] ?? f.options[0].value} onChange={(e) => setValue(f.key, e.target.value)}>
+                {f.options.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={values[f.key] ?? ''}
+                maxLength={f.maxLength * 2 /* emoji are 2 UTF-16 units; the store clamps by code point */}
+                onChange={(e) => setValue(f.key, fitEdit(e.target.value, e.target.selectionStart ?? e.target.value.length, f.maxLength))}
+              />
+            )}
           </label>
         ))}
       </div>

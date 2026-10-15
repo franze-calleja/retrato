@@ -9,6 +9,7 @@ import { EXPORT_SCALE } from '../render/export'
 import { useBooth } from '../store/booth'
 import { placeholderPhoto } from '../templates/placeholder'
 import { getTemplate } from '../templates/registry'
+import { resolveTemplate } from '../templates/resolve'
 import { prefersReducedMotion } from '../ui/motion'
 import { CameraStage } from './CameraStage'
 import { InstantPrint } from './InstantPrint'
@@ -25,7 +26,9 @@ export function Booth() {
   const { setCapture, goToPicker } = useBooth.getState()
   const mode = useBooth((s) => s.mode)
   const packId = useBooth((s) => s.packId)
-  const template = mode === 'pack' ? packViewfinder(getPack(packId)) : getTemplate(templateId)
+  const values = useBooth((s) => s.values)
+  // Cards with layouts (the Joker) frame the shot through the current layout's window.
+  const template = mode === 'pack' ? packViewfinder(getPack(packId)) : resolveTemplate(getTemplate(templateId), values)
 
   const { videoRef, status, start } = useCamera()
   const side = useBooth((s) => s.cameraSide)
@@ -83,6 +86,8 @@ export function Booth() {
     (photo: PhotoSource) => {
       // Every capture is already frozen (and capped) by `capture`, so a pack keeps it as is.
       if (mode === 'pack') return setCapture(photo)
+      // Keep the whole (frozen) frame for cards whose layout can change in the editor, so no layout over-crops.
+      if (template.variant) return setCapture(photo)
       const r = template.photoRect
       setCapture(cropPhoto(photo, r.w * EXPORT_SCALE, r.h * EXPORT_SCALE))
     },

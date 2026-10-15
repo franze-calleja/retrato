@@ -5,6 +5,7 @@ import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
 import { TRAY_MAX, useTray } from '../store/tray'
 import { resolveDefaults } from '../templates/fields'
+import * as registry from '../templates/registry'
 import { getTemplate } from '../templates/registry'
 import { Editor } from './Editor'
 
@@ -188,4 +189,16 @@ test('reduced motion still gets a static card shadow', () => {
   open(true)
   expect(document.querySelector('.card-shadow')).not.toBeNull()
   Reflect.deleteProperty(window, 'matchMedia')
+})
+
+test('a field with options is a select that sets the value', () => {
+  const t = { ...getTemplate('stamp') }
+  const fields = [...t.fields, { key: 'mood', label: 'Mood', default: 'a', maxLength: 4, options: [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta' }] }]
+  const spy = vi.spyOn(registry, 'getTemplate').mockReturnValue({ ...t, fields } as never)
+  open(true)
+  const select = screen.getByLabelText('Mood') as HTMLSelectElement
+  expect(select.tagName).toBe('SELECT')
+  fireEvent.change(select, { target: { value: 'b' } })
+  expect(useBooth.getState().values.mood).toBe('b')
+  spy.mockRestore()
 })

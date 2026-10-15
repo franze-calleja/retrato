@@ -325,7 +325,11 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
   font: 700 18px ui-monospace, 'SF Mono', Menlo, Consolas, monospace; text-transform: uppercase; padding: 10px;
   background: var(--dark); color: var(--ink); border: 3px solid var(--dark); border-radius: 6px;
 }
-.fields input:focus { border-color: var(--gold); outline: none; }
+.fields select {
+  font: 700 18px var(--font); padding: 10px;
+  background: var(--dark); color: var(--ink); border: 3px solid var(--dark); border-radius: 6px;
+}
+.fields input:focus, .fields select:focus { border-color: var(--gold); outline: none; }
 
 /* Card reveal */
 .reveal { position: relative; perspective: 900px; width: min(100%, 520px); }

@@ -2,6 +2,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { expect, test, vi } from 'vitest'
 import { useBooth } from '../store/booth'
 import { useStats } from '../store/stats'
+import * as registry from '../templates/registry'
+import { getTemplate } from '../templates/registry'
 import { Booth } from './Booth'
 
 test('upload control stays in the tab order (camera fallback must be keyboard reachable)', () => {
@@ -242,5 +244,20 @@ test('the camera stage says which side faces the guest, so the print knows where
   expect(document.querySelector('.camera-stage')!.getAttribute('data-side')).toBe('front')
   fireEvent.click(screen.getByRole('button', { name: /show back/i }))
   expect(document.querySelector('.camera-stage')!.getAttribute('data-side')).toBe('back')
+  useBooth.setState(useBooth.getInitialState(), true)
+})
+
+test('captures for cards with layouts keep the whole frame so any layout can crop it', async () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  const t = getTemplate('stamp')
+  const spy = vi.spyOn(registry, 'getTemplate').mockImplementation((id) => (id === 'stamp' ? ({ ...t, variant: () => ({}) } as never) : t))
+  useBooth.setState({ ...useBooth.getInitialState(), screen: 'booth', templateId: 'stamp' }, true)
+  render(<Booth />)
+  await uploadInto()
+  for (const ms of [150, 900, 1200, 450]) act(() => { vi.advanceTimersByTime(ms) })
+  expect(useBooth.getState().capture!.w).toBe(800) // uncropped frozen frame, not the photo window
+  spy.mockRestore()
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
   useBooth.setState(useBooth.getInitialState(), true)
 })
