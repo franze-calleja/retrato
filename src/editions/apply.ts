@@ -40,6 +40,7 @@ export function applyEdition(
   h: number,
   angle: number,
   badgeAt?: BadgeAnchor,
+  opts: { badge?: boolean } = {},
 ) {
   const img = edition.overlay(w, h, angle)
   if (img) {
@@ -53,5 +54,5 @@ export function applyEdition(
     ctx.drawImage(tmp, 0, 0)
     ctx.restore()
   }
-  if (edition.badge) drawBadge(ctx, edition.badge, badgeAt)
+  if (edition.badge && opts.badge !== false) drawBadge(ctx, edition.badge, badgeAt)
 }

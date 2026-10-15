@@ -126,3 +126,32 @@ test('templates without a ghostRect draw the photo once', () => {
   composeStamp(t, photo, {}, 2, out)
   expect(draw.mock.calls.filter((c) => c[0] === photo.source)).toHaveLength(1)
 })
+
+test('an overlay is drawn after the photo, and the edition badge goes on the overlay', async () => {
+  const apply = await import('../editions/apply')
+  const spy = vi.spyOn(apply, 'applyEdition')
+  const overlay = vi.fn((ctx: CanvasRenderingContext2D) => ctx.fillRect(0, 0, 1, 1))
+  const t = { ...getTemplate('stamp'), id: 'overlay-test', overlay }
+  const p = { source: document.createElement('canvas'), w: 100, h: 100 }
+  const out = document.createElement('canvas')
+  const ctx = out.getContext('2d')!
+  const order: string[] = []
+  vi.spyOn(ctx, 'drawImage').mockImplementation(((src: unknown) => {
+    order.push(src === p.source ? 'photo' : 'art')
+  }) as never)
+  composeStamp(t, p, {}, 2, out, { edition: getEdition('holo'), angle: 0.35 })
+  expect(overlay).toHaveBeenCalled()
+  expect(order).toEqual(['art', 'photo', 'art'])
+  const badges = spy.mock.calls.map((c) => c[6]?.badge)
+  expect(badges).toEqual([false, true]) // frame: no badge; overlay: badge
+  spy.mockRestore()
+})
+
+test('without an overlay the frame still carries the badge', async () => {
+  const apply = await import('../editions/apply')
+  const spy = vi.spyOn(apply, 'applyEdition')
+  const t = { ...getTemplate('stamp'), id: 'no-overlay-test' }
+  composeStamp(t, { source: document.createElement('canvas'), w: 10, h: 10 }, {}, 1, undefined, { edition: getEdition('foil'), angle: 0.35 })
+  expect(spy.mock.calls.map((c) => c[6]?.badge ?? true)).toEqual([true])
+  spy.mockRestore()
+})

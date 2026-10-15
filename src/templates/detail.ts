@@ -94,13 +94,24 @@ export function postmark(ctx: CanvasRenderingContext2D, cx: number, cy: number, 
 export const verticalLength = (text: string, font: 'big' | 'small') => (font === 'big' ? measureBig(text) : measureText(text))
 
 /**
- * Text turned a quarter left (reads bottom to top). It fills columns x … x+thickness−1 and rows y−length … y−1,
- * so `y` is the exclusive bottom. A shadow, if given, falls up-right in screen terms (local +1,+1).
+ * Text turned a quarter turn. `up` reads bottom to top: columns x … x+thickness−1, rows y−length … y−1 (`y` is the
+ * exclusive bottom). `down` reads top to bottom: columns x−thickness … x−1, rows y … y+length−1 (playing-card index).
+ * A shadow, if given, follows the local (+1, +1) offset.
  */
-export function drawTextVertical(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, color: Color, font: 'big' | 'small', shadow?: Color) {
+export function drawTextVertical(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  color: Color,
+  font: 'big' | 'small',
+  shadow?: Color,
+  dir: 'up' | 'down' = 'up',
+) {
   ctx.save()
-  // Exact quarter turn (rotate(-π/2) leaves ~1e-16 skew terms): local (u, v) → screen (x + v, y − u).
-  ctx.transform(0, -1, 1, 0, x, y)
+  // Exact quarter turns (rotate() leaves ~1e-16 skew terms). up: (u, v) → (x + v, y − u); down: (u, v) → (x − v, y + u).
+  if (dir === 'up') ctx.transform(0, -1, 1, 0, x, y)
+  else ctx.transform(0, 1, -1, 0, x, y)
   if (font === 'big') drawBig(ctx, text, 0, 0, color, 1, shadow)
   else drawText(ctx, text, 0, 0, color, 1, shadow)
   ctx.restore()

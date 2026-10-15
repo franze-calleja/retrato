@@ -74,3 +74,10 @@ test('corner ornaments can skip a corner (where the edition badge sits)', () => 
   const three = rects((c) => cornerOrnaments(c, R, C, ['tr'])).length
   expect(three).toBe((all * 3) / 4)
 })
+
+test('vertical text can read downward (playing-card corner index)', () => {
+  const c = document.createElement('canvas').getContext('2d')!
+  const tf = vi.spyOn(c, 'transform')
+  drawTextVertical(c, 'JOKER', 8, 5, C, 'small', undefined, 'down')
+  expect(tf).toHaveBeenCalledWith(0, 1, -1, 0, 8, 5)
+})

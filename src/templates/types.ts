@@ -4,6 +4,11 @@ import type { PhotoShape } from './shapes'
 
 export type { Rect }
 
+export interface FieldOption {
+  value: string
+  label: string
+}
+
 export interface TemplateField {
   key: string
   label: string
@@ -12,6 +17,8 @@ export interface TemplateField {
   maxLength: number
   /** Regenerate on every capture (e.g. ticket serial). */
   perCapture?: boolean
+  /** Render as a select with these choices. */
+  options?: readonly FieldOption[]
 }
 
 export interface Template {
@@ -33,4 +40,10 @@ export interface Template {
   printSizeMm: { w: number; h: number }
   /** Draws frame and text at art scale. Must tolerate missing values. */
   render(ctx: CanvasRenderingContext2D, values: Record<string, string>): void
+  /** Layout-dependent overrides (e.g. the Joker's layouts), chosen from the card's values. */
+  variant?(values: Record<string, string>): TemplateVariant
+  /** Art drawn over the photo (full-art layouts), at art scale. */
+  overlay?(ctx: CanvasRenderingContext2D, values: Record<string, string>): void
 }
+
+export type TemplateVariant = Partial<Pick<Template, 'photoRect' | 'photoShape' | 'badgeAt' | 'ghostRect' | 'render' | 'overlay'>>
