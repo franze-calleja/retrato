@@ -23,9 +23,9 @@ export function rareTint(editionIds: string[]): string | null {
 export function usePackOpen(reducedMotion: boolean) {
   const [phase, setPhase] = useState<OpenPhase>(reducedMotion ? 'done' : 'sealed')
   const open = useCallback(() => setPhase((p) => (p === 'sealed' ? 'shake' : p)), [])
-  const voice = useRef<Voice | null>(null)
+  const voices = useRef<Voice[]>([])
   const skip = useCallback(() => {
-    voice.current?.stop()
+    for (const v of voices.current) v.stop()
     setPhase('done')
   }, [])
 
@@ -33,7 +33,8 @@ export function usePackOpen(reducedMotion: boolean) {
   useEffect(() => {
     const sound = PHASE_SFX[phase]
     if (!sound) return
-    voice.current = play(sound)
+    const voice = play(sound)
+    if (voice) voices.current.push(voice)
     if (phase === 'tear') setMix('duck')
   }, [phase])
 

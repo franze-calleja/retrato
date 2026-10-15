@@ -140,3 +140,10 @@ test('settings saved before sound existed load with sound defaults', () => {
   localStorage.setItem(OPERATOR_KEY, JSON.stringify({ paper: 'letter', idleMinutes: 5 }))
   expect([loadMusicVolume(), loadSfxVolume(), loadShowSoundButton(), loadPaper()]).toEqual([40, 70, true, 'letter'])
 })
+
+test('hiding the speaker button gives the operator volumes back (a guest mute does not linger)', async () => {
+  const { useSound } = await import('./sound')
+  useSound.setState({ mode: 'off' })
+  useOperator.getState().setShowSoundButton(false)
+  expect(useSound.getState().mode).toBe('all')
+})

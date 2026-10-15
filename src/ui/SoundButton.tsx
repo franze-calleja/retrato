@@ -26,7 +26,7 @@ export function SoundButton({ keysOff }: { keysOff: boolean }) {
   useEffect(() => {
     if (!available || keysOff) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() !== 'm' || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return
+      if (e.key.toLowerCase() !== 'm' || e.repeat || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return
       useSound.getState().cycle()
     }
     window.addEventListener('keydown', onKey)

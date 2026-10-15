@@ -69,3 +69,18 @@ test('a print left to run plays its chime at handoff', () => {
   expect(play).toHaveBeenLastCalledWith('chime')
   play.mockRestore()
 })
+
+test('skipping stops every sound still ringing, not just the motor', () => {
+  const stops: ReturnType<typeof vi.fn>[] = []
+  const play = vi.spyOn(sfx, 'play').mockImplementation(() => {
+    const stop = vi.fn()
+    stops.push(stop)
+    return { stop }
+  })
+  const { result } = renderHook(() => usePrintSequence(false))
+  act(() => { vi.advanceTimersByTime(PRINT_TIMING.flash) })
+  act(() => result.current.skip())
+  expect(stops).toHaveLength(2) // flash + whirr
+  for (const stop of stops) expect(stop).toHaveBeenCalled()
+  play.mockRestore()
+})

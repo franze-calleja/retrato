@@ -52,3 +52,11 @@ test('hidden when the operator turns it off or there is no Web Audio', () => {
   rerender(<SoundButton keysOff={false} />)
   expect(screen.queryByRole('button')).toBeNull()
 })
+
+test('holding M down cycles once, not through every mode', () => {
+  render(<SoundButton keysOff={false} />)
+  fireEvent.keyDown(window, { key: 'm' })
+  fireEvent.keyDown(window, { key: 'm', repeat: true })
+  fireEvent.keyDown(window, { key: 'm', repeat: true })
+  expect(useSound.getState().mode).toBe('sfx')
+})

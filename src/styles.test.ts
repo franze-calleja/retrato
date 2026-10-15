@@ -60,3 +60,9 @@ test('the operator panel scrolls inside the screen, so Close stays reachable on 
   expect(body).toMatch(/max-height:\s*calc\(100dvh - 32px\)/)
   expect(body).toMatch(/overflow-y:\s*auto/)
 })
+
+test('the speaker button is at least a 44 px touch target', () => {
+  const body = rule('.sound-btn') ?? ''
+  expect(body).toMatch(/min-width:\s*44px/)
+  expect(body).toMatch(/min-height:\s*44px/)
+})

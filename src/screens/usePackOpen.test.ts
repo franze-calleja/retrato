@@ -130,3 +130,19 @@ test('skipping stops the sound still ringing and plays no more', () => {
   expect(play).toHaveBeenCalledTimes(1)
   play.mockRestore()
 })
+
+test('skipping stops every opening sound still ringing', () => {
+  const stops: ReturnType<typeof vi.fn>[] = []
+  const play = vi.spyOn(sfx, 'play').mockImplementation(() => {
+    const stop = vi.fn()
+    stops.push(stop)
+    return { stop }
+  })
+  const { result } = renderHook(() => usePackOpen(false))
+  act(() => result.current.open())
+  act(() => { vi.advanceTimersByTime(OPEN_TIMING.shake) })
+  act(() => result.current.skip())
+  expect(stops).toHaveLength(2) // shake + tear
+  for (const stop of stops) expect(stop).toHaveBeenCalled()
+  play.mockRestore()
+})

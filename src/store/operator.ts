@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { DEFAULT_WEIGHTS, editions } from '../editions/registry'
 import type { EditionSettings } from '../editions/roll'
 import type { PaperId } from '../print/layout'
+import { useSound } from './sound'
 import { migrateKey, readJson, writeJson } from './storage'
 
 export const OPERATOR_KEY = 'retrato:operator'
@@ -135,6 +136,8 @@ export const useOperator = create<OperatorState>()((set, get) => ({
     save(get())
   },
   setShowSoundButton(show) {
+    // With no button a guest's mute couldn't be undone: hiding it hands control back to these volumes.
+    if (!show) useSound.getState().resetToDefault()
     set({ showSoundButton: show })
     save(get())
   },

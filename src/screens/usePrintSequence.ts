@@ -11,17 +11,17 @@ const NEXT: Record<Exclude<PrintPhase, 'done'>, PrintPhase> = { flash: 'eject', 
 /** Instant print: flash → eject → develop → handoff → done. Reduced motion is done at once. */
 export function usePrintSequence(reducedMotion: boolean) {
   const [phase, setPhase] = useState<PrintPhase>(reducedMotion ? 'done' : 'flash')
-  const whirr = useRef<Voice | null>(null)
+  const voices = useRef<Voice[]>([])
   const skip = useCallback(() => {
-    whirr.current?.stop()
+    for (const v of voices.current) v.stop()
     setPhase('done')
   }, [])
 
   // Flash zap, motor whirr as the print slides out, a chime as it's handed over.
   useEffect(() => {
-    if (phase === 'flash') play('flash')
-    if (phase === 'eject') whirr.current = play('whirr')
-    if (phase === 'handoff') play('chime')
+    const sound = phase === 'flash' ? 'flash' : phase === 'eject' ? 'whirr' : phase === 'handoff' ? 'chime' : null
+    const voice = sound && play(sound)
+    if (voice) voices.current.push(voice)
   }, [phase])
 
   useEffect(() => {
