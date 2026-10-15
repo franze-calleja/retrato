@@ -59,14 +59,14 @@ export const GLYPHS: Record<string, readonly string[]> = {
 }
 
 // Uppercase per character: ß→SS or ﬁ→FI would otherwise grow the text past its slot.
-const upper = (ch: string) => {
+export const upperChar = (ch: string) => {
   const u = ch.toUpperCase()
   return Array.from(u)[0] // ß→S, ﬁ→F: one slot, and a letter rather than ?
 }
-const chars = (text: string) => Array.from(text, upper)
+const chars = (text: string) => Array.from(text, upperChar)
 
 export function glyphFor(ch: string): readonly string[] {
-  return GLYPHS[upper(ch)] ?? GLYPHS['?']
+  return GLYPHS[upperChar(ch)] ?? GLYPHS['?']
 }
 
 export function measureText(text: string, scale = 1): number {
