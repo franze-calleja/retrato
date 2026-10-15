@@ -1,13 +1,15 @@
-import { BLUE, BLUE_DARK, CREAM, GOLD, NAVY_DARK, OUTLINE, SHADOW } from './colors'
-import { fill, panel, withDropShadow } from './draw'
-import { drawTextCentered, fitScale } from './pixelFont'
+import { CARD_WHITE, CREAM, SHADOW, TEAL, TEAL_DARK, TEAL_INK, TEAL_LIGHT } from './colors'
+import { bevel, dither, ring } from './detail'
+import { css, fill, panel, withDropShadow } from './draw'
+import { drawTextCentered } from './pixelFont'
+import { drawTitle } from './pixelFontLarge'
 import { fillShape, grow } from './shapes'
 import type { Template } from './types'
 
 const BW = 96
 const BH = 132
 const SHADOW_OFFSET = 3
-const PHOTO = { x: 18, y: 16, w: 60, h: 60 }
+const PHOTO = { x: 22, y: 34, w: 52, h: 52 }
 
 export const PLANETS = ['MERCURY', 'VENUS', 'EARTH', 'MARS', 'JUPITER', 'SATURN', 'URANUS', 'NEPTUNE', 'PLUTO']
 export const COSMIC_LINES = [
@@ -18,44 +20,52 @@ const pick = (list: readonly string[], rand: () => number) => list[Math.floor(ra
 export const randomPlanet = (rand: () => number = Math.random) => pick(PLANETS, rand)
 export const randomCosmicLine = (rand: () => number = Math.random) => pick(COSMIC_LINES, rand)
 
-const hash = (x: number, y: number) => {
-  const v = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453
-  return v - Math.floor(v)
-}
-
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
-  panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
-  panel(ctx, NAVY_DARK, 1, 1, BW - 2, BH - 2, 2)
+  panel(ctx, TEAL_INK, 0, 0, BW, BH, 4)
+  panel(ctx, TEAL, 1, 1, BW - 2, BH - 2, 3)
+  bevel(ctx, { x: 2, y: 2, w: BW - 4, h: BH - 4 }, TEAL_LIGHT, TEAL_DARK)
+  dither(ctx, { x: 4, y: 4, w: BW - 8, h: BH - 8 }, TEAL_LIGHT, 0.02, 3)
+  dither(ctx, { x: 4, y: 4, w: BW - 8, h: BH - 8 }, CREAM, 0.008, 4)
 
-  // Fixed starfield.
-  for (let y = 3; y < BH - 3; y++) {
-    for (let x = 3; x < BW - 3; x++) {
-      const n = hash(x, y)
-      if (n > 0.995) fill(ctx, GOLD, x, y, 1, 1)
-      else if (n > 0.975) fill(ctx, CREAM, x, y, 1, 1)
-    }
-  }
+  // Instrument header: our own row of lights, a toggle and a level bar.
+  panel(ctx, TEAL_INK, 6, 4, BW - 12, 10, 2)
+  fill(ctx, TEAL_DARK, 7, 5, BW - 14, 8)
+  fill(ctx, TEAL_LIGHT, 10, 8, 2, 2)
+  fill(ctx, CREAM, 14, 8, 2, 2)
+  panel(ctx, TEAL_LIGHT, 19, 6, 11, 5, 2)
+  fill(ctx, CREAM, 25, 7, 3, 3)
+  for (let i = 0; i < 5; i++) fill(ctx, i < 3 ? CREAM : TEAL_LIGHT, 35 + i * 4, 8, 2, 2)
+  for (let x = 58; x < 78; x += 3) fill(ctx, TEAL_LIGHT, x, 7, 2, 4)
+  ring(ctx, 84, 8, 2, CREAM)
 
-  // Orbit ring passing behind the porthole.
+  // Name pill.
+  panel(ctx, TEAL_INK, 14, 17, 68, 13, 4)
+  panel(ctx, CARD_WHITE, 15, 18, 66, 11, 3)
+  drawTitle(ctx, values.planet ?? '', BW / 2, 16, 64, TEAL_INK, undefined, 1)
+
+  // Orbit ring behind the round window.
   const cx = PHOTO.x + PHOTO.w / 2
   const cy = PHOTO.y + PHOTO.h / 2
-  for (let a = 0; a < 360; a += 1) {
+  ctx.fillStyle = css(TEAL_LIGHT)
+  for (let a = 0; a < 360; a++) {
     const t = (a * Math.PI) / 180
-    fill(ctx, BLUE, Math.round(cx + 44 * Math.cos(t)), Math.round(cy + 13 * Math.sin(t)), 1, 1)
+    ctx.fillRect(Math.round(cx + 40 * Math.cos(t)), Math.round(cy + 12 * Math.sin(t)), 1, 1)
   }
+  fillShape(ctx, TEAL_LIGHT, grow(PHOTO, 3), 'circle')
+  fillShape(ctx, TEAL_INK, grow(PHOTO, 1), 'circle')
 
-  // Round porthole: gold mat, dark rim; the composer clips the photo to the same circle.
-  fillShape(ctx, GOLD, grow(PHOTO, 3), 'circle')
-  fillShape(ctx, OUTLINE, grow(PHOTO, 1), 'circle')
-
-  const planet = values.planet ?? ''
-  const s = fitScale(planet, BW - 12, 2)
-  drawTextCentered(ctx, planet, BW / 2, s === 2 ? 86 : 89, CREAM, s, BLUE_DARK)
-
-  panel(ctx, OUTLINE, 8, 102, BW - 16, 14, 2)
-  panel(ctx, BLUE, 9, 103, BW - 18, 12, 1)
-  drawTextCentered(ctx, values.effect ?? '', BW / 2, 107, CREAM, 1, BLUE_DARK)
-  drawTextCentered(ctx, 'PIXEL COSMOS', BW / 2, 121, GOLD)
+  // Footer: cosmic stat, level pips, grille.
+  panel(ctx, TEAL_INK, 8, 94, BW - 16, 32, 2)
+  panel(ctx, TEAL_DARK, 9, 95, BW - 18, 30, 1)
+  const stat = values.effect ?? ''
+  drawTextCentered(ctx, stat, BW / 2, 98, CREAM)
+  const digit = /\d/.exec(stat)
+  const level = Math.min(5, Math.max(1, digit ? Number(digit[0]) : 3))
+  for (let i = 0; i < 5; i++) {
+    panel(ctx, TEAL_INK, 28 + i * 8, 106, 7, 7, 1)
+    fill(ctx, i < level ? CREAM : TEAL_DARK, 29 + i * 8, 107, 5, 5)
+  }
+  for (let y = 117; y <= 121; y += 2) fill(ctx, TEAL_INK, 14, y, BW - 28, 1)
 }
 
 export const planet: Template = {
