@@ -77,3 +77,9 @@ test('pickDistinct copes with a rand() that returns exactly 1', () => {
   expect(picks.every((p) => p !== undefined)).toBe(true)
   expect(new Set(picks).size).toBe(3)
 })
+
+test('dealt cards fill fields missing from remembered values', () => {
+  const card = dealPack(classic, settings(), { ticket: { event: 'OLD' } }, () => 0).find((c) => c.templateId === 'ticket')!
+  expect(card.values.event).toBe('OLD')
+  expect(card.values.seat).toBe('ROW A SEAT 07')
+})

@@ -33,7 +33,7 @@ export function dealPack(
   const picks = pool.length >= PACK_SIZE ? pickDistinct(pool, PACK_SIZE, rand) : Array.from({ length: PACK_SIZE }, (_, i) => pool[i % pool.length])
   const seen = new Set<string>()
   return picks.map((t) => {
-    const base = saved[t.id] ?? resolveDefaults(t)
+    const base = { ...resolveDefaults(t), ...saved[t.id] }
     let values = refreshPerCapture(t, base)
     for (let i = 0; i < MAX_REROLLS && seen.has(`${t.id}:${JSON.stringify(values)}`); i++) {
       values = refreshPerCapture(t, base)

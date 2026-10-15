@@ -60,8 +60,9 @@ export const useBooth = create<BoothState>()((set, get) => ({
       ...cleared,
       mode: 'single',
       templateId: id,
-      // Roll per-capture fields (serials, member numbers) fresh for each visit to the booth.
-      values: refreshPerCapture(getTemplate(id), get().saved[id] ?? resolveDefaults(getTemplate(id))),
+      // Roll per-capture fields (serials, member numbers) fresh for each visit to the booth; fields added since the
+      // values were remembered get their defaults.
+      values: refreshPerCapture(getTemplate(id), { ...resolveDefaults(getTemplate(id)), ...get().saved[id] }),
       screen: 'booth',
     })
   },

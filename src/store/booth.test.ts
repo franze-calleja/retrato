@@ -77,6 +77,13 @@ describe('booth store', () => {
     expect(s().cameraSide).toBe('back')
   })
 
+  test('remembered values from before a new field get its default', () => {
+    useBooth.setState({ saved: { ticket: { event: 'OLD', date: '2026-01-01', serial: 'NO. 000001' } } })
+    s().selectTemplate('ticket')
+    expect(s().values.event).toBe('OLD')
+    expect(s().values.seat).toBe('ROW A SEAT 07')
+  })
+
   test('setValue clamps pasted text to maxLength by code point', () => {
     s().setValue('value', '😀😀😀😀😀😀😀')
     expect(Array.from(s().values.value)).toHaveLength(5)

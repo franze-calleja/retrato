@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import { refreshPerCapture, resolveDefaults } from './fields'
 import { getTemplate } from './registry'
 import { randomSerial, todayIso } from './ticket'
@@ -40,4 +40,22 @@ test('serial words longer than the stub wrap instead of losing characters', asyn
   expect(serialLines('NO. 123456')).toEqual(['NO.', '123456'])
   expect(serialLines('1234567890')).toEqual(['123456789', '0'])
   expect(serialLines('A B C D')).toEqual(['A', 'B', 'C'])
+})
+
+test('the ticket has a Seat field after Date', () => {
+  const keys = getTemplate('ticket').fields.map((f) => f.key)
+  expect(keys).toEqual(['event', 'date', 'seat', 'serial'])
+  expect(resolveDefaults(getTemplate('ticket')).seat).toBe('ROW A SEAT 07')
+})
+
+test('the serial runs down the stub, clear of the edition badge', async () => {
+  const detail = await import('./detail')
+  const spy = vi.spyOn(detail, 'drawTextVertical')
+  const t = getTemplate('ticket')
+  const c = document.createElement('canvas').getContext('2d')!
+  t.render(c, { ...resolveDefaults(t), serial: 'NO. 123456' })
+  expect(spy).toHaveBeenCalled()
+  const [, text, , y] = spy.mock.calls[0]
+  expect(text).toBe('NO. 123456')
+  expect(y).toBeLessThanOrEqual(76 - 9) // badge sits in the bottom 9 px of the stub
 })
