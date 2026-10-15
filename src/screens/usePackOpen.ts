@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { setMix } from '../audio/music'
+import { play, type Sfx, type Voice } from '../audio/sfx'
 import { isAdvanceKey } from '../ui/keys'
 
 export type OpenPhase = 'sealed' | 'shake' | 'tear' | 'burst' | 'done'
@@ -6,6 +8,7 @@ export type OpenPhase = 'sealed' | 'shake' | 'tear' | 'burst' | 'done'
 export const OPEN_TIMING = { auto: 3000, shake: 350, tear: 400, burst: 600 } as const
 
 const NEXT: Record<Exclude<OpenPhase, 'done'>, OpenPhase> = { sealed: 'shake', shake: 'tear', tear: 'burst', burst: 'done' }
+const PHASE_SFX: Partial<Record<OpenPhase, Sfx>> = { shake: 'shake', tear: 'tear', burst: 'burst' }
 
 export const RARE_TINT = { holo: '#7fd6ff', poly: '#ff7fe1' } as const
 
@@ -20,7 +23,19 @@ export function rareTint(editionIds: string[]): string | null {
 export function usePackOpen(reducedMotion: boolean) {
   const [phase, setPhase] = useState<OpenPhase>(reducedMotion ? 'done' : 'sealed')
   const open = useCallback(() => setPhase((p) => (p === 'sealed' ? 'shake' : p)), [])
-  const skip = useCallback(() => setPhase('done'), [])
+  const voice = useRef<Voice | null>(null)
+  const skip = useCallback(() => {
+    voice.current?.stop()
+    setPhase('done')
+  }, [])
+
+  // Each step has its sound; the tear dips the music so the rip cuts through.
+  useEffect(() => {
+    const sound = PHASE_SFX[phase]
+    if (!sound) return
+    voice.current = play(sound)
+    if (phase === 'tear') setMix('duck')
+  }, [phase])
 
   useEffect(() => {
     if (phase === 'done') return

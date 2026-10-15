@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { EDITION_SFX } from '../audio/sfx'
 import { fitCount, packSheets, type Page, type PaperId } from '../print/layout'
 import { PrintSheets } from '../print/PrintSheets'
 import { composeStamp } from '../render/composeStamp'
@@ -26,7 +27,7 @@ export function Editor() {
   const edition = getEdition(useBooth((s) => s.edition))
   const [reducedMotion] = useState(prefersReducedMotion)
   const revealed = useBooth((s) => s.revealed)
-  const { phase, celebrate, skip } = useReveal(edition.rare, reducedMotion || revealed)
+  const { phase, celebrate, skip } = useReveal(edition.rare, reducedMotion || revealed, EDITION_SFX[edition.id])
   const { setValue, retake, goToPicker } = useBooth.getState()
   // The current layout's version (photo window etc.); the glare's photo hole follows it.
   const template = resolveTemplate(getTemplate(templateId), values)

@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { REVEAL_TIMING, useReveal } from './useReveal'
+import * as sfx from '../audio/sfx'
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -52,4 +53,25 @@ test('unmounting mid-reveal leaves no pending timers', () => {
   const { unmount } = renderHook(() => useReveal(true, false))
   unmount()
   expect(vi.getTimerCount()).toBe(0)
+})
+
+test('the card whooshes as it flips and plays the edition sound face up', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  renderHook(() => useReveal(true, false, 'rare2'))
+  act(() => { vi.advanceTimersByTime(REVEAL_TIMING.back) })
+  expect(play).toHaveBeenLastCalledWith('flip')
+  act(() => { vi.advanceTimersByTime(REVEAL_TIMING.flip) })
+  expect(play).toHaveBeenLastCalledWith('rare2')
+  play.mockRestore()
+})
+
+test('no edition sound for common cards or when the card starts face up', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  renderHook(() => useReveal(false, false))
+  act(() => { vi.advanceTimersByTime(REVEAL_TIMING.back + REVEAL_TIMING.flip) })
+  expect(play.mock.calls).toEqual([['flip']])
+  play.mockClear()
+  renderHook(() => useReveal(true, true, 'rare3'))
+  expect(play).not.toHaveBeenCalled()
+  play.mockRestore()
 })

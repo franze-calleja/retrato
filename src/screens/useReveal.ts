@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { play, type Sfx } from '../audio/sfx'
 
 export type RevealPhase = 'back' | 'flip' | 'shown'
 
 export const REVEAL_TIMING = { back: 250, flip: 600, celebrate: 1200 } as const
 
-export function useReveal(rare: boolean, reducedMotion: boolean) {
+/** `sound` plays as the card lands face up (the edition's arpeggio). */
+export function useReveal(rare: boolean, reducedMotion: boolean, sound?: Sfx) {
   const [phase, setPhase] = useState<RevealPhase>(reducedMotion ? 'shown' : 'back')
   const [celebrate, setCelebrate] = useState(false)
   const phaseRef = useRef(phase)
@@ -13,8 +15,9 @@ export function useReveal(rare: boolean, reducedMotion: boolean) {
     if (phaseRef.current === 'shown') return
     phaseRef.current = 'shown'
     setPhase('shown')
+    if (sound) play(sound)
     if (rare && !reducedMotion) setCelebrate(true)
-  }, [rare, reducedMotion])
+  }, [rare, reducedMotion, sound])
 
   // Advance back → flip → shown.
   useEffect(() => {
@@ -23,6 +26,7 @@ export function useReveal(rare: boolean, reducedMotion: boolean) {
       if (phase === 'flip') return show()
       phaseRef.current = 'flip'
       setPhase('flip')
+      play('flip')
     }, REVEAL_TIMING[phase])
     return () => clearTimeout(id)
   }, [phase, show])
