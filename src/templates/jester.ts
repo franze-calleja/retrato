@@ -2,7 +2,7 @@ import { BLUE, CARD_WHITE, CREAM, CREAM_DARK, GOLD, NAVY, OUTLINE, PINK, PURPLE,
 import { dither, drawTextVertical } from './detail'
 import { css, fill, outline, panel, withDropShadow } from './draw'
 import { drawTextCentered, wrapText } from './pixelFont'
-import { drawTitle, titleFit } from './pixelFontLarge'
+import { drawTitle } from './pixelFontLarge'
 import type { BadgeAnchor } from '../editions/apply'
 import type { Template, TemplateVariant } from './types'
 
@@ -112,8 +112,9 @@ function fullOverlay(ctx: CanvasRenderingContext2D, values: Record<string, strin
   panel(ctx, OUTLINE, B.x, B.y, B.w, B.h, 2)
   panel(ctx, CARD_WHITE, B.x + 1, B.y + 1, B.w - 2, B.h - 2, 1)
   const cx = B.x + B.w / 2
-  drawTitle(ctx, values.name ?? '', cx, B.y + 1, B.w - 6, OUTLINE, undefined, 1)
-  drawTextCentered(ctx, titleFit(values.effect ?? '', B.w - 6, 0).text, cx, B.y + 15, RED_DARK)
+  drawTitle(ctx, values.name ?? '', cx, B.y, B.w - 6, OUTLINE, undefined, 1)
+  // Two short lines fit under the name, like the classic layout (no mid-word cuts).
+  wrapText(values.effect ?? '', B.w - 6, 2).forEach((line, i) => drawTextCentered(ctx, line, cx, B.y + 12 + i * 6, RED_DARK))
 }
 
 const shadowed = (draw: (c: CanvasRenderingContext2D) => void) => (ctx: CanvasRenderingContext2D) =>

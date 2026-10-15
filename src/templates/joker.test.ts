@@ -76,3 +76,11 @@ test('full art: the overlay only covers the corner plates and the bottom banner'
   const bad = rects.filter(([x, y, w, h]) => !allowed.some((a) => x >= a.x && y >= a.y && x + w <= a.x + a.w && y + h <= a.y + a.h))
   expect(bad).toEqual([])
 })
+
+test('full art wraps the effect onto two lines instead of cutting a word', async () => {
+  const font = await import('./pixelFont')
+  const spy = vi.spyOn(font, 'drawTextCentered')
+  const t = resolveTemplate(joker(), { layout: 'fullart' })
+  t.overlay!(document.createElement('canvas').getContext('2d')!, { name: 'JOKER', effect: 'RETRIGGERS LAUGHTER', layout: 'fullart' })
+  expect(spy.mock.calls.map((c) => c[1])).toEqual(expect.arrayContaining(['RETRIGGERS', 'LAUGHTER']))
+})
