@@ -113,82 +113,86 @@ export function Editor() {
   )
 
   return (
-    <section className="screen">
-      <h2>{template.name}</h2>
-      <div className="reveal" data-phase={phase} onClick={phase === 'shown' ? undefined : skip}>
-        <div className="reveal-card">
-          <div className="reveal-face reveal-front">
-            <TiltCard>
-              {reducedMotion ? (
-                <div className="card-shadow">{card}</div>
-              ) : (
-                <CardGlare template={template} edition={edition}>
-                  {card}
-                </CardGlare>
-              )}
-            </TiltCard>
+    <section className="screen editor">
+      <div className="editor-card" style={{ '--card-aspect': template.size.w / template.size.h } as CSSProperties}>
+        <div className="reveal" data-phase={phase} onClick={phase === 'shown' ? undefined : skip}>
+          <div className="reveal-card">
+            <div className="reveal-face reveal-front">
+              <TiltCard>
+                {reducedMotion ? (
+                  <div className="card-shadow">{card}</div>
+                ) : (
+                  <CardGlare template={template} edition={edition}>
+                    {card}
+                  </CardGlare>
+                )}
+              </TiltCard>
+            </div>
+            <div className="reveal-face reveal-back">
+              <CardBackCanvas template={template} scale={PREVIEW_SCALE} />
+            </div>
           </div>
-          <div className="reveal-face reveal-back">
-            <CardBackCanvas template={template} scale={PREVIEW_SCALE} />
+          {/* Always mounted so the banner text is announced when it appears. */}
+          <div className="reveal-live" role="status" data-testid="reveal-live">
+            {celebrate && <div className="edition-banner">{edition.name.toUpperCase()}!</div>}
           </div>
+          {celebrate && (
+            <>
+              {Array.from({ length: 10 }, (_, i) => (
+                <span key={i} className="sparkle" style={{ '--a': `${i * 36}deg` } as CSSProperties} />
+              ))}
+            </>
+          )}
         </div>
-        {/* Always mounted so the banner text is announced when it appears. */}
-        <div className="reveal-live" role="status" data-testid="reveal-live">
-          {celebrate && <div className="edition-banner">{edition.name.toUpperCase()}!</div>}
-        </div>
-        {celebrate && (
-          <>
-            {Array.from({ length: 10 }, (_, i) => (
-              <span key={i} className="sparkle" style={{ '--a': `${i * 36}deg` } as CSSProperties} />
-            ))}
-          </>
+        {phase === 'shown' && edition.hasEffect && !celebrate && (
+          <p className="edition-note">{edition.name} edition</p>
         )}
       </div>
-      {phase === 'shown' && edition.hasEffect && !celebrate && (
-        <p className="edition-note">{edition.name} edition</p>
-      )}
 
-      <div className="fields">
-        {template.fields.map((f) => (
-          <label key={f.key}>
-            {f.label}
-            {f.options ? (
-              <select value={values[f.key] ?? f.options[0].value} onChange={(e) => setValue(f.key, e.target.value)}>
-                {f.options.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                value={values[f.key] ?? ''}
-                maxLength={f.maxLength * 2 /* emoji are 2 UTF-16 units; the store clamps by code point */}
-                onChange={(e) => setValue(f.key, fitEdit(e.target.value, e.target.selectionStart ?? e.target.value.length, f.maxLength))}
-              />
-            )}
+      <div className="editor-side">
+        <h2>{template.name}</h2>
+        <div className="fields">
+          {template.fields.map((f) => (
+            <label key={f.key} className={!f.options && f.maxLength <= 2 ? 'field-short' : undefined}>
+              {f.label}
+              {f.options ? (
+                <select value={values[f.key] ?? f.options[0].value} onChange={(e) => setValue(f.key, e.target.value)}>
+                  {f.options.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={values[f.key] ?? ''}
+                  maxLength={f.maxLength * 2 /* emoji are 2 UTF-16 units; the store clamps by code point */}
+                  onChange={(e) => setValue(f.key, fitEdit(e.target.value, e.target.selectionStart ?? e.target.value.length, f.maxLength))}
+                />
+              )}
+            </label>
+          ))}
+        </div>
+
+        <div className="row">
+          <button className="btn gold" onClick={download}>Download PNG</button>
+          <label className="copies">
+            Copies
+            <select value={copies} onChange={(e) => setCopies(e.target.value)}>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="fill">Fill page</option>
+            </select>
           </label>
-        ))}
-      </div>
-
-      <div className="row">
-        <button className="btn gold" onClick={download}>Download PNG</button>
-        <label className="copies">
-          Copies
-          <select value={copies} onChange={(e) => setCopies(e.target.value)}>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="4">4</option>
-            <option value="fill">Fill page</option>
-          </select>
-        </label>
-        <button ref={printBtn} className="btn blue" onClick={startPrint}>Print</button>
-        <button className="btn green" onClick={addToTray} disabled={trayFull}>
-          {trayFull ? `Tray full (${TRAY_MAX})` : 'Add to tray'}
-        </button>
-      </div>
-      <p className="editor-note" role="status">{note}</p>
-      <div className="row">
-        <button className="btn red" onClick={retake}>Retake</button>
-        <button className="btn" onClick={goToPicker}>Change card</button>
+          <button ref={printBtn} className="btn blue" onClick={startPrint}>Print</button>
+          <button className="btn green" onClick={addToTray} disabled={trayFull}>
+            {trayFull ? `Tray full (${TRAY_MAX})` : 'Add to tray'}
+          </button>
+        </div>
+        <p className="editor-note" role="status">{note}</p>
+        <div className="row">
+          <button className="btn red" onClick={retake}>Retake</button>
+          <button className="btn" onClick={goToPicker}>Change card</button>
+        </div>
       </div>
 
       {job && <PrintSheets key={job.n} pages={job.pages} paper={job.paper} onReady={() => window.print()} />}

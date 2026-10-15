@@ -331,6 +331,28 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .fields input:focus, .fields select:focus { border-color: var(--gold); outline: none; }
 
+/* Phones and portrait tablets: one column, card at full size (the wrappers don't affect layout). */
+.editor-card, .editor-side { display: contents; }
+.editor-side h2 { order: -1; }
+/* Desktop: card left, controls right; the card shrinks to fit the screen height so nothing scrolls. */
+@media (min-width: 900px) {
+  .editor { flex-direction: row; justify-content: center; align-items: center; gap: 48px; }
+  .editor-card {
+    display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0;
+    flex: 0 1 min(520px, calc((100dvh - 220px) * var(--card-aspect)));
+  }
+  .editor-card .reveal { width: 100%; }
+  .editor-side { display: flex; flex-direction: column; gap: 16px; flex: 0 0 min(440px, 42%); }
+  .editor-side h2 { order: 0; text-align: left; margin: 0; }
+  .editor-side .fields { width: 100%; gap: 10px; grid-template-columns: repeat(3, 1fr); }
+  /* Label beside its input keeps four fields within a 720px-tall screen. */
+  .editor-side .fields label { grid-column: 1 / -1; grid-template-columns: 112px 1fr; align-items: center; gap: 8px; }
+  /* Single-digit fields (e.g. stats) sit three across. */
+  .editor-side .fields label.field-short { grid-column: auto; grid-template-columns: auto 1fr; }
+  .editor-side .fields input, .editor-side .fields select { min-width: 0; padding: 8px; }
+  .editor-side .row { justify-content: flex-start; }
+}
+
 /* Card reveal */
 .reveal { position: relative; perspective: 900px; width: min(100%, 520px); }
 .reveal[data-phase='back'], .reveal[data-phase='flip'] { cursor: pointer; }

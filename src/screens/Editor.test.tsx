@@ -226,3 +226,36 @@ test('the glare cuts its photo hole for the current layout (full-art Joker)', as
   expect(spy.mock.calls.at(-1)![0].photoRect).toEqual({ x: 4, y: 4, w: 88, h: 124 })
   spy.mockRestore()
 })
+
+test('the card and the controls sit in their own columns', () => {
+  const { container } = open(true)
+  const card = container.querySelector('.editor-card')
+  const side = container.querySelector('.editor-side')
+  expect(card?.querySelector('.reveal')).toBeInstanceOf(HTMLElement)
+  expect(side?.querySelector('.reveal')).toBeNull()
+  expect(side?.querySelector('h2')?.textContent).toBe(getTemplate('ticket').name)
+  for (const name of ['Download PNG', 'Print', 'Add to tray', 'Retake', 'Change card']) {
+    expect(side?.contains(screen.getByRole('button', { name }))).toBe(true)
+  }
+  expect(side?.contains(screen.getByLabelText(/copies/i))).toBe(true)
+})
+
+test('very short fields are marked so desktop can set them side by side', () => {
+  useBooth.setState(
+    {
+      ...useBooth.getInitialState(),
+      screen: 'editor',
+      templateId: 'trading',
+      edition: 'common',
+      values: resolveDefaults(getTemplate('trading')),
+      capture: { source: document.createElement('canvas'), w: 480, h: 512 },
+      revealed: true,
+    },
+    true,
+  )
+  render(<Editor />)
+  const label = (re: RegExp) => screen.getByLabelText(re).closest('label')
+  expect(label(/^charm/i)?.classList.contains('field-short')).toBe(true)
+  expect(label(/^luck/i)?.classList.contains('field-short')).toBe(true)
+  expect(label(/^name/i)?.classList.contains('field-short')).toBe(false)
+})
