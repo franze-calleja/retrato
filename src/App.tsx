@@ -11,6 +11,7 @@ import { useBooth } from './store/booth'
 import { useOperator } from './store/operator'
 import { useSound } from './store/sound'
 import { useTray } from './store/tray'
+import { SoundButton } from './ui/SoundButton'
 import { SwirlBackground } from './ui/SwirlBackground'
 import { registerTap } from './ui/taps'
 import { useIdleReset } from './ui/useIdleReset'
@@ -67,6 +68,7 @@ export default function App() {
       <main className="app">
         <h1 className="logo" tabIndex={-1} onClick={onLogoTap}>RETRATO</h1>
         <TrayButton />
+        <SoundButton keysOff={panelOpen} />
         {trayOpen ? (
           <Tray />
         ) : (
