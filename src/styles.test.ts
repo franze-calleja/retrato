@@ -54,3 +54,9 @@ test('the print comes out of the side: the camera makes room sideways on wide sc
   expect(rule(".camera-stage.printing[data-side='front'] .camera-holder > .tilt")).toMatch(/translate:\s*16cqw/)
   expect(rule(".camera-stage.printing[data-side='back'] .camera-holder > .tilt")).toMatch(/translate:\s*-16cqw/)
 })
+
+test('the operator panel scrolls inside the screen, so Close stays reachable on short screens', () => {
+  const body = rule('.operator-panel') ?? ''
+  expect(body).toMatch(/max-height:\s*calc\(100dvh - 32px\)/)
+  expect(body).toMatch(/overflow-y:\s*auto/)
+})

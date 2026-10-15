@@ -441,6 +441,8 @@ h2 { font: 700 26px/1.2 var(--font); text-align: center; margin: 0 0 16px; text-
 }
 .operator-panel {
   display: grid; gap: 14px; width: min(100%, 440px); padding: 20px;
+  /* The Sound section made it taller than a laptop screen: scroll inside it (backdrop padding 16px × 2). */
+  max-height: calc(100dvh - 32px); overflow-y: auto;
   background: var(--panel); border: 3px solid var(--dark); border-radius: 8px; box-shadow: 0 6px 0 var(--dark);
 }
 .operator-panel:focus { outline: none; }
