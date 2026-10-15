@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAudio } from './audio/useAudio'
+import { useTapSounds } from './audio/useTapSounds'
 import { Booth } from './screens/Booth'
 import { Editor } from './screens/Editor'
 import { OperatorPanel } from './screens/OperatorPanel'
@@ -16,6 +17,7 @@ import { useIdleReset } from './ui/useIdleReset'
 
 export default function App() {
   useAudio()
+  useTapSounds()
   const screen = useBooth((s) => s.screen)
   const trayOpen = useTray((s) => s.open)
   const wasTrayOpen = useRef(false)
