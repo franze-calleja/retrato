@@ -1,10 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 import { useBooth } from '../store/booth'
 import { useOperator } from '../store/operator'
 import { useStats } from '../store/stats'
 import { templates } from '../templates/registry'
 import { Shop } from './Shop'
+import * as sfx from '../audio/sfx'
 
 beforeEach(() => {
   localStorage.clear()
@@ -157,4 +158,14 @@ test('rerolling while every card is shown does not replay the spin', () => {
   fireEvent.click(screen.getByRole('button', { name: /see all cards/i }))
   fireEvent.click(screen.getByRole('button', { name: /reroll/i }))
   expect(document.querySelectorAll('.spin-in')).toHaveLength(0)
+})
+
+test('Reroll plays its own shuffle sound instead of a tick', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  render(<Shop />)
+  const reroll = screen.getByRole('button', { name: /reroll/i })
+  expect(reroll.hasAttribute('data-sfx')).toBe(true)
+  fireEvent.click(reroll)
+  expect(play).toHaveBeenCalledWith('reroll')
+  play.mockRestore()
 })

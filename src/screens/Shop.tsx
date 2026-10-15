@@ -14,6 +14,7 @@ import { getTemplate, templates } from '../templates/registry'
 import type { Template } from '../templates/types'
 import { TiltCard } from '../ui/TiltCard'
 import { StampCanvas } from './StampCanvas'
+import { play } from '../audio/sfx'
 
 const TEMPLATE_IDS = templates.map((t) => t.id)
 const BULBS_ACROSS = 12
@@ -166,7 +167,8 @@ export function Shop() {
         <div className="counter-top">
           <div className="counter-buttons">
             <button className="btn red big" onClick={() => selectPack('classic')}>Open pack</button>
-            <button className="btn green big" onClick={() => {
+            <button className="btn green big" data-sfx onClick={() => {
+                play('reroll')
                 setFeatured((cur) => nextFeatured(TEMPLATE_IDS, cur, Math.random))
                 setRolls((n) => n + 1)
               }}

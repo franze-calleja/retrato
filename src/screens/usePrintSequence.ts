@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { play, type Voice } from '../audio/sfx'
 import { isAdvanceKey } from '../ui/keys'
 
 export type PrintPhase = 'flash' | 'eject' | 'develop' | 'handoff' | 'done'
@@ -10,7 +11,18 @@ const NEXT: Record<Exclude<PrintPhase, 'done'>, PrintPhase> = { flash: 'eject', 
 /** Instant print: flash → eject → develop → handoff → done. Reduced motion is done at once. */
 export function usePrintSequence(reducedMotion: boolean) {
   const [phase, setPhase] = useState<PrintPhase>(reducedMotion ? 'done' : 'flash')
-  const skip = useCallback(() => setPhase('done'), [])
+  const whirr = useRef<Voice | null>(null)
+  const skip = useCallback(() => {
+    whirr.current?.stop()
+    setPhase('done')
+  }, [])
+
+  // Flash zap, motor whirr as the print slides out, a chime as it's handed over.
+  useEffect(() => {
+    if (phase === 'flash') play('flash')
+    if (phase === 'eject') whirr.current = play('whirr')
+    if (phase === 'handoff') play('chime')
+  }, [phase])
 
   useEffect(() => {
     if (phase === 'done') return

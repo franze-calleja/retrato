@@ -8,6 +8,7 @@ import { resolveDefaults } from '../templates/fields'
 import * as registry from '../templates/registry'
 import { getTemplate } from '../templates/registry'
 import { Editor } from './Editor'
+import * as sfx from '../audio/sfx'
 
 // Restore spies even when an assertion fails, so they never leak into later tests.
 afterEach(() => vi.restoreAllMocks())
@@ -258,4 +259,25 @@ test('very short fields are marked so desktop can set them side by side', () => 
   expect(label(/^charm/i)?.classList.contains('field-short')).toBe(true)
   expect(label(/^luck/i)?.classList.contains('field-short')).toBe(true)
   expect(label(/^name/i)?.classList.contains('field-short')).toBe(false)
+})
+
+test('Download, Print and Add to tray confirm with their own sound', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  open(true)
+  for (const name of [/download png/i, /^print$/i, /add to tray/i]) {
+    const b = screen.getByRole('button', { name })
+    expect(b.hasAttribute('data-sfx')).toBe(true)
+    fireEvent.click(b)
+  }
+  expect(play.mock.calls.filter((c) => c[0] === 'confirm')).toHaveLength(3)
+})
+
+test('a card that cannot join a full tray bonks', async () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(function (cb: BlobCallback) { setTimeout(() => cb(new Blob(['x']))) })
+  open(true)
+  fireEvent.click(screen.getByRole('button', { name: /add to tray/i }))
+  for (let i = 0; i < TRAY_MAX; i++)
+    useTray.getState().add({ templateId: 'stamp', name: 'Stamp', edition: 'common', url: `blob:${i}`, size: { w: 50, h: 62 }, copies: 1 })
+  await waitFor(() => expect(play).toHaveBeenCalledWith('bonk'))
 })

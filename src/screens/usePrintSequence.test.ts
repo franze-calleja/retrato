@@ -1,6 +1,7 @@
 import { act, fireEvent, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { PRINT_TIMING, usePrintSequence } from './usePrintSequence'
+import * as sfx from '../audio/sfx'
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -46,4 +47,25 @@ test('unmount clears timers', () => {
   const { unmount } = renderHook(() => usePrintSequence(false))
   unmount()
   expect(vi.getTimerCount()).toBe(0)
+})
+
+test('the print flashes, whirrs out and chimes at handoff; skipping stops the whirr', () => {
+  const stop = vi.fn()
+  const play = vi.spyOn(sfx, 'play').mockReturnValue({ stop })
+  const { result } = renderHook(() => usePrintSequence(false))
+  expect(play).toHaveBeenLastCalledWith('flash')
+  act(() => { vi.advanceTimersByTime(PRINT_TIMING.flash) })
+  expect(play).toHaveBeenLastCalledWith('whirr')
+  act(() => result.current.skip())
+  expect(stop).toHaveBeenCalled()
+  expect(play.mock.calls.map((c) => c[0])).toEqual(['flash', 'whirr'])
+  play.mockRestore()
+})
+
+test('a print left to run plays its chime at handoff', () => {
+  const play = vi.spyOn(sfx, 'play').mockReturnValue(null)
+  renderHook(() => usePrintSequence(false))
+  for (const ms of [PRINT_TIMING.flash, PRINT_TIMING.eject, PRINT_TIMING.develop]) act(() => { vi.advanceTimersByTime(ms) })
+  expect(play).toHaveBeenLastCalledWith('chime')
+  play.mockRestore()
 })
