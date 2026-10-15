@@ -1,9 +1,12 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 import { getEdition } from '../editions/registry'
 import { resolveDefaults } from '../templates/fields'
 import { placeholderPhoto } from '../templates/placeholder'
 import { getTemplate } from '../templates/registry'
 import { composeStamp } from './composeStamp'
+
+// Restore spies even when an assertion fails, so they never leak into later tests.
+afterEach(() => vi.restoreAllMocks())
 
 const t = getTemplate('stamp')
 const photo = placeholderPhoto(t)

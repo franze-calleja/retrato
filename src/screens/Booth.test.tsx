@@ -1,10 +1,13 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 import { useBooth } from '../store/booth'
 import { useStats } from '../store/stats'
 import * as registry from '../templates/registry'
 import { getTemplate } from '../templates/registry'
 import { Booth } from './Booth'
+
+// Restore spies even when an assertion fails, so they never leak into later tests.
+afterEach(() => vi.restoreAllMocks())
 
 test('upload control stays in the tab order (camera fallback must be keyboard reachable)', () => {
   render(<Booth />)

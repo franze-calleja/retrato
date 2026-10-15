@@ -9,6 +9,9 @@ import * as registry from '../templates/registry'
 import { getTemplate } from '../templates/registry'
 import { Editor } from './Editor'
 
+// Restore spies even when an assertion fails, so they never leak into later tests.
+afterEach(() => vi.restoreAllMocks())
+
 afterEach(() => useBooth.setState(useBooth.getInitialState(), true))
 
 function open(revealed: boolean) {
@@ -200,5 +203,26 @@ test('a field with options is a select that sets the value', () => {
   expect(select.tagName).toBe('SELECT')
   fireEvent.change(select, { target: { value: 'b' } })
   expect(useBooth.getState().values.mood).toBe('b')
+  spy.mockRestore()
+})
+
+test('the glare cuts its photo hole for the current layout (full-art Joker)', async () => {
+  const glare = await import('./glare')
+  const spy = vi.spyOn(glare, 'glareClip')
+  useBooth.setState(
+    {
+      ...useBooth.getInitialState(),
+      screen: 'editor',
+      templateId: 'jester',
+      edition: 'common',
+      values: { name: 'JOKER', effect: 'X', layout: 'fullart' },
+      capture: { source: document.createElement('canvas'), w: 600, h: 800 },
+      revealed: true,
+    },
+    true,
+  )
+  render(<Editor />)
+  expect(spy).toHaveBeenCalled()
+  expect(spy.mock.calls.at(-1)![0].photoRect).toEqual({ x: 4, y: 4, w: 88, h: 124 })
   spy.mockRestore()
 })

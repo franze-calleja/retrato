@@ -1,8 +1,11 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 import { templates } from '../templates/registry'
 import { PACKS } from './catalog'
 import { PACK_ART_SIZE, TEAR_ROW, packArt, packArtParts } from './packArt'
 import { packViewfinder } from './viewfinder'
+
+// Restore spies even when an assertion fails, so they never leak into later tests.
+afterEach(() => vi.restoreAllMocks())
 
 test.each(PACKS.map((p) => [p.id, p] as const))('%s viewfinder: 3:4 window, named after the pack, not selectable', (_id, pack) => {
   const v = packViewfinder(pack)

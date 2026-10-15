@@ -9,6 +9,7 @@ import { isPrintShortcut } from '../ui/printShortcut'
 import { TRAY_MAX, useTray } from '../store/tray'
 import { fitEdit } from '../templates/fields'
 import { getTemplate } from '../templates/registry'
+import { resolveTemplate } from '../templates/resolve'
 import { SNAPSHOT_ANGLE } from '../editions/angle'
 import { getEdition } from '../editions/registry'
 import { TiltCard } from '../ui/TiltCard'
@@ -27,7 +28,8 @@ export function Editor() {
   const revealed = useBooth((s) => s.revealed)
   const { phase, celebrate, skip } = useReveal(edition.rare, reducedMotion || revealed)
   const { setValue, retake, goToPicker } = useBooth.getState()
-  const template = getTemplate(templateId)
+  // The current layout's version (photo window etc.); the glare's photo hole follows it.
+  const template = resolveTemplate(getTemplate(templateId), values)
   const paper = useOperator((s) => s.paper)
   const trayFull = useTray((s) => s.items.length >= TRAY_MAX)
   const [copies, setCopies] = useState('1')

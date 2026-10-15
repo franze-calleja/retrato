@@ -139,7 +139,7 @@ export const jester: Template = {
   fields: [
     { key: 'name', label: 'Name', default: 'JOKER', maxLength: 12 },
     { key: 'effect', label: 'Effect', default: () => randomJokerEffect(), maxLength: 36, perCapture: true },
-    { key: 'layout', label: 'Layout', default: () => rollJokerLayout(), maxLength: 8, perCapture: true, options: JOKER_LAYOUTS },
+    { key: 'layout', label: 'Layout', default: () => rollJokerLayout(), maxLength: Math.max(...JOKER_LAYOUTS.map((o) => o.value.length)), perCapture: true, options: JOKER_LAYOUTS },
   ],
   variant: (values) => VARIANTS[layoutOf(values.layout)],
   render(ctx, values) {

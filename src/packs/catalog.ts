@@ -81,7 +81,7 @@ const ringed = (ctx: CanvasRenderingContext2D, cx: number, top: number) => {
 }
 const hat = (ctx: CanvasRenderingContext2D, cx: number, top: number) => {
   drawBitmap(ctx, JOKER_CAP, cx - 11, top + 4, RED, 2)
-  for (const x of [cx - 13, cx + 10, cx - 2]) fill(ctx, GOLD, x, top + (x === cx - 2 ? 2 : 2), 3, 3)
+  for (const x of [cx - 13, cx + 10, cx - 2]) fill(ctx, GOLD, x, top + 2, 3, 3)
 }
 
 export const PACKS: readonly PackDef[] = [

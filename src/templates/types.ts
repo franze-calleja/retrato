@@ -40,7 +40,10 @@ export interface Template {
   printSizeMm: { w: number; h: number }
   /** Draws frame and text at art scale. Must tolerate missing values. */
   render(ctx: CanvasRenderingContext2D, values: Record<string, string>): void
-  /** Layout-dependent overrides (e.g. the Joker's layouts), chosen from the card's values. */
+  /**
+   * Layout-dependent overrides (e.g. the Joker's layouts), chosen from the card's values. Return the same object for
+   * the same layout (e.g. from a constant table): resolved templates are memoised on that identity.
+   */
   variant?(values: Record<string, string>): TemplateVariant
   /** Art drawn over the photo (full-art layouts), at art scale. */
   overlay?(ctx: CanvasRenderingContext2D, values: Record<string, string>): void
