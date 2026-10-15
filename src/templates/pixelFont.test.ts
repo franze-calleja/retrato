@@ -79,3 +79,8 @@ test('ß and ﬁ draw as a letter, not as ?', () => {
   expect(glyphFor('ß')).toBe(GLYPHS.S)
   expect(glyphFor('ﬁ')).toBe(GLYPHS.F)
 })
+
+test('the small font has ♥ and № too, so titles that fall back keep them', () => {
+  expect(GLYPHS['♥']).toBeDefined()
+  expect(GLYPHS['№']).toBeDefined()
+})

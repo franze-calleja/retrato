@@ -1,4 +1,6 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
+
+afterEach(() => vi.restoreAllMocks())
 import { resolveDefaults } from './fields'
 import { voucher } from './voucher'
 
@@ -9,13 +11,11 @@ test('expiry reads VALID UNTIL / TODAY by default', () => {
 test('the stub carries a round seal instead of KEEP THIS', async () => {
   const font = await import('./pixelFont')
   const texts: string[] = []
-  const spy = vi.spyOn(CanvasRenderingContext2D.prototype, 'fillRect')
   const draw = vi.spyOn(font, 'drawTextCentered').mockImplementation((_c, t) => void texts.push(t))
   voucher.render(document.createElement('canvas').getContext('2d')!, resolveDefaults(voucher))
   expect(texts).not.toContain('KEEP')
   expect(texts).toEqual(expect.arrayContaining(['VALID UNTIL', 'PIXEL', 'BOOTH']))
   draw.mockRestore()
-  spy.mockRestore()
 })
 
 test('long text stays inside the card', () => {

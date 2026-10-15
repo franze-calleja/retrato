@@ -27,7 +27,7 @@ Bring the cards up to the detail level of the booth camera. Round 1 adds a large
 
 - `BIG_GLYPHS`: 5 columns × 7 rows bitmaps for A–Z, 0–9, `. , - ! ? ' & / : # ¢ ★ ♥ №` and space; unknown characters draw as `?`. Letters uppercase per character the same way as the 3×5 font (ß/ﬁ take one slot).
 - Advance 6 px (5 + 1 gap). `measureBig(text, scale)`, `drawBig(ctx, text, x, y, color, scale, shadow?)`, `drawBigCentered(...)`.
-- `drawTitle(ctx, text, cx, y, maxWidth, color, shadow?, maxScale = 2) → { font: 'big' | 'small'; scale: number; width: number }`: tries big font at `maxScale…1`, then the 3×5 font at 2…1; draws the first that fits `maxWidth`, centred, vertically centred on a 14 px line (`y` = top of the line); if nothing fits it draws the 3×5 font at scale 1 truncated to fit. Returns what it drew (for tests).
+- `drawTitle(ctx, text, cx, y, maxWidth, color, shadow?, maxScale = 2) → { font: 'big' | 'small'; scale: number; width: number }`: tries big font at `maxScale…1`, then the 3×5 font at scale 1; draws the first that fits `maxWidth`, centred, vertically centred on a 14 px line (`y` = top of the line); if nothing fits it draws the 3×5 font at scale 1 truncated to fit. Returns what it drew (for tests).
 
 ## Detail helpers (`src/templates/detail.ts`)
 
@@ -39,7 +39,7 @@ All take art-pixel coordinates and draw with `fill` (so editions/overlays treat 
 - `cornerOrnaments(ctx, rect, color)`: a 5×5 flourish bitmap in each inner corner, mirrored.
 - `guilloche(ctx, rect, color, period, amplitude)`: two interleaved sine-wave 1 px lines repeated vertically every 4 px (banknote-style pattern), clipped to the rect.
 - `ring(ctx, cx, cy, r, color)`: 1 px pixel circle outline (midpoint algorithm).
-- `postmark(ctx, cx, cy, r, color)`: two concentric rings plus three wavy cancel lines to the right.
+- `postmark(ctx, cx, cy, r, color)`: two concentric rings plus three wavy cancel lines to their left.
 - `drawTextVertical(ctx, text, x, y, color, font: 'big' | 'small', shadow?)`: text rotated 90° counter-clockwise (reads bottom to top), via exact quarter-turn transforms so pixels stay crisp.
 
 ## Card layouts (art sizes unchanged)

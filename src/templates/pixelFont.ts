@@ -56,6 +56,8 @@ export const GLYPHS: Record<string, readonly string[]> = {
   '*': ['101', '010', '101', '000', '000'],
   '¢': ['010', '111', '100', '111', '010'],
   '★': ['010', '111', '010', '101', '000'],
+  '♥': ['101', '111', '111', '010', '000'],
+  '№': ['101', '111', '111', '101', '011'],
 }
 
 // Uppercase per character: ß→SS or ﬁ→FI would otherwise grow the text past its slot.

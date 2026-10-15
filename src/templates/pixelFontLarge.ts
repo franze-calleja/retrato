@@ -79,7 +79,7 @@ export function drawBigCentered(ctx: CanvasRenderingContext2D, text: string, cx:
 }
 
 /**
- * Title on a 14 px line starting at `y`, centred on `cx`: the big font at maxScale…1, then the small font at 2…1,
+ * Title on a 14 px line starting at `y`, centred on `cx`: the big font at maxScale…1, then the small font,
  * whichever first fits maxWidth; if nothing fits, the small font truncated to fit. Returns what it drew.
  */
 export function drawTitle(
@@ -99,12 +99,11 @@ export function drawTitle(
       return { font: 'big', scale: s, width: w }
     }
   }
-  for (const s of [2, 1]) {
-    const w = measureText(text, s)
-    if (w <= maxWidth) {
-      drawTextCentered(ctx, text, cx, y + Math.floor((TITLE_LINE - 5 * s) / 2), color, s, shadow)
-      return { font: 'small', scale: s, width: w }
-    }
+  // (A small-font scale-2 step would never win: big scale 1 always fits more characters.)
+  const w = measureText(text)
+  if (w <= maxWidth) {
+    drawTextCentered(ctx, text, cx, y + Math.floor((TITLE_LINE - 5) / 2), color, 1, shadow)
+    return { font: 'small', scale: 1, width: w }
   }
   let cut = Array.from(text)
   while (cut.length && measureText(cut.join('')) > maxWidth) cut = cut.slice(0, -1)

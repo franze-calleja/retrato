@@ -11,7 +11,7 @@ const SHADOW_OFFSET = 3
 const PHOTO = { x: 6, y: 6, w: 72, h: 80 }
 const CUT = 146
 const TEXT_CX = 113 // center of the 84..142 text column
-const STUB_CX = 167
+const SEAL_CX = 166 // a pixel in from the stub centre so the seal clears the gold keyline
 
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
@@ -20,7 +20,8 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   // Double border with corner flourishes.
   outline(ctx, CREAM, 3, 3, BW - 6, BH - 6)
   outline(ctx, GOLD, 5, 5, BW - 10, BH - 10)
-  cornerOrnaments(ctx, { x: 7, y: 7, w: BW - 14, h: BH - 14 }, GOLD)
+  // Flourishes frame the text and stub side (the photo mat would hide the left ones); none under the badge.
+  cornerOrnaments(ctx, { x: 84, y: 7, w: BW - 91, h: BH - 14 }, GOLD, ['tr'])
 
   panel(ctx, CREAM, PHOTO.x - 3, PHOTO.y - 3, PHOTO.w + 6, PHOTO.h + 6, 1)
   outline(ctx, OUTLINE, PHOTO.x - 1, PHOTO.y - 1, PHOTO.w + 2, PHOTO.h + 2)
@@ -45,11 +46,11 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   drawTextCentered(ctx, 'PIXEL BOOTH', TEXT_CX, 80, GOLD, 1, BLUE_DARK)
 
   // Round seal on the stub.
-  ring(ctx, STUB_CX, 48, 15, CREAM)
-  ring(ctx, STUB_CX, 48, 13, GOLD)
-  drawBigCentered(ctx, '★', STUB_CX, 37, GOLD)
-  drawTextCentered(ctx, 'PIXEL', STUB_CX, 47, CREAM)
-  drawTextCentered(ctx, 'BOOTH', STUB_CX, 54, CREAM)
+  ring(ctx, SEAL_CX, 48, 14, CREAM)
+  ring(ctx, SEAL_CX, 48, 12, GOLD)
+  drawBigCentered(ctx, '★', SEAL_CX, 37, GOLD)
+  drawTextCentered(ctx, 'PIXEL', SEAL_CX, 44, CREAM)
+  drawTextCentered(ctx, 'BOOTH', SEAL_CX, 51, CREAM)
 }
 
 export const voucher: Template = {

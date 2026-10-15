@@ -13,9 +13,6 @@ const STUB = 148
 const TEXT_CX = 109
 const STUB_CX = 168
 
-/** Headline ink; dark on gold so it stays readable. */
-export const ADMIT_TEXT = OUTLINE
-
 const pad = (n: number, len: number) => String(n).padStart(len, '0')
 
 export function todayIso(now = new Date()): string {
@@ -24,18 +21,6 @@ export function todayIso(now = new Date()): string {
 
 export function randomSerial(rand: () => number = Math.random): string {
   return `NO. ${pad(Math.floor(rand() * 1_000_000), 6)}`
-}
-
-const STUB_CHARS = 9
-
-/** Serial words as stub lines: words longer than the stub wrap onto the next line; at most 3 lines. */
-export function serialLines(serial: string): string[] {
-  const lines: string[] = []
-  for (const word of serial.split(' ').filter(Boolean)) {
-    const cps = Array.from(word)
-    for (let i = 0; i < cps.length; i += STUB_CHARS) lines.push(cps.slice(i, i + STUB_CHARS).join(''))
-  }
-  return lines.slice(0, 3)
 }
 
 const SERIAL_TOP = 22
@@ -64,8 +49,9 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   // ADMIT ONE ribbon with notched ends.
   fill(ctx, OUTLINE, 74, 3, 70, 13)
   fill(ctx, RED, 75, 4, 68, 11)
-  ctx.clearRect(74, 8, 2, 3)
-  ctx.clearRect(142, 8, 2, 3)
+  // Notched ends: gold, not cleared — clearing here would punch see-through holes in the printed card.
+  fill(ctx, GOLD, 74, 8, 2, 3)
+  fill(ctx, GOLD, 142, 8, 2, 3)
   drawBigCentered(ctx, 'ADMIT ONE', TEXT_CX, 6, CREAM, 1, RED_DARK)
 
   panel(ctx, OUTLINE, 74, 20, 70, 20, 2)

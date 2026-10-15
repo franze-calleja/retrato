@@ -1,4 +1,6 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
+
+afterEach(() => vi.restoreAllMocks())
 import { stamp } from './stamp'
 
 const overlaps = (a: { x: number; y: number; w: number; h: number }, b: typeof a) =>

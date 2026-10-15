@@ -49,10 +49,28 @@ test('ring and postmark skip the avoid rect (the photo window)', () => {
 
 test('vertical text draws the same pixels as horizontal text, rotated a quarter turn', () => {
   const c = document.createElement('canvas').getContext('2d')!
-  const rot = vi.spyOn(c, 'rotate')
+  const tf = vi.spyOn(c, 'transform')
   const vertical = rects((cc) => drawTextVertical(cc, 'NO. 123', 5, 60, C, 'small')).length
   const horizontal = rects((cc) => drawText(cc, 'NO. 123', 0, 0, C)).length
   expect(vertical).toBe(horizontal)
-  drawTextVertical(c, 'A', 0, 10, C, 'big')
-  expect(rot).toHaveBeenCalledWith(-Math.PI / 2)
+  drawTextVertical(c, 'A', 3, 10, C, 'big')
+  // local (u, v) → screen (3 + v, 10 − u): an exact quarter turn anchored at the bottom-left
+  expect(tf).toHaveBeenCalledWith(0, -1, 1, 0, 3, 10)
+})
+
+test('texture helpers set the colour once instead of per pixel', () => {
+  const c = document.createElement('canvas').getContext('2d')!
+  let sets = 0
+  const proto = Object.getPrototypeOf(c)
+  const desc = Object.getOwnPropertyDescriptor(proto, 'fillStyle')!
+  Object.defineProperty(c, 'fillStyle', { configurable: true, get: () => desc.get!.call(c), set: (v) => (sets++, desc.set!.call(c, v)) })
+  dither(c, { x: 0, y: 0, w: 60, h: 60 }, C, 0.5, 3)
+  guilloche(c, { x: 0, y: 0, w: 60, h: 20 }, C, 16, 2)
+  expect(sets).toBe(2)
+})
+
+test('corner ornaments can skip a corner (where the edition badge sits)', () => {
+  const all = rects((c) => cornerOrnaments(c, R, C)).length
+  const three = rects((c) => cornerOrnaments(c, R, C, ['tr'])).length
+  expect(three).toBe((all * 3) / 4)
 })

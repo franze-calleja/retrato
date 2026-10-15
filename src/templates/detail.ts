@@ -1,4 +1,4 @@
-import { drawBitmap, fill, type Color, type Rect } from './draw'
+import { css, drawBitmap, fill, type Color, type Rect } from './draw'
 import { drawText, measureText } from './pixelFont'
 import { drawBig, measureBig } from './pixelFontLarge'
 
@@ -21,8 +21,9 @@ export function bevel(ctx: CanvasRenderingContext2D, r: Rect, light: Color, dark
 
 /** Deterministic speckle texture (paper grain, linen). */
 export function dither(ctx: CanvasRenderingContext2D, r: Rect, color: Color, density: number, seed = 0) {
+  ctx.fillStyle = css(color) // set once: these helpers paint thousands of single pixels
   for (let y = r.y; y < r.y + r.h; y++)
-    for (let x = r.x; x < r.x + r.w; x++) if (hash(x, y, seed) < density) fill(ctx, color, x, y, 1, 1)
+    for (let x = r.x; x < r.x + r.w; x++) if (hash(x, y, seed) < density) ctx.fillRect(x, y, 1, 1)
 }
 
 /** Engraved horizontal line pattern. */
@@ -34,24 +35,27 @@ const FLOURISH = ['11110', '10000', '10110', '10010', '00000']
 const flipH = (rows: readonly string[]) => rows.map((row) => [...row].reverse().join(''))
 const flipV = (rows: readonly string[]) => [...rows].reverse()
 
-/** A small flourish in each inner corner of `r`. */
-export function cornerOrnaments(ctx: CanvasRenderingContext2D, r: Rect, color: Color) {
+export type Corner = 'tl' | 'tr' | 'bl' | 'br'
+
+/** A small flourish in each inner corner of `r`, except any listed in `skip` (e.g. where a badge sits). */
+export function cornerOrnaments(ctx: CanvasRenderingContext2D, r: Rect, color: Color, skip: readonly Corner[] = []) {
   const right = r.x + r.w - 5
   const bottom = r.y + r.h - 5
-  drawBitmap(ctx, FLOURISH, r.x, r.y, color)
-  drawBitmap(ctx, flipH(FLOURISH), right, r.y, color)
-  drawBitmap(ctx, flipV(FLOURISH), r.x, bottom, color)
-  drawBitmap(ctx, flipV(flipH(FLOURISH)), right, bottom, color)
+  if (!skip.includes('tl')) drawBitmap(ctx, FLOURISH, r.x, r.y, color)
+  if (!skip.includes('tr')) drawBitmap(ctx, flipH(FLOURISH), right, r.y, color)
+  if (!skip.includes('bl')) drawBitmap(ctx, flipV(FLOURISH), r.x, bottom, color)
+  if (!skip.includes('br')) drawBitmap(ctx, flipV(flipH(FLOURISH)), right, bottom, color)
 }
 
 /** Banknote-style pattern: two interleaved sine lines, repeated every 4 px down `r`. */
 export function guilloche(ctx: CanvasRenderingContext2D, r: Rect, color: Color, period: number, amplitude: number) {
+  ctx.fillStyle = css(color)
   for (let base = r.y + amplitude; base < r.y + r.h - amplitude; base += 4)
     for (let x = r.x; x < r.x + r.w; x++) {
       const t = (2 * Math.PI * (x - r.x)) / period
       for (const phase of [0, Math.PI]) {
         const y = Math.round(base + amplitude * Math.sin(t + phase))
-        if (y >= r.y && y < r.y + r.h) fill(ctx, color, x, y, 1, 1)
+        if (y >= r.y && y < r.y + r.h) ctx.fillRect(x, y, 1, 1)
       }
     }
 }
@@ -75,7 +79,7 @@ export function ring(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: n
   }
 }
 
-/** Postal cancellation: two rings and three wavy lines to the left. */
+/** Postal cancellation: two rings and three wavy cancel lines to their left. */
 export function postmark(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, color: Color, avoid?: Rect) {
   ring(ctx, cx, cy, r, color, avoid)
   ring(ctx, cx, cy, r - 2, color, avoid)
@@ -89,11 +93,14 @@ export function postmark(ctx: CanvasRenderingContext2D, cx: number, cy: number, 
 /** Length along the column of rotated text. */
 export const verticalLength = (text: string, font: 'big' | 'small') => (font === 'big' ? measureBig(text) : measureText(text))
 
-/** Text turned a quarter left (reads bottom to top), starting at the bottom-left (x, y). */
+/**
+ * Text turned a quarter left (reads bottom to top). It fills columns x … x+thickness−1 and rows y−length … y−1,
+ * so `y` is the exclusive bottom. A shadow, if given, falls up-right in screen terms (local +1,+1).
+ */
 export function drawTextVertical(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, color: Color, font: 'big' | 'small', shadow?: Color) {
   ctx.save()
-  ctx.translate(x, y)
-  ctx.rotate(-Math.PI / 2)
+  // Exact quarter turn (rotate(-π/2) leaves ~1e-16 skew terms): local (u, v) → screen (x + v, y − u).
+  ctx.transform(0, -1, 1, 0, x, y)
   if (font === 'big') drawBig(ctx, text, 0, 0, color, 1, shadow)
   else drawText(ctx, text, 0, 0, color, 1, shadow)
   ctx.restore()

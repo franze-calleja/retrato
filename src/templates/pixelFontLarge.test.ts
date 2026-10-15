@@ -28,7 +28,7 @@ test('width is (n × 6 − 1) × scale, counting code points', () => {
   expect(measureBig('')).toBe(0)
 })
 
-test('drawTitle steps down big 2 → big 1 → small 2 → small 1, then truncates', () => {
+test('drawTitle steps down big 2 → big 1 → small, then truncates', () => {
   expect(drawTitle(ctx(), 'HI', 50, 0, 100, [0, 0, 0])).toEqual({ font: 'big', scale: 2, width: measureBig('HI', 2) })
   expect(drawTitle(ctx(), 'HELLO', 50, 0, 40, [0, 0, 0])).toEqual({ font: 'big', scale: 1, width: measureBig('HELLO') })
   const s = drawTitle(ctx(), 'HELLO THERE', 50, 0, 50, [0, 0, 0])

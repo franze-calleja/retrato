@@ -1,4 +1,6 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
+
+afterEach(() => vi.restoreAllMocks())
 import { refreshPerCapture, resolveDefaults } from './fields'
 import { getTemplate } from './registry'
 import { randomSerial, todayIso } from './ticket'
@@ -21,9 +23,8 @@ test('ticket serial regenerates per capture; event name is kept', () => {
 })
 
 
-test('ADMIT ONE headline is readable on the gold ticket (WCAG contrast ≥ 4.5)', async () => {
-  const { ADMIT_TEXT } = await import('./ticket')
-  const { GOLD } = await import('./colors')
+test('ADMIT ONE on its red ribbon meets large-text contrast (WCAG ≥ 3)', async () => {
+  const { CREAM, RED } = await import('./colors')
   const lum = (c: readonly number[]) => {
     const [r, g, b] = c.slice(0, 3).map((v) => {
       const s = v / 255
@@ -31,15 +32,20 @@ test('ADMIT ONE headline is readable on the gold ticket (WCAG contrast ≥ 4.5)'
     })
     return 0.2126 * r + 0.7152 * g + 0.0722 * b
   }
-  const [hi, lo] = [lum(ADMIT_TEXT), lum(GOLD)].sort((a, b) => b - a)
-  expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5)
+  const [hi, lo] = [lum(CREAM), lum(RED)].sort((a, b) => b - a)
+  expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(3)
 })
 
-test('serial words longer than the stub wrap instead of losing characters', async () => {
-  const { serialLines } = await import('./ticket')
-  expect(serialLines('NO. 123456')).toEqual(['NO.', '123456'])
-  expect(serialLines('1234567890')).toEqual(['123456789', '0'])
-  expect(serialLines('A B C D')).toEqual(['A', 'B', 'C'])
+test('a full 10-character serial is printed whole down the stub', async () => {
+  const detail = await import('./detail')
+  const spy = vi.spyOn(detail, 'drawTextVertical')
+  const t = getTemplate('ticket')
+  try {
+    t.render(document.createElement('canvas').getContext('2d')!, { ...resolveDefaults(t), serial: '1234567890' })
+    expect(spy.mock.calls[0][1]).toBe('1234567890')
+  } finally {
+    spy.mockRestore()
+  }
 })
 
 test('the ticket has a Seat field after Date', () => {
@@ -56,6 +62,26 @@ test('the serial runs down the stub, clear of the edition badge', async () => {
   t.render(c, { ...resolveDefaults(t), serial: 'NO. 123456' })
   expect(spy).toHaveBeenCalled()
   const [, text, , y] = spy.mock.calls[0]
+  spy.mockRestore()
   expect(text).toBe('NO. 123456')
   expect(y).toBeLessThanOrEqual(76 - 9) // badge sits in the bottom 9 px of the stub
+})
+
+test('the ticket only cuts notches at its edges and the stub line — no holes in the body', () => {
+  const clear = vi.spyOn(CanvasRenderingContext2D.prototype, 'clearRect')
+  const t = getTemplate('ticket')
+  try {
+    t.render(document.createElement('canvas').getContext('2d')!, resolveDefaults(t))
+    const BW = 188
+    const BH = 76
+    const STUB = 148
+    const interior = clear.mock.calls.filter(([x, y, w, h]) => {
+      const atEdge = x <= 3 || x + w >= BW - 3 || y <= 3 || y + h >= BH - 3
+      const atStub = x >= STUB - 2 && x + w <= STUB + 3
+      return !atEdge && !atStub && w * h < BW * BH
+    })
+    expect(interior).toEqual([])
+  } finally {
+    clear.mockRestore()
+  }
 })
