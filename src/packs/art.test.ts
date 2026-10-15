@@ -40,3 +40,16 @@ test('packArtParts draws into given canvases', () => {
   const targets = { top: document.createElement('canvas'), body: document.createElement('canvas') }
   expect(packArtParts(PACKS[0], 2, targets)).toEqual(targets)
 })
+
+test.each(PACKS.map((p) => [p.id, p] as const))('%s pack illustration draws inside its area under the label', (_id, pack) => {
+  const fr = vi.spyOn(CanvasRenderingContext2D.prototype, 'fillRect')
+  pack.art.illustration(document.createElement('canvas').getContext('2d')!, 32, 52)
+  expect(fr.mock.calls.length).toBeGreaterThan(10)
+  for (const [x, y, w, h] of fr.mock.calls) {
+    expect(x).toBeGreaterThanOrEqual(32 - 16)
+    expect(x + w).toBeLessThanOrEqual(32 + 16)
+    expect(y).toBeGreaterThanOrEqual(52)
+    expect(y + h).toBeLessThanOrEqual(52 + 19)
+  }
+  fr.mockRestore()
+})

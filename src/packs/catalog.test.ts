@@ -4,6 +4,7 @@ import { PACKS, getPack } from './catalog'
 
 test('four packs with unique ids, in shelf order', () => {
   expect(PACKS.map((p) => p.id)).toEqual(['classic', 'arcana', 'cosmic', 'jester'])
+  expect(PACKS.map((p) => p.name)).toEqual(['Classic Pack', 'Arcana Pack', 'Cosmic Pack', 'Joker Pack'])
 })
 
 test('every pack draws from real cards and says what it deals', () => {
