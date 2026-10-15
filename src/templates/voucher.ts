@@ -16,7 +16,7 @@ const STUB_CX = 167
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
   panel(ctx, BLUE, 1, 1, BW - 2, BH - 2, 2)
-  dither(ctx, { x: 2, y: 2, w: BW - 4, h: BH - 4 }, BLUE_MID, 0.14, 7)
+  dither(ctx, { x: 2, y: 2, w: BW - 4, h: BH - 4 }, BLUE_MID, 0.08, 7)
   // Double border with corner flourishes.
   outline(ctx, CREAM, 3, 3, BW - 6, BH - 6)
   outline(ctx, GOLD, 5, 5, BW - 10, BH - 10)

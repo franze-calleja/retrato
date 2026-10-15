@@ -1,5 +1,5 @@
 import { CREAM, CREAM_DARK, GOLD, GOLD_DARK, GOLD_LIGHT, OUTLINE, RED, RED_DARK, RED_LIGHT, RED_MID, SHADOW } from './colors'
-import { bevel, hatch, postmark } from './detail'
+import { bevel, hatch } from './detail'
 import { fill, outline, panel, withDropShadow } from './draw'
 import { drawText } from './pixelFont'
 import { drawTitle } from './pixelFontLarge'
@@ -37,7 +37,6 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, CREAM, PHOTO.x - 3, PHOTO.y - 3, PHOTO.w + 6, PHOTO.h + 6, 1)
   bevel(ctx, { x: PHOTO.x - 3, y: PHOTO.y - 3, w: PHOTO.w + 6, h: PHOTO.h + 6 }, CREAM, CREAM_DARK)
   outline(ctx, OUTLINE, PHOTO.x - 1, PHOTO.y - 1, PHOTO.w + 2, PHOTO.h + 2)
-  postmark(ctx, 84, 8, 9, RED_DARK, PHOTO)
 
   drawTitle(ctx, values.title ?? '', BW / 2, 94, 76, CREAM, RED_DARK, 1)
   drawText(ctx, 'PIXEL POST', 8, 109, GOLD, 1, RED_DARK)
