@@ -27,7 +27,8 @@ export function statValue(v: string): number {
 }
 
 export function randomCardNo(rand: () => number = Math.random): string {
-  return `№ ${String(1 + Math.min(99, Math.floor(rand() * 100))).padStart(3, '0')}/100`
+  // No prefix: neither № nor # reads clearly in the 3×5 font.
+  return `${String(1 + Math.min(99, Math.floor(rand() * 100))).padStart(3, '0')}/100`
 }
 
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {

@@ -35,18 +35,18 @@ test('prints at trading-card size with the art aspect ratio', () => {
   expect(t.printSizeMm.h / t.printSizeMm.w).toBeCloseTo(t.size.h / t.size.w, 2)
 })
 
-test('card numbers look like № 042/100 and stay in 001–100', async () => {
+test('card numbers look like 042/100 and stay in 001–100', async () => {
   const { randomCardNo } = await import('./trading')
-  expect(randomCardNo(() => 0)).toBe('№ 001/100')
-  expect(randomCardNo(() => 0.4199)).toBe('№ 042/100')
-  expect(randomCardNo(() => 0.9999)).toBe('№ 100/100')
+  expect(randomCardNo(() => 0)).toBe('001/100')
+  expect(randomCardNo(() => 0.4199)).toBe('042/100')
+  expect(randomCardNo(() => 0.9999)).toBe('100/100')
 })
 
 test('the trading card has a per-capture Card no. field that fits its slot', () => {
   const t = getTemplate('trading')
   const f = t.fields.find((x) => x.key === 'number')!
   expect(f).toMatchObject({ label: 'Card no.', maxLength: 9, perCapture: true })
-  expect(resolveDefaults(t).number).toMatch(/^№ \d{3}\/100$/)
+  expect(resolveDefaults(t).number).toMatch(/^\d{3}\/100$/)
   // The number's pixels = what a render with a number draws beyond the same render without one.
   const fr = vi.spyOn(CanvasRenderingContext2D.prototype, 'fillRect')
   const base = { ...resolveDefaults(t), charm: '5', chaos: '5', luck: '5' }
@@ -69,7 +69,7 @@ test('trading card keeps photo and print size, draws nothing in the photo, no ho
   expect(t.photoRect).toEqual({ x: 10, y: 22, w: 76, h: 64 })
   const fr = vi.spyOn(CanvasRenderingContext2D.prototype, 'fillRect')
   const cr = vi.spyOn(CanvasRenderingContext2D.prototype, 'clearRect')
-  t.render(document.createElement('canvas').getContext('2d')!, { name: 'W'.repeat(12), type: 'W'.repeat(16), charm: '9', chaos: '9', luck: '9', number: '№ 100/100' })
+  t.render(document.createElement('canvas').getContext('2d')!, { name: 'W'.repeat(12), type: 'W'.repeat(16), charm: '9', chaos: '9', luck: '9', number: '100/100' })
   const P = t.photoRect
   // Texture under the mat is painted over by it; only what is drawn after the mat could show over the photo.
   const mat = fr.mock.calls.findIndex(([x, y, w, h]) => x === P.x - 3 && y === P.y - 2 && w === P.w + 6 && h === P.h + 4)

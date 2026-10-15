@@ -70,10 +70,11 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   drawBitmap(ctx, MOON5, 68, 24, SEPIA_DARK)
 
   // Title plate.
-  panel(ctx, SEPIA_INK, 6, 116, BW - 12, 16, 2)
-  panel(ctx, SEPIA_LIGHT, 7, 117, BW - 14, 14, 1)
-  drawTitle(ctx, values.title ?? '', BW / 2, 117, 68, SEPIA_INK, undefined, 1)
-  drawTextCentered(ctx, 'PIXEL TAROT', BW / 2, 134, SEPIA_DARK)
+  // Spans the inner border so the longest title (THE HIGH PRIESTESS, 71 px) fits whole.
+  panel(ctx, SEPIA_INK, 4, 116, BW - 8, 16, 2)
+  panel(ctx, SEPIA_LIGHT, 5, 117, BW - 10, 14, 1)
+  drawTitle(ctx, values.title ?? '', BW / 2, 117, 72, SEPIA_INK, undefined, 1)
+  drawTextCentered(ctx, 'PIXEL TAROT', BW / 2, 133, SEPIA_DARK)
 }
 
 export const tarot: Template = {

@@ -42,3 +42,9 @@ test('tarot keeps its arched photo window and print size; nothing drawn inside t
   expect(after).toEqual([])
   expect(cr.mock.calls.filter(([, , w, h]) => w * h < 84 * 144)).toEqual([])
 })
+
+test('the longest arcana title fits whole on the plate', async () => {
+  const { ARCANA } = await import('./tarot')
+  const { titleFit } = await import('./pixelFontLarge')
+  for (const { title } of ARCANA) expect(titleFit(title, 72, 1).text).toBe(title)
+})
