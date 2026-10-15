@@ -1,6 +1,8 @@
-import { GOLD, GOLD_DARK, NAVY, OUTLINE, SHADOW } from './colors'
+import { SEPIA_DARK, SEPIA_INK, SEPIA_LIGHT, SEPIA_MID, SHADOW } from './colors'
+import { dither } from './detail'
 import { drawBitmap, outline, panel, withDropShadow } from './draw'
-import { drawTextCentered, fitScale } from './pixelFont'
+import { drawTextCentered } from './pixelFont'
+import { drawTitle } from './pixelFontLarge'
 import { fillShape, grow } from './shapes'
 import type { Template } from './types'
 
@@ -8,7 +10,6 @@ const BW = 84
 const BH = 144
 const SHADOW_OFFSET = 3
 const PHOTO = { x: 12, y: 24, w: 60, h: 86 }
-const DIAMOND = ['010', '111', '010']
 
 export const ARCANA = [
   'THE FOOL', 'THE MAGICIAN', 'THE HIGH PRIESTESS', 'THE EMPRESS', 'THE EMPEROR', 'THE HIEROPHANT',
@@ -43,32 +44,36 @@ export function numeralFor(title: string): string {
   return ARCANA.find((a) => a.title === t)?.numeral ?? ''
 }
 
-function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
-  panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
-  panel(ctx, NAVY, 1, 1, BW - 2, BH - 2, 2)
-  outline(ctx, GOLD, 3, 3, BW - 6, BH - 6)
-  outline(ctx, GOLD_DARK, 5, 5, BW - 10, BH - 10)
-  for (const [x, y] of [[7, 7], [BW - 10, 7], [7, BH - 10], [BW - 10, BH - 10]]) drawBitmap(ctx, DIAMOND, x, y, GOLD)
+const STAR5 = ['00100', '01110', '11111', '01110', '00100']
+const MOON5 = ['01110', '11000', '10000', '11000', '01110']
 
-  // Numeral plate.
+function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
+  panel(ctx, SEPIA_INK, 0, 0, BW, BH, 3)
+  panel(ctx, SEPIA_LIGHT, 1, 1, BW - 2, BH - 2, 2)
+  dither(ctx, { x: 6, y: 6, w: BW - 12, h: BH - 12 }, SEPIA_MID, 0.16, 5)
+  outline(ctx, SEPIA_DARK, 3, 3, BW - 6, BH - 6)
+  outline(ctx, SEPIA_MID, 5, 5, BW - 10, BH - 10)
+
+  // Numeral tab.
   const numeral = numeralFor(values.title ?? '')
   if (numeral) {
-    panel(ctx, OUTLINE, 30, 8, 24, 11, 2)
-    panel(ctx, GOLD, 31, 9, 22, 9, 1)
-    drawTextCentered(ctx, numeral, BW / 2, 11, OUTLINE)
+    panel(ctx, SEPIA_INK, 30, 7, 24, 11, 2)
+    panel(ctx, SEPIA_LIGHT, 31, 8, 22, 9, 1)
+    drawTextCentered(ctx, numeral, BW / 2, 10, SEPIA_INK)
   }
 
-  // Arched window: gold mat, dark rim; the composer clips the photo to the same arch.
-  fillShape(ctx, GOLD, grow(PHOTO, 3), 'arch')
-  fillShape(ctx, OUTLINE, grow(PHOTO, 1), 'arch')
+  // Arched window: tan mat, ink rim; the composer clips the photo to the same arch.
+  fillShape(ctx, SEPIA_MID, grow(PHOTO, 3), 'arch')
+  fillShape(ctx, SEPIA_INK, grow(PHOTO, 1), 'arch')
+  // Star and crescent in the spandrels beside the arch.
+  drawBitmap(ctx, STAR5, 11, 24, SEPIA_DARK)
+  drawBitmap(ctx, MOON5, 68, 24, SEPIA_DARK)
 
   // Title plate.
-  panel(ctx, OUTLINE, 6, 116, BW - 12, 16, 2)
-  panel(ctx, GOLD, 7, 117, BW - 14, 14, 1)
-  const title = values.title ?? ''
-  const s = fitScale(title, BW - 20, 2)
-  drawTextCentered(ctx, title, BW / 2, s === 2 ? 119 : 122, OUTLINE, s)
-  drawTextCentered(ctx, 'PIXEL TAROT', BW / 2, 134, GOLD_DARK)
+  panel(ctx, SEPIA_INK, 6, 116, BW - 12, 16, 2)
+  panel(ctx, SEPIA_LIGHT, 7, 117, BW - 14, 14, 1)
+  drawTitle(ctx, values.title ?? '', BW / 2, 117, 68, SEPIA_INK, undefined, 1)
+  drawTextCentered(ctx, 'PIXEL TAROT', BW / 2, 134, SEPIA_DARK)
 }
 
 export const tarot: Template = {
