@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { refreshPerCapture, resolveDefaults } from './fields'
-import { JESTER_EFFECTS } from './jester'
+import { JOKER_EFFECTS } from './jester'
 import { COSMIC_LINES, PLANETS } from './planet'
 import { measureText, wrapText } from './pixelFont'
 import { getTemplate, templates } from './registry'
@@ -46,7 +46,7 @@ test('planet names and cosmic lines fit their fields', () => {
 })
 
 test('every jester effect fits its two-line box', () => {
-  for (const e of JESTER_EFFECTS) expect(wrapText(e, 70, 2).join(' ')).toBe(e)
+  for (const e of JOKER_EFFECTS) expect(wrapText(e, 70, 2).join(' ')).toBe(e)
 })
 
 test('wrapText breaks on words, hard-splits long words, and caps the line count', () => {

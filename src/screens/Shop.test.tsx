@@ -33,13 +33,18 @@ test('choosing a card opens the booth for it', () => {
   expect([useBooth.getState().screen, useBooth.getState().templateId, useBooth.getState().mode]).toEqual(['booth', 'ticket', 'single'])
 })
 
-test.each(['Classic Pack', 'Arcana Pack', 'Cosmic Pack', 'Jester Pack'])('%s is a button with its own info box that opens that pack', (name) => {
+test.each([
+  ['Classic Pack', 'classic'],
+  ['Arcana Pack', 'arcana'],
+  ['Cosmic Pack', 'cosmic'],
+  ['Joker Pack', 'jester'], // renamed for guests; the internal id stays
+])('%s is a button with its own info box that opens that pack', (name, id) => {
   render(<Shop />)
   const pack = screen.getByRole('button', { name })
   expect(document.getElementById(pack.getAttribute('aria-describedby')!)?.textContent).toMatch(/keep 1/i)
   fireEvent.click(pack)
   const st = useBooth.getState()
-  expect([st.screen, st.mode, st.packId]).toEqual(['booth', 'pack', name.split(' ')[0].toLowerCase()])
+  expect([st.screen, st.mode, st.packId]).toEqual(['booth', 'pack', id])
 })
 
 test('odds panel follows the operator settings', () => {

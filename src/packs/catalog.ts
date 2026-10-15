@@ -12,7 +12,6 @@ import {
   RED_DARK,
 } from '../templates/colors'
 import type { Color } from '../templates/draw'
-import { JESTER_CAP } from '../templates/jester'
 
 export interface PackArt {
   body: Color
@@ -32,6 +31,8 @@ export interface PackDef {
   art: PackArt
 }
 
+// Jester's cap with bells (pack emblem).
+const JESTER_CAP = ['10000000001', '11000100011', '01101110110', '00111111100', '00111111100', '01111111110']
 const STAR = ['0001000', '0001000', '0011100', '1111111', '0011100', '0110110', '1100011']
 const MOON = ['0011100', '0110000', '1100000', '1100000', '1100000', '0110000', '0011100']
 const RINGED = ['000111000', '001111100', '111111111', '001111100', '000111000']
@@ -60,8 +61,8 @@ export const PACKS: readonly PackDef[] = [
   },
   {
     id: 'jester',
-    name: 'Jester Pack',
-    description: '3 jesters with 3 different tricks. Keep 1.',
+    name: 'Joker Pack',
+    description: '3 jokers with 3 different tricks. Keep 1.',
     pool: ['jester'],
     art: { body: RED, stripe: RED_DARK, ends: GOLD, emblem: JESTER_CAP, emblemColor: GOLD },
   },
