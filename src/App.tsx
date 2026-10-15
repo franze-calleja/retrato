@@ -59,7 +59,7 @@ export default function App() {
     <>
       <SwirlBackground palette={screen === 'picker' ? 'shop' : 'booth'} />
       <main className="app">
-        <h1 className="logo" tabIndex={-1} onClick={onLogoTap}>PIXEL BOOTH</h1>
+        <h1 className="logo" tabIndex={-1} onClick={onLogoTap}>RETRATO</h1>
         <TrayButton />
         {trayOpen ? (
           <Tray />

@@ -30,12 +30,12 @@ test('shutter, flash and rear screen sit inside the body', () => {
   for (const r of [SHUTTER, FLASH, REAR_SCREEN]) expect(inside(r)).toBe(true)
 })
 
-test('the only lettering on the camera is PIXEL BOOTH', () => {
+test('the only lettering on the camera is RETRATO', () => {
   __resetCameraArtCache()
   texts.length = 0
   cameraArt('front', 1, document.createElement('canvas'))
   cameraArt('back', 1, document.createElement('canvas'))
-  expect(new Set(texts.filter(Boolean))).toEqual(new Set(['PIXEL BOOTH']))
+  expect(new Set(texts.filter(Boolean))).toEqual(new Set(['RETRATO']))
 })
 
 test('the print slot is on the left edge of the front and the right edge of the back', async () => {

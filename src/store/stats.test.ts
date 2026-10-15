@@ -42,3 +42,10 @@ test('blocked storage still counts in memory', () => {
   expect(() => useStats.getState().recordPhoto()).not.toThrow()
   expect(useStats.getState().photos).toBe(1)
 })
+
+test('the photo count saved under the old pixel-booth key carries over', () => {
+  localStorage.clear()
+  localStorage.setItem('pixel-booth:stats', JSON.stringify({ photos: 7 }))
+  expect(loadPhotos()).toBe(7)
+  expect(STATS_KEY).toBe('retrato:stats')
+})

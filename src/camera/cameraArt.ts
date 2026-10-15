@@ -56,7 +56,7 @@ function slot(ctx: CanvasRenderingContext2D, r: Rect, darkX: number, lightX: num
 export function drawCameraFront(ctx: CanvasRenderingContext2D) {
   body(ctx)
   slot(ctx, PRINT_SLOT, PRINT_SLOT.x + 1, PRINT_SLOT.x + 2)
-  drawText(ctx, 'PIXEL BOOTH', 8, 8, OUTLINE)
+  drawText(ctx, 'RETRATO', 8, 8, OUTLINE)
   // Viewfinder window.
   panel(ctx, OUTLINE, 54, 5, 16, 12, 1)
   fill(ctx, SILVER_LIGHT, 55, 6, 14, 10)

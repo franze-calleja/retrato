@@ -1,6 +1,6 @@
 import { BLUE_DARK, CREAM, OUTLINE, RED, SHADOW } from '../templates/colors'
 import { fill, panel, withDropShadow } from '../templates/draw'
-import { drawTextCentered } from '../templates/pixelFont'
+import { drawBigCentered } from '../templates/pixelFontLarge'
 import type { Template } from '../templates/types'
 
 // Every template reserves a 3-art-pixel drop-shadow margin on the right and bottom.
@@ -16,10 +16,10 @@ function body(ctx: CanvasRenderingContext2D, w: number, h: number) {
   }
   const cx = Math.floor(w / 2)
   const cy = Math.floor(h / 2)
-  panel(ctx, OUTLINE, cx - 15, cy - 11, 30, 22, 2)
-  panel(ctx, CREAM, cx - 14, cy - 10, 28, 20, 1)
-  drawTextCentered(ctx, 'PIXEL', cx, cy - 7, OUTLINE)
-  drawTextCentered(ctx, 'BOOTH', cx, cy + 2, OUTLINE)
+  // Name plate: RETRATO in the 5×7 font is 41 px, so the plate fits the narrowest card (Tarot, 84 px).
+  panel(ctx, OUTLINE, cx - 25, cy - 8, 50, 17, 2)
+  panel(ctx, CREAM, cx - 24, cy - 7, 48, 15, 1)
+  drawBigCentered(ctx, 'RETRATO', cx, cy - 3, OUTLINE)
 }
 
 export function cardBack(template: Template, scale: number, target?: HTMLCanvasElement): HTMLCanvasElement {

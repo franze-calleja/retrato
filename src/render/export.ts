@@ -5,5 +5,5 @@ export const EXPORT_SCALE = 8
 export const cardSlug = (name: string) => name.toLowerCase().replace(/\bcard\b/g, '').trim().replace(/\s+/g, '-')
 
 export function exportFileName(templateId: string, now = new Date()): string {
-  return `pixel-booth-${templateId}-${now.toISOString().replace(/[:.]/g, '-')}.png`
+  return `retrato-${templateId}-${now.toISOString().replace(/[:.]/g, '-')}.png`
 }

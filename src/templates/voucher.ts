@@ -43,14 +43,13 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 
   drawTextCentered(ctx, 'VALID UNTIL', TEXT_CX, 55, GOLD, 1, BLUE_DARK)
   drawTitle(ctx, values.expires ?? '', TEXT_CX, 60, 56, CREAM, BLUE_DARK, 1)
-  drawTextCentered(ctx, 'PIXEL BOOTH', TEXT_CX, 80, GOLD, 1, BLUE_DARK)
+  drawTextCentered(ctx, 'RETRATO', TEXT_CX, 80, GOLD, 1, BLUE_DARK)
 
   // Round seal on the stub.
   ring(ctx, SEAL_CX, 48, 14, CREAM)
   ring(ctx, SEAL_CX, 48, 12, GOLD)
   drawBigCentered(ctx, '★', SEAL_CX, 37, GOLD)
-  drawTextCentered(ctx, 'PIXEL', SEAL_CX, 44, CREAM)
-  drawTextCentered(ctx, 'BOOTH', SEAL_CX, 51, CREAM)
+  drawBigCentered(ctx, 'R', SEAL_CX, 47, CREAM) // monogram: the full name doesn't fit inside the seal
 }
 
 export const voucher: Template = {

@@ -105,3 +105,11 @@ test('idle reset defaults to 3 minutes, persists, and rejects unknown values', (
   useOperator.getState().reset()
   expect(useOperator.getState().idleMinutes).toBe(3)
 })
+
+test('settings saved under the old pixel-booth key carry over', () => {
+  localStorage.setItem('pixel-booth:operator', JSON.stringify({ weights: { holo: 50 }, forced: 'foil', paper: 'letter', idleMinutes: 10 }))
+  expect(loadSettings().forced).toBe('foil')
+  expect(loadPaper()).toBe('letter')
+  expect(loadIdleMinutes()).toBe(10)
+  expect(OPERATOR_KEY).toBe('retrato:operator')
+})

@@ -23,3 +23,16 @@ export function writeJson(key: string, value: unknown) {
     // Keep working in memory.
   }
 }
+
+/** Moves a value saved under a renamed key, unless the new key already has one. */
+export function migrateKey(from: string, to: string) {
+  try {
+    const s = safeStorage()
+    const old = s?.getItem(from)
+    if (!s || old == null) return
+    if (s.getItem(to) == null) s.setItem(to, old)
+    s.removeItem(from)
+  } catch {
+    // Keep working with whatever is readable.
+  }
+}

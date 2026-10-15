@@ -60,7 +60,7 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
 
   drawTextCentered(ctx, values.date ?? '', TEXT_CX, 44, OUTLINE)
   drawTextCentered(ctx, values.seat ?? '', TEXT_CX, 52, RED_DARK)
-  drawTextCentered(ctx, 'PIXEL BOOTH', TEXT_CX, 63, RED_DARK)
+  drawTextCentered(ctx, 'RETRATO', TEXT_CX, 63, RED_DARK)
 
   drawTextCentered(ctx, 'ADMIT', STUB_CX, 6, OUTLINE)
   drawTextCentered(ctx, 'ONE', STUB_CX, 13, OUTLINE)

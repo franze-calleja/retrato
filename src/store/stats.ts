@@ -1,9 +1,12 @@
 import { create } from 'zustand'
-import { readJson, writeJson } from './storage'
+import { migrateKey, readJson, writeJson } from './storage'
 
-export const STATS_KEY = 'pixel-booth:stats'
+export const STATS_KEY = 'retrato:stats'
+/** Where the count was saved before the app was renamed. */
+const LEGACY_STATS_KEY = 'pixel-booth:stats'
 
 export function loadPhotos(): number {
+  migrateKey(LEGACY_STATS_KEY, STATS_KEY)
   const n = (readJson(STATS_KEY) as { photos?: unknown } | null)?.photos
   return typeof n === 'number' && Number.isInteger(n) && n >= 0 ? n : 0
 }

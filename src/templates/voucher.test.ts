@@ -11,11 +11,16 @@ test('expiry reads VALID UNTIL / TODAY by default', () => {
 test('the stub carries a round seal instead of KEEP THIS', async () => {
   const font = await import('./pixelFont')
   const texts: string[] = []
+  const big = await import('./pixelFontLarge')
+  const bigTexts: string[] = []
   const draw = vi.spyOn(font, 'drawTextCentered').mockImplementation((_c, t) => void texts.push(t))
+  const drawBig = vi.spyOn(big, 'drawBigCentered').mockImplementation((_c, t) => void bigTexts.push(t))
   voucher.render(document.createElement('canvas').getContext('2d')!, resolveDefaults(voucher))
   expect(texts).not.toContain('KEEP')
-  expect(texts).toEqual(expect.arrayContaining(['VALID UNTIL', 'PIXEL', 'BOOTH']))
+  expect(texts).toEqual(expect.arrayContaining(['VALID UNTIL', 'RETRATO']))
+  expect(bigTexts).toEqual(expect.arrayContaining(['★', 'R']))
   draw.mockRestore()
+  drawBig.mockRestore()
 })
 
 test('long text stays inside the card', () => {

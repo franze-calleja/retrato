@@ -2,9 +2,16 @@ import { create } from 'zustand'
 import { DEFAULT_WEIGHTS, editions } from '../editions/registry'
 import type { EditionSettings } from '../editions/roll'
 import type { PaperId } from '../print/layout'
-import { readJson, writeJson } from './storage'
+import { migrateKey, readJson, writeJson } from './storage'
 
-export const OPERATOR_KEY = 'pixel-booth:operator'
+export const OPERATOR_KEY = 'retrato:operator'
+/** Where settings were saved before the app was renamed. */
+const LEGACY_OPERATOR_KEY = 'pixel-booth:operator'
+
+function readSaved(): unknown {
+  migrateKey(LEGACY_OPERATOR_KEY, OPERATOR_KEY)
+  return readJson(OPERATOR_KEY)
+}
 
 const isEdition = (id: unknown): id is string => editions.some((e) => e.id === id)
 const clampWeight = (v: number) => Math.min(100, Math.max(0, v))
@@ -25,13 +32,13 @@ export function sanitize(raw: unknown): EditionSettings {
 }
 
 export function loadSettings(): EditionSettings {
-  return sanitize(readJson(OPERATOR_KEY))
+  return sanitize(readSaved())
 }
 
 export const isPaper = (v: unknown): v is PaperId => v === 'a4' || v === 'letter'
 
 export function loadPaper(): PaperId {
-  const raw = readJson(OPERATOR_KEY) as { paper?: unknown } | null
+  const raw = readSaved() as { paper?: unknown } | null
   return raw && typeof raw === 'object' && isPaper(raw.paper) ? raw.paper : 'a4'
 }
 
@@ -41,7 +48,7 @@ export const DEFAULT_IDLE = 3
 const isIdle = (v: unknown): v is number => IDLE_CHOICES.some((c) => c === v)
 
 export function loadIdleMinutes(): number {
-  const raw = readJson(OPERATOR_KEY) as { idleMinutes?: unknown } | null
+  const raw = readSaved() as { idleMinutes?: unknown } | null
   return raw && typeof raw === 'object' && isIdle(raw.idleMinutes) ? raw.idleMinutes : DEFAULT_IDLE
 }
 
