@@ -28,8 +28,8 @@ export class FakeNode {
     this.outputs.push(n)
     return n
   }
-  disconnect() {
-    this.outputs = []
+  disconnect(target?: FakeNode | FakeParam) {
+    this.outputs = target ? this.outputs.filter((o) => o !== target) : []
   }
 }
 
@@ -42,6 +42,7 @@ export class FakeSource extends FakeNode {
   loop = false
   startedAt: number | null = null
   stoppedAt: number | null = null
+  onended: (() => void) | null = null
   start(t = 0) { this.startedAt = t }
   stop(t = 0) { this.stoppedAt = t }
 }

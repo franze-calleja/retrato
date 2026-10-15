@@ -6,6 +6,8 @@ import { useTray } from '../store/tray'
 import { getEngine, isRunning, resume, setLevels, suspend, unlock } from './engine'
 import { setMix, startMusic, stopMusic } from './music'
 
+const GESTURES = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const
+
 /** App-wide audio: unlock on a gesture, follow the volumes, play music, mix per screen, pause when hidden. */
 export function useAudio() {
   const mode = useSound((s) => s.mode)
@@ -24,11 +26,10 @@ export function useAudio() {
       if (isRunning() || document.visibilityState === 'hidden') return
       void unlock().then(setRunning)
     }
-    document.addEventListener('pointerdown', onGesture, true)
-    document.addEventListener('keydown', onGesture, true)
+    // Touch only counts as a gesture on release (pointerup/touchend/click), a mouse already on press.
+    for (const type of GESTURES) document.addEventListener(type, onGesture, true)
     return () => {
-      document.removeEventListener('pointerdown', onGesture, true)
-      document.removeEventListener('keydown', onGesture, true)
+      for (const type of GESTURES) document.removeEventListener(type, onGesture, true)
     }
   }, [])
 

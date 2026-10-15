@@ -36,7 +36,7 @@ function build(ctx: AudioContext): Engine {
   sfx.connect(master)
   const musicTone = ctx.createBiquadFilter()
   musicTone.type = 'lowpass'
-  musicTone.frequency.value = 20000
+  musicTone.frequency.value = Math.min(20000, ctx.sampleRate / 2)
   musicTone.connect(master)
   const musicMix = ctx.createGain()
   musicMix.connect(musicTone)

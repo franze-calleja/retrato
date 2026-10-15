@@ -77,3 +77,22 @@ test('a hidden tab or the print dialog pauses audio, then it picks up again', as
   fireEvent(window, new Event('afterprint'))
   await waitFor(() => expect(fake.state).toBe('running'))
 })
+
+test('a touch tap unlocks audio too (touch only counts as a gesture on release)', async () => {
+  renderHook(() => useAudio())
+  fireEvent.click(document)
+  await waitFor(() => expect(fake.state).toBe('running'))
+})
+
+test('music turned back on while the tab was hidden plays when it returns', async () => {
+  useSound.setState({ mode: 'sfx' })
+  renderHook(() => useAudio())
+  fireEvent.pointerDown(document)
+  await waitFor(() => expect(fake.state).toBe('running'))
+  setVisibility('hidden')
+  await waitFor(() => expect(fake.state).toBe('suspended'))
+  act(() => useSound.setState({ mode: 'all' })) // e.g. the idle reset while the screen was locked
+  setVisibility('visible')
+  await waitFor(() => expect(fake.state).toBe('running'))
+  expect(music.isMusicPlaying()).toBe(true)
+})

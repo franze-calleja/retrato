@@ -7,6 +7,8 @@ export const BAR = BEAT * 4
 /** Seconds ahead the scheduler looks on each tick. */
 export const LOOKAHEAD = 0.12
 export const TICK_MS = 25
+/** A bar this late (the page was busy, e.g. rendering a print) still plays; later than this it's skipped. */
+export const LATE_GRACE = 0.5
 
 interface Chord {
   name: string
@@ -67,7 +69,10 @@ export function scheduleBar(ctx: BaseAudioContext, out: AudioNode, wobble: Audio
       o.type = 'sawtooth'
       o.frequency.setValueAtTime(hz(m), t)
       o.detune.setValueAtTime(cents, t)
-      wobble?.connect(o.detune)
+      if (wobble) {
+        wobble.connect(o.detune)
+        o.onended = () => wobble.disconnect(o.detune) // otherwise every bar's pads stay attached for good
+      }
       o.connect(pad)
       o.start(t)
       o.stop(padEnd + 0.05)
@@ -97,12 +102,12 @@ interface Session {
 }
 let session: Session | null = null
 
-/** Schedules every bar starting inside the look-ahead window; a bar whose start already passed is skipped. */
+/** Schedules every bar starting inside the look-ahead window; a bar more than LATE_GRACE late is skipped, never played as a backlog. */
 function pump(s: Session) {
   const now = s.ctx.currentTime
   while (barStart(s.loopStart, s.nextBar) < now + LOOKAHEAD) {
     const t = barStart(s.loopStart, s.nextBar)
-    if (t >= now) {
+    if (t >= now - LATE_GRACE) {
       s.bars.push(scheduleBar(s.ctx, s.out, s.wobble, s.nextBar, t, s.rand))
       if (s.bars.length > 3) s.bars.shift()
     }
@@ -110,10 +115,10 @@ function pump(s: Session) {
   }
 }
 
-/** Fades the loop in over 2 s. Does nothing without running audio or when already playing. */
+/** Fades the loop in over 2 s. While audio is paused it waits on the frozen clock and plays on resume. */
 export function startMusic(rand: () => number = Math.random) {
   const e = getEngine()
-  if (!e || session || e.ctx.state !== 'running') return
+  if (!e || session || e.ctx.state === 'closed') return
   const ctx = e.ctx
   const now = ctx.currentTime
   const out = ctx.createGain()
@@ -142,6 +147,7 @@ export function stopMusic() {
   s.out.gain.cancelScheduledValues(now)
   s.out.gain.setValueAtTime(s.out.gain.value, now)
   s.out.gain.linearRampToValueAtTime(0.0001, now + 0.5)
+  setTimeout(() => s.out.disconnect(), 600) // after the fade, so a dead gain doesn't stay on the bus
   for (const n of [s.lfo, ...s.bars.flat()]) {
     try {
       n.stop(now + 0.55)
@@ -162,7 +168,8 @@ let duckTimer: ReturnType<typeof setTimeout> | undefined
 function apply(e: Engine, mix: Mix) {
   const now = e.ctx.currentTime
   e.musicMix.gain.setTargetAtTime(MIX[mix].level, now, 0.15)
-  e.musicTone.frequency.setTargetAtTime(mix === 'duck' ? MIX[base].tone : MIX[mix].tone, now, 0.15)
+  const tone = mix === 'duck' ? MIX[base].tone : MIX[mix].tone
+  e.musicTone.frequency.setTargetAtTime(Math.min(tone, e.ctx.sampleRate / 2), now, 0.15)
 }
 
 /** Screen mix (full in the shop, quiet elsewhere); duck dips under a loud effect, then returns. */

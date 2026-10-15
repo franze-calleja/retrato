@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { __setEngineForTest, getEngine } from './engine'
-import { FakeAudioContext, type FakeSource, asAudio } from './fakeAudio'
+import { FakeAudioContext, type FakeNode, type FakeSource, asAudio } from './fakeAudio'
 import { BAR, DUCK_MS, MELODY_NOTES, PROGRESSION, TICK_MS, hz, isMusicPlaying, scheduleBar, setMix, startMusic, stopMusic } from './music'
 
 let fake: FakeAudioContext
@@ -82,10 +82,50 @@ test('start and stop are idempotent; stopping ends the loop', () => {
   expect(fake.sources()).toHaveLength(count)
 })
 
-test('music waits for audio to be running', () => {
+test('music can start while audio is paused and plays once it resumes', () => {
   fake.state = 'suspended'
   startMusic(never)
+  expect(isMusicPlaying()).toBe(true)
+  expect(bass(fake)).toHaveLength(2)
+})
+
+test('a closed context never starts music', () => {
+  fake.state = 'closed'
+  startMusic(never)
   expect(isMusicPlaying()).toBe(false)
+})
+
+test('a bar only a little late (a busy moment) still plays', () => {
+  startMusic(never)
+  fake.currentTime = 3.05 + 0.3 // bar 1 started 0.3 s ago while the page was busy
+  vi.advanceTimersByTime(TICK_MS)
+  expect(bass(fake)).toHaveLength(4)
+})
+
+test('each pad lets go of the shared wobble when it ends, so nothing piles up over hours', () => {
+  const ctx = new FakeAudioContext()
+  const wobble = ctx.createGain()
+  scheduleBar(asAudio(ctx), ctx.destination as unknown as AudioNode, wobble as unknown as AudioNode, 0, 0, never)
+  expect(wobble.outputs.length).toBeGreaterThan(0)
+  for (const s of ctx.sources()) s.onended?.()
+  expect(wobble.outputs).toHaveLength(0)
+})
+
+test('stopping music detaches it from the music bus after the fade', () => {
+  startMusic(never)
+  const bus = getEngine()!.music as unknown as FakeNode
+  const feeding = () => fake.nodes.filter((n) => n.outputs.includes(bus))
+  expect(feeding()).toHaveLength(1)
+  stopMusic()
+  vi.advanceTimersByTime(600)
+  expect(feeding()).toHaveLength(0)
+})
+
+test('the mix filter never asks for a cutoff above the Nyquist frequency', () => {
+  setMix('full')
+  const tone = getEngine()!.musicTone.frequency as unknown as { value: number; events: { value: number }[] }
+  expect(tone.value).toBeLessThanOrEqual(fake.sampleRate / 2)
+  for (const ev of tone.events) expect(ev.value).toBeLessThanOrEqual(fake.sampleRate / 2)
 })
 
 test('mixes: full, quiet, and a duck that returns to the screen mix', () => {
