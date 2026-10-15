@@ -1,6 +1,8 @@
-import { BLUE, BLUE_DARK, CREAM, GOLD, OUTLINE, RED, SHADOW } from './colors'
-import { drawBitmap, fill, outline, panel, withDropShadow } from './draw'
-import { drawTextCentered, fitScale } from './pixelFont'
+import { BLUE, BLUE_DARK, BLUE_MID, CREAM, GOLD, GOLD_DARK, GOLD_LIGHT, OUTLINE, SHADOW } from './colors'
+import { bevel, cornerOrnaments, dither, ring } from './detail'
+import { fill, outline, panel, withDropShadow } from './draw'
+import { drawTextCentered } from './pixelFont'
+import { drawBigCentered, drawTitle } from './pixelFontLarge'
 import type { Template } from './types'
 
 const BW = 188
@@ -11,11 +13,14 @@ const CUT = 146
 const TEXT_CX = 113 // center of the 84..142 text column
 const STUB_CX = 167
 
-const HEART = ['0110110', '1111111', '1111111', '0111110', '0011100', '0001000']
-
 function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   panel(ctx, OUTLINE, 0, 0, BW, BH, 3)
   panel(ctx, BLUE, 1, 1, BW - 2, BH - 2, 2)
+  dither(ctx, { x: 2, y: 2, w: BW - 4, h: BH - 4 }, BLUE_MID, 0.14, 7)
+  // Double border with corner flourishes.
+  outline(ctx, CREAM, 3, 3, BW - 6, BH - 6)
+  outline(ctx, GOLD, 5, 5, BW - 10, BH - 10)
+  cornerOrnaments(ctx, { x: 7, y: 7, w: BW - 14, h: BH - 14 }, GOLD)
 
   panel(ctx, CREAM, PHOTO.x - 3, PHOTO.y - 3, PHOTO.w + 6, PHOTO.h + 6, 1)
   outline(ctx, OUTLINE, PHOTO.x - 1, PHOTO.y - 1, PHOTO.w + 2, PHOTO.h + 2)
@@ -27,22 +32,24 @@ function body(ctx: CanvasRenderingContext2D, values: Record<string, string>) {
   ctx.clearRect(CUT - 2, BH - 2, 5, 2)
   ctx.clearRect(CUT - 1, BH - 3, 3, 1)
 
-  const title = values.title ?? ''
-  const ts = fitScale(title, 58, 2)
-  drawTextCentered(ctx, title, TEXT_CX, ts === 2 ? 8 : 10, CREAM, ts, BLUE_DARK)
+  drawTitle(ctx, values.title ?? '', TEXT_CX, 7, 56, CREAM, BLUE_DARK, 2)
 
-  panel(ctx, OUTLINE, 84, 30, 58, 24, 2)
-  panel(ctx, GOLD, 85, 31, 56, 22, 1)
-  const amount = values.amount ?? ''
-  const as = fitScale(amount, 52, 2)
-  drawTextCentered(ctx, amount, TEXT_CX, as === 2 ? 37 : 40, OUTLINE, as)
+  // Value plate.
+  panel(ctx, OUTLINE, 84, 24, 58, 26, 2)
+  panel(ctx, GOLD, 85, 25, 56, 24, 1)
+  bevel(ctx, { x: 86, y: 25, w: 54, h: 24 }, GOLD_LIGHT, GOLD_DARK)
+  drawTitle(ctx, values.amount ?? '', TEXT_CX, 30, 52, OUTLINE, undefined, 2)
 
-  drawTextCentered(ctx, values.expires ?? '', TEXT_CX, 62, CREAM, 1, BLUE_DARK)
-  drawTextCentered(ctx, 'PIXEL BOOTH', TEXT_CX, 76, GOLD, 1, BLUE_DARK)
+  drawTextCentered(ctx, 'VALID UNTIL', TEXT_CX, 55, GOLD, 1, BLUE_DARK)
+  drawTitle(ctx, values.expires ?? '', TEXT_CX, 60, 56, CREAM, BLUE_DARK, 1)
+  drawTextCentered(ctx, 'PIXEL BOOTH', TEXT_CX, 80, GOLD, 1, BLUE_DARK)
 
-  drawTextCentered(ctx, 'KEEP', STUB_CX, 26, CREAM, 1, BLUE_DARK)
-  drawBitmap(ctx, HEART, STUB_CX - 3, 39, RED)
-  drawTextCentered(ctx, 'THIS', STUB_CX, 54, CREAM, 1, BLUE_DARK)
+  // Round seal on the stub.
+  ring(ctx, STUB_CX, 48, 15, CREAM)
+  ring(ctx, STUB_CX, 48, 13, GOLD)
+  drawBigCentered(ctx, '★', STUB_CX, 37, GOLD)
+  drawTextCentered(ctx, 'PIXEL', STUB_CX, 47, CREAM)
+  drawTextCentered(ctx, 'BOOTH', STUB_CX, 54, CREAM)
 }
 
 export const voucher: Template = {
@@ -56,7 +63,7 @@ export const voucher: Template = {
   fields: [
     { key: 'title', label: 'Title', default: 'VOUCHER', maxLength: 14 },
     { key: 'amount', label: 'Amount', default: 'FREE HUG', maxLength: 12 },
-    { key: 'expires', label: 'Expires', default: 'VALID TODAY', maxLength: 14 },
+    { key: 'expires', label: 'Expires', default: 'TODAY', maxLength: 14 },
   ],
   render(ctx, values) {
     withDropShadow(ctx, BW, BH, SHADOW_OFFSET, SHADOW, (c) => body(c, values))
